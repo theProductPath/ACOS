@@ -72,3 +72,14 @@ The decision rule for where a new change lands is in [`docs/extending-acos.md`](
 - Reference instance (tPP): [`../../tPPOS/README.md`](../../tPPOS/README.md)
 - Extension conventions: [`docs/extending-acos.md`](docs/extending-acos.md)
 - tPPOS company brief (positioning context for why tPP built this): [`../../tPPOS/company-brief.md`](../../tPPOS/company-brief.md)
+
+
+## License
+
+Licensed under the Apache License, Version 2.0. See [LICENSE](LICENSE).
+
+SPDX-License-Identifier: Apache-2.0
+
+## Trademarks
+
+The project names, logos, and associated brand assets are trademarks of their respective owners. Use of the code, documentation, templates, and examples is governed by the Apache-2.0 license; use of names and brand assets may require separate permission.
