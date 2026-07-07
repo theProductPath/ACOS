@@ -1,0 +1,31 @@
+.DS_Store
+.fuse_hidden*
+
+# Local secrets and environment overrides
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+
+# JavaScript/package-manager outputs, if tooling is added later
+node_modules/
+dist/
+build/
+coverage/
+
+# Editor/project-local metadata
+.idea/
+.vscode/
+*.swp
+
+# Internal build checkpoints — not for adopters (agent-ignore)
+_progress/
+setup-acos-repo.sh
