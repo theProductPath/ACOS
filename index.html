@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ACOS — Agentic Company Operating System</title>
+<meta name="description" content="ACOS is the portable, LLM-agnostic operating system for running a small business as one coherent context surface every AI agent can read." />
+<link rel="icon" href="favicon.png" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+<style>
+:root{
+  --dark:#181d26;--dark2:#12161d;--card:#2a303c;--card2:#222834;--border:#3d4a5c;
+  --accent:#c75c2a;--accentText:#e8865a;--accentSoft:rgba(199,92,42,.14);
+  --text:#e4eaf4;--muted:#a8b3c6;--success:#3fb27f;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;font-family:Inter,"Helvetica Neue",Arial,sans-serif;background:var(--dark);color:var(--text);line-height:1.55;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+.wrap{max-width:1120px;margin:0 auto;padding:0 28px}
+.section{padding:88px 0}
+.eyebrow{display:inline-block;font-size:.8rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--accentText);margin:0 0 16px}
+h1,h2,h3{margin:0;letter-spacing:-.01em;font-weight:800}
+p{margin:0}
+
+/* Nav */
+.nav{position:sticky;top:0;z-index:50;background:rgba(24,29,38,.86);backdrop-filter:blur(10px);border-bottom:1px solid var(--border)}
+.nav-inner{display:flex;align-items:center;justify-content:space-between;height:66px}
+.brand{display:flex;align-items:center;gap:11px;font-weight:800;font-size:1.05rem;color:var(--text)}
+.mark{width:34px;height:34px;display:inline-grid;place-items:center;background:#fff;border-radius:6px;flex:0 0 auto}
+.mark svg{width:24px;height:24px;display:block}
+.nav-links{display:flex;align-items:center;gap:26px}
+.nav-links a{color:var(--muted);font-size:.92rem;font-weight:500;transition:color .15s}
+.nav-links a:hover,.nav-links a.here{color:var(--text)}
+.btn{display:inline-block;font-weight:700;font-size:.95rem;border-radius:8px;padding:12px 22px;cursor:pointer;transition:transform .15s,background .15s,border-color .15s;border:1px solid transparent}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:hover{transform:translateY(-2px);background:#d56b39}
+.btn-ghost{background:transparent;color:var(--text);border-color:var(--border)}
+.btn-ghost:hover{border-color:var(--accentText);color:var(--accentText)}
+.nav .btn{padding:9px 18px;font-size:.9rem}
+@media(max-width:820px){.nav-links a:not(.btn){display:none}}
+
+/* Hero */
+.hero{padding:96px 0 84px;background:radial-gradient(900px 460px at 82% -8%,rgba(199,92,42,.20),transparent 60%),radial-gradient(700px 420px at 8% 12%,rgba(61,74,92,.30),transparent 62%),var(--dark);border-bottom:1px solid var(--border)}
+.hero-tag{display:inline-flex;align-items:center;gap:8px;font-size:.82rem;font-weight:600;color:var(--accentText);background:var(--accentSoft);border:1px solid rgba(199,92,42,.35);padding:7px 14px;border-radius:999px;margin-bottom:26px}
+.hero h1{font-size:clamp(2.3rem,5.3vw,4rem);line-height:1.05;max-width:15ch}
+.hero h1 .hl{color:var(--accentText)}
+.hero-lede{margin:24px 0 34px;color:var(--muted);font-size:clamp(1.08rem,1.8vw,1.32rem);max-width:60ch}
+.hero-cta{display:flex;flex-wrap:wrap;gap:14px;align-items:center}
+.hero-note{margin-top:20px;color:var(--muted);font-size:.85rem;display:flex;align-items:center;gap:8px}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--success);display:inline-block}
+
+/* Problem */
+.lead-2col{display:grid;grid-template-columns:1.1fr 1fr;gap:56px;align-items:start}
+.section h2{font-size:clamp(1.7rem,3.2vw,2.5rem);line-height:1.12;max-width:20ch}
+.section .kicker-p{margin-top:20px;color:var(--muted);font-size:1.08rem}
+.pain-list{display:grid;gap:14px;margin-top:6px}
+.pain{display:flex;gap:14px;padding:18px 20px;background:var(--card2);border:1px solid var(--border);border-radius:10px}
+.pain .x{color:var(--accentText);font-weight:800;flex:0 0 auto;font-size:1.05rem;line-height:1.5}
+.pain p{color:var(--muted);font-size:.98rem}
+.pain b{color:var(--text);font-weight:600}
+@media(max-width:820px){.lead-2col{grid-template-columns:1fr;gap:34px}}
+
+/* Feature grid */
+.alt{background:var(--dark2);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.head-center{text-align:center;max-width:720px;margin:0 auto 52px}
+.head-center h2{margin:0 auto;max-width:22ch}
+.head-center p{margin-top:18px;color:var(--muted);font-size:1.08rem}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:26px;transition:transform .18s,border-color .18s}
+.card:hover{transform:translateY(-4px);border-color:var(--accent)}
+.card .ico{width:44px;height:44px;border-radius:9px;background:var(--accentSoft);display:grid;place-items:center;margin-bottom:16px;color:var(--accentText)}
+.card .ico svg{width:24px;height:24px}
+.card h3{font-size:1.18rem;margin-bottom:8px}
+.card p{color:var(--muted);font-size:.96rem}
+@media(max-width:900px){.grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:600px){.grid{grid-template-columns:1fr}}
+
+/* How */
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;counter-reset:s}
+.step{position:relative;padding:28px 24px 26px;background:var(--card);border:1px solid var(--border);border-radius:12px}
+.step::before{counter-increment:s;content:counter(s);display:grid;place-items:center;width:38px;height:38px;border-radius:9px;background:var(--accent);color:#fff;font-weight:800;font-size:1.05rem;margin-bottom:16px}
+.step h3{font-size:1.2rem;margin-bottom:9px}
+.step p{color:var(--muted);font-size:.97rem}
+.step code{background:var(--dark2);border:1px solid var(--border);border-radius:5px;padding:1px 6px;font-size:.85em;color:var(--accentText)}
+@media(max-width:820px){.steps{grid-template-columns:1fr}}
+
+/* Explore cards (link to deeper pages) */
+.explore{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.xcard{display:block;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:28px;transition:transform .18s,border-color .18s}
+.xcard:hover{transform:translateY(-4px);border-color:var(--accent)}
+.xcard .k{font-size:.78rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--accentText)}
+.xcard h3{font-size:1.35rem;margin:10px 0 8px}
+.xcard p{color:var(--muted);font-size:.98rem}
+.xcard .go{margin-top:16px;color:var(--accentText);font-weight:700;font-size:.92rem}
+@media(max-width:760px){.explore{grid-template-columns:1fr}}
+
+/* Spec */
+.spec{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.spec-col{background:var(--card2);border:1px solid var(--border);border-radius:12px;padding:28px}
+.spec-col h3{font-size:1.15rem;display:flex;align-items:center;gap:10px;margin-bottom:18px}
+.spec-col ul{margin:0;padding:0;list-style:none;display:grid;gap:13px}
+.spec-col li{display:flex;gap:11px;color:var(--muted);font-size:.98rem}
+.spec-col li b{color:var(--text);font-weight:600}
+.tick{color:var(--success);flex:0 0 auto;font-weight:800}
+.cross{color:var(--muted);flex:0 0 auto;font-weight:800;opacity:.7}
+@media(max-width:760px){.spec{grid-template-columns:1fr}}
+
+/* Proof */
+.proof{background:linear-gradient(120deg,var(--card) 0%,#241c1a 100%);border:1px solid var(--border);border-left:6px solid var(--accent);border-radius:14px;padding:44px;display:grid;grid-template-columns:1.3fr 1fr;gap:44px;align-items:center}
+.proof h2{font-size:clamp(1.5rem,2.6vw,2.1rem);max-width:22ch}
+.proof p{color:var(--muted);margin-top:16px;font-size:1.05rem}
+.proof-stats{display:grid;gap:16px}
+.stat{background:rgba(0,0,0,.22);border:1px solid var(--border);border-radius:10px;padding:18px 20px}
+.stat .n{font-size:1.7rem;font-weight:800;color:var(--accentText)}
+.stat .l{color:var(--muted);font-size:.9rem;margin-top:3px}
+@media(max-width:820px){.proof{grid-template-columns:1fr;padding:32px}}
+
+/* Audience */
+.aud{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.aud .card h3{color:var(--accentText)}
+@media(max-width:900px){.aud{grid-template-columns:1fr}}
+
+/* CTA */
+.cta{text-align:center;background:radial-gradient(700px 300px at 50% 0%,rgba(199,92,42,.22),transparent 60%),var(--dark2);border-top:1px solid var(--border)}
+.cta h2{font-size:clamp(1.9rem,3.6vw,2.8rem);max-width:18ch;margin:0 auto}
+.cta p{color:var(--muted);font-size:1.12rem;margin:20px auto 32px;max-width:52ch}
+.cta-row{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+
+/* Footer */
+.footer{border-top:1px solid var(--border);background:var(--dark);padding:34px 0}
+.footer-inner{display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap;color:var(--muted);font-size:.88rem}
+.footer a{color:var(--muted)}
+.footer a:hover{color:var(--accentText)}
+.footer-links{display:flex;gap:20px;flex-wrap:wrap}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="wrap nav-inner">
+    <a class="brand" href="index.html">
+      <span class="mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none"><rect x="4" y="4" width="10" height="10" rx="2" stroke="#c75c2a" stroke-width="2"/><rect x="18" y="4" width="10" height="10" rx="2" stroke="#c75c2a" stroke-width="2"/><rect x="11" y="18" width="10" height="10" rx="2" stroke="#c75c2a" stroke-width="2"/><path d="M9 14v2.5h7V18M23 14v2.5h-7" stroke="#c75c2a" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+      <span>ACOS</span>
+    </a>
+    <div class="nav-links">
+      <a class="here" href="index.html">Home</a>
+      <a href="adopt.html">Adopt</a>
+      <a href="blueprint.html">Blueprint</a>
+      <a href="cascade.html">Cascade</a>
+      <a class="btn btn-primary" href="https://github.com/theProductPath/acos">GitHub</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="wrap">
+    <span class="hero-tag">Agentic Company Operating System · v0.1</span>
+    <h1>The operating system for running your business with <span class="hl">AI agents</span>.</h1>
+    <p class="hero-lede">Your company already runs on scattered folders, docs, and tools. ACOS turns that sprawl into one coherent context surface any AI agent can read, orient itself in, and act on — without you re-explaining your business every single time.</p>
+    <div class="hero-cta">
+      <a class="btn btn-primary" href="adopt.html">Get the framework</a>
+      <a class="btn btn-ghost" href="#how">See how it works</a>
+    </div>
+    <p class="hero-note"><span class="dot"></span> LLM-agnostic · tool-agnostic · bring your own folders · Apache-2.0</p>
+  </div>
+</header>
+
+<section class="section" id="problem">
+  <div class="wrap lead-2col">
+    <div>
+      <span class="eyebrow">The problem</span>
+      <h2>Every AI tool you use starts from zero.</h2>
+      <p class="kicker-p">You've wired up assistants, agents, and copilots across your business. But each one lands in your files blind — no idea where things live, what to skip, or how your company actually works. So it guesses, or you spend the first ten minutes of every task re-explaining context you've explained a hundred times.</p>
+    </div>
+    <div class="pain-list">
+      <div class="pain"><span class="x">✕</span><p><b>Context lives in your head.</b> The rules for how your business runs aren't written anywhere an agent can read them.</p></div>
+      <div class="pain"><span class="x">✕</span><p><b>Every tool reinvents the wheel.</b> Multiple agents across multiple folders each build their own understanding, inconsistently.</p></div>
+      <div class="pain"><span class="x">✕</span><p><b>No shared conventions.</b> Where files go, how documents reference each other, what's off-limits — nothing is codified.</p></div>
+      <div class="pain"><span class="x">✕</span><p><b>It doesn't compound.</b> What you teach one tool today is lost the moment you switch models or open a new session.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="section alt">
+  <div class="wrap">
+    <div class="head-center">
+      <span class="eyebrow">What ACOS is</span>
+      <h2>A shared operating layer your whole business — and every agent — reads first.</h2>
+      <p>ACOS is a small, opinionated set of conventions that make your company legible to AI. Point any tool at your folder tree, have it read the top-level README, and it can find the right context, follow your house rules, and get to work. Written once, honored by every agent, on every model, forever.</p>
+    </div>
+    <div class="grid">
+      <div class="card">
+        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5h6l2 2h10v11a2 2 0 0 1-2 2H3z"/><path d="M3 9h18"/></svg></div>
+        <h3>README cascade</h3>
+        <p>Agents orient themselves top-down — instance root, to the folder in scope, to the specific item — so they always have the right context and never guess.</p>
+      </div>
+      <div class="card">
+        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="7" height="7" rx="1"/><rect x="13" y="4" width="7" height="7" rx="1"/><rect x="4" y="13" width="7" height="7" rx="1"/><rect x="13" y="13" width="7" height="7" rx="1"/></svg></div>
+        <h3>Template library</h3>
+        <p>Ready-made scaffolds for the artifacts every company has — company brief, client brief, client manifest, dashboards. Copy in, fill out, done.</p>
+      </div>
+      <div class="card">
+        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.4 4.9 5.4.8-3.9 3.8.9 5.4L12 14.3 7.2 16.9l.9-5.4L4.2 7.7l5.4-.8z"/></svg></div>
+        <h3>Skill library</h3>
+        <p>Reusable agent capabilities — brief processing, brand capture, dashboard refresh, integrity checks — that work against any ACOS instance out of the box.</p>
+      </div>
+      <div class="card">
+        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M4 12h16M4 17h10"/></svg></div>
+        <h3>House rules</h3>
+        <p>Naming, markdown style, frontmatter, what to ignore, who to escalate to — codified once so every agent behaves consistently instead of improvising.</p>
+      </div>
+      <div class="card">
+        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5 18 18M18 6l-2.5 2.5M8.5 15.5 6 18"/><circle cx="12" cy="12" r="2.5"/></svg></div>
+        <h3>Overlays</h3>
+        <p>Configure any skill for your business — account names, folder paths, routing quirks — without forking it. Your specifics, the framework's logic.</p>
+      </div>
+      <div class="card">
+        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M7 20h10M8 12l2.5 2.5L16 9"/></svg></div>
+        <h3>Live dashboard</h3>
+        <p>A single state record — what's active, what's slipping, what needs you this week — refreshed automatically each morning from across your business.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="how">
+  <div class="wrap">
+    <div class="head-center">
+      <span class="eyebrow">How it works</span>
+      <h2>Three moves from folder sprawl to an agent-ready company.</h2>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <h3>Instrument your tree</h3>
+        <p>Drop ACOS templates into your existing folders — Google Drive, OneDrive, Dropbox, a repo, it doesn't matter. Each folder gets a README that tells agents what it is and how it works. No migration, no new tool to learn.</p>
+      </div>
+      <div class="step">
+        <h3>Fill in your instance</h3>
+        <p>Populate the company brief with your voice, clients, and products. Your business-specific content lives in <code>your instance</code>; the reusable framework stays clean underneath it. Add overlays where your setup has quirks.</p>
+      </div>
+      <div class="step">
+        <h3>Point agents at the root</h3>
+        <p>Any LLM or AI platform reads your root README first, cascades into the folder in scope, and follows your house rules. Improve the framework once and every agent, on every model, inherits it.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section alt" id="explore">
+  <div class="wrap">
+    <div class="head-center">
+      <span class="eyebrow">Go deeper</span>
+      <h2>See the architecture and the cascade in motion.</h2>
+      <p>Two interactive explainers walk through how ACOS is built and how an agent actually orients itself inside an instance.</p>
+    </div>
+    <div class="explore">
+      <a class="xcard" href="blueprint.html">
+        <div class="k">Architecture</div>
+        <h3>Instance Blueprint</h3>
+        <p>The layered view: the reusable ACOS framework, the company instance on top, the operating folders that hold your work, and the rendered views over them — plus the promotion path that feeds proven patterns back into the framework.</p>
+        <div class="go">Explore the blueprint →</div>
+      </a>
+      <a class="xcard" href="cascade.html">
+        <div class="k">Orientation</div>
+        <h3>Cascade Paths</h3>
+        <p>A worked example of how an agent dropped into a client folder climbs to the company root, then descends through the right client, project, brand, and routing instructions — and writes durable knowledge back when it's done.</p>
+        <div class="go">Explore the cascade →</div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="included">
+  <div class="wrap">
+    <div class="head-center">
+      <span class="eyebrow">What's included</span>
+      <h2>Opinionated where it counts. Out of your way everywhere else.</h2>
+      <p>ACOS gives you the connective tissue and nothing you don't need. It's deliberately not a platform you're locked into.</p>
+    </div>
+    <div class="spec">
+      <div class="spec-col">
+        <h3><span class="tick">✓</span> What ACOS provides</h3>
+        <ul>
+          <li><span class="tick">✓</span><p>A set of four folder <b>README patterns</b> — root, container, item, asset.</p></li>
+          <li><span class="tick">✓</span><p>A <b>template library</b> for company brief, client brief, and client manifest.</p></li>
+          <li><span class="tick">✓</span><p>A <b>skill library</b> of reusable agent capabilities that run on any instance.</p></li>
+          <li><span class="tick">✓</span><p>An <b>overlay convention</b> so each business configures skills without forking them.</p></li>
+          <li><span class="tick">✓</span><p><b>House rules</b> for naming, markdown, frontmatter, and escalation.</p></li>
+        </ul>
+      </div>
+      <div class="spec-col">
+        <h3><span class="cross">—</span> What you bring</h3>
+        <ul>
+          <li><span class="cross">—</span><p><b>Storage.</b> Bring your own folder tree. ACOS rides on whatever you already use.</p></li>
+          <li><span class="cross">—</span><p><b>Tooling.</b> Any LLM or platform that can read markdown and walk a folder tree works.</p></li>
+          <li><span class="cross">—</span><p><b>Content.</b> Briefs are templates, not filled-in identities — your business fills them in.</p></li>
+          <li><span class="tick">✓</span><p>The payoff: <b>no lock-in.</b> Switch models or tools freely; your operating layer stays put.</p></li>
+          <li><span class="tick">✓</span><p>Open source under <b>Apache-2.0</b> — yours to adopt, extend, and keep.</p></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section alt" id="proof">
+  <div class="wrap">
+    <div class="proof">
+      <div>
+        <span class="eyebrow">Proof, not theory</span>
+        <h2>ACOS runs the company that built it.</h2>
+        <p>ACOS was extracted from tPPOS — the operating system theProductPath itself runs on every day. The framework isn't a whiteboard idea; it's the generalized, battle-tested core of a real company's daily operations. Patterns get proven inside a live business first, then promoted into the framework so you inherit only what already works.</p>
+      </div>
+      <div class="proof-stats">
+        <div class="stat"><div class="n">6+</div><div class="l">Reusable agent skills live in the framework today</div></div>
+        <div class="stat"><div class="n">1</div><div class="l">Full reference instance running in production (tPPOS)</div></div>
+        <div class="stat"><div class="n">100%</div><div class="l">Model- and tool-agnostic — no platform lock-in</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap">
+    <div class="head-center">
+      <span class="eyebrow">Who it's for</span>
+      <h2>Built for small businesses serious about running on AI.</h2>
+    </div>
+    <div class="aud">
+      <div class="card"><h3>Owner-operators</h3><p>You wear every hat and lean on AI to keep up. ACOS gets the context out of your head and into a place every tool can use — so you stop being the bottleneck.</p></div>
+      <div class="card"><h3>Consultancies &amp; agencies</h3><p>Client work spans folders, briefs, and brand rules. ACOS keeps every engagement consistent and every agent on-brand, whichever client you're in.</p></div>
+      <div class="card"><h3>Lean, AI-native teams</h3><p>You'd rather encode how the company works than repeat it. ACOS makes your operating knowledge a shared, versioned asset that compounds over time.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="section cta" id="get">
+  <div class="wrap">
+    <span class="eyebrow">Get started</span>
+    <h2>Make your business readable to every agent.</h2>
+    <p>ACOS is open source and free to adopt. Start with the adoption guide, scaffold your first instance from the templates, and point your agents at the root.</p>
+    <div class="cta-row">
+      <a class="btn btn-primary" href="adopt.html">Read the adoption guide</a>
+      <a class="btn btn-ghost" href="https://github.com/theProductPath/acos">Get the framework on GitHub</a>
+    </div>
+    <p class="hero-note" style="justify-content:center;margin-top:24px">Apache-2.0 licensed · v0.1, actively developed</p>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="wrap footer-inner">
+    <div class="brand" style="font-size:.95rem">
+      <span class="mark" style="width:28px;height:28px" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none"><rect x="4" y="4" width="10" height="10" rx="2" stroke="#c75c2a" stroke-width="2"/><rect x="18" y="4" width="10" height="10" rx="2" stroke="#c75c2a" stroke-width="2"/><rect x="11" y="18" width="10" height="10" rx="2" stroke="#c75c2a" stroke-width="2"/><path d="M9 14v2.5h7V18M23 14v2.5h-7" stroke="#c75c2a" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+      <span>ACOS — Agentic Company Operating System</span>
+    </div>
+    <div class="footer-links">
+      <a href="adopt.html">Adopt</a>
+      <a href="blueprint.html">Blueprint</a>
+      <a href="cascade.html">Cascade</a>
+      <a href="https://github.com/theProductPath/acos">GitHub</a>
+    </div>
+    <div>A theProductPath framework · © 2026 · Apache-2.0</div>
+  </div>
+</footer>
+
+</body>
+</html>

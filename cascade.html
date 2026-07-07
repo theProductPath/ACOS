@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>ACOS Cascade Paths</title>
+<meta name="description" content="A worked example of how an AI agent dropped into a folder orients itself — climbing to the company root, then descending into the right client, project, brand, and routing instructions." />
+<link rel="icon" href="favicon.png" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+:root{
+  --bg:#181d26;--surface:#222831;--card:#2a303c;--border:#2e3848;--border-strong:#3d4a5c;
+  --primary:#c75c2a;--primary-text:#e8865a;--text:#e4eaf4;--muted:#8895aa;
+  --e-instance:#38bdf8;--e-clients:#22c55e;--e-projects:#f59e0b;--e-brand:#2dd4bf;
+  --e-route:#a78bfa;--e-people:#60a5fa;--e-admin:#94a3b8;
+  font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;background:var(--bg);color:var(--text)}
+
+/* Nav */
+.nav{position:sticky;top:0;z-index:50;background:rgba(24,29,38,.9);backdrop-filter:blur(10px);border-bottom:1px solid var(--border)}
+.nav-inner{max-width:1320px;margin:0 auto;padding:0 24px;height:60px;display:flex;align-items:center;justify-content:space-between}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:1rem;color:var(--text);text-decoration:none}
+.brand .mk{width:30px;height:30px;display:inline-grid;place-items:center;background:#fff;border-radius:6px}
+.brand .mk svg{width:21px;height:21px;display:block}
+.nav-links{display:flex;align-items:center;gap:24px}
+.nav-links a{color:var(--muted);font-size:.9rem;font-weight:500;text-decoration:none}
+.nav-links a:hover,.nav-links a.here{color:var(--text)}
+.nav-links .btn{background:var(--primary);color:#fff;padding:8px 16px;border-radius:8px;font-weight:700;font-size:.86rem}
+@media(max-width:820px){.nav-links a:not(.btn){display:none}}
+
+.page{max-width:1320px;margin:0 auto;display:grid;grid-template-columns:minmax(0,1fr) 380px}
+main{padding:34px 28px;min-width:0}
+aside{border-left:1px solid var(--border);background:#1c222c;padding:26px 24px;min-height:100%;position:sticky;top:60px;align-self:start}
+
+.kicker{color:var(--primary-text);font-size:.78rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase}
+h1{margin:10px 0 8px;font-size:33px;line-height:1.1;font-weight:800;letter-spacing:-.01em}
+.subtitle{max-width:900px;margin:0 0 12px;color:var(--muted);font-size:15.5px;line-height:1.55}
+.example-note{max-width:900px;margin:0 0 22px;color:var(--muted);font-size:12.5px;font-style:italic;opacity:.85}
+
+.tabs{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 22px}
+.tab{min-height:34px;border-radius:8px;border:1px solid var(--border-strong);background:var(--surface);color:var(--text);padding:8px 13px;font:inherit;font-size:12.5px;font-weight:800;cursor:pointer;transition:border-color .14s,background .14s}
+.tab:hover,.tab.active{border-color:var(--primary);background:color-mix(in srgb,var(--primary),var(--surface) 82%)}
+
+.map{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:14px;align-items:start}
+.rail{grid-column:span 8;display:grid;gap:12px}
+.side-rail{grid-column:span 4;display:grid;gap:12px}
+
+.step,.branch,.closeout{--accent:var(--e-instance);border:1px solid color-mix(in srgb,var(--accent),var(--border) 50%);background:linear-gradient(90deg,color-mix(in srgb,var(--accent),transparent 90%),transparent 48%),var(--card);border-radius:9px;color:var(--text);cursor:pointer;font:inherit;min-height:96px;padding:13px 14px 13px 16px;position:relative;text-align:left;transition:transform 140ms ease,border-color 140ms ease,background 140ms ease}
+.step::before,.branch::before,.closeout::before{content:"";position:absolute;inset:0 auto 0 0;width:5px;background:var(--accent)}
+.step:hover,.step.active,.branch:hover,.branch.active,.closeout:hover,.closeout.active{transform:translateY(-2px);border-color:var(--accent);background:linear-gradient(90deg,color-mix(in srgb,var(--accent),transparent 84%),transparent 52%),#303746}
+.step strong,.branch strong,.closeout strong{display:block;font-size:15px;line-height:1.25;margin-bottom:6px}
+.step span,.branch span,.closeout span{display:block;color:var(--muted);font-size:12px;line-height:1.4}
+.step small,.branch small,.closeout small{display:inline-flex;margin-bottom:7px;color:color-mix(in srgb,var(--accent),#fff 28%);font-size:10px;font-weight:900;letter-spacing:.06em;text-transform:uppercase}
+.step.client{--accent:var(--e-clients)}
+.step.dev{--accent:var(--e-projects)}
+.branch.brand{--accent:var(--e-brand)}
+.branch.route{--accent:var(--e-route)}
+.branch.people{--accent:var(--e-people)}
+.closeout{--accent:var(--e-admin)}
+
+.connector{height:26px;margin-left:22px;border-left:1px solid var(--border-strong);position:relative}
+.connector::after{content:"";position:absolute;left:-4px;bottom:0;width:7px;height:7px;border-radius:999px;background:var(--border-strong)}
+
+.side-card{border:1px solid var(--border);background:#1c222c;border-radius:9px;padding:15px}
+.side-card h2{margin:0 0 8px;font-size:18px;letter-spacing:-.01em}
+.side-card p{margin:0;color:var(--muted);font-size:13px;line-height:1.5}
+
+aside h2{margin:0 0 8px;font-size:24px;letter-spacing:-.01em}
+.panel-kicker{margin:0 0 8px;color:var(--primary-text);font-size:12px;text-transform:uppercase;font-weight:900;letter-spacing:.08em}
+.panel-text{color:var(--muted);line-height:1.55;font-size:14px;margin:0 0 18px}
+.detail-block{border:1px solid var(--border);background:var(--surface);border-radius:9px;padding:13px;margin-bottom:10px}
+.detail-block strong{display:block;color:var(--text);font-size:12px;line-height:1.2;margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em}
+.detail-block span,.detail-block li{color:var(--muted);font-size:13px;line-height:1.5;overflow-wrap:anywhere}
+.detail-block ul{margin:0;padding-left:18px}
+.detail-block li+li{margin-top:5px}
+.path{font-family:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;color:var(--primary-text);background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:6px 9px;display:inline-block;overflow-wrap:anywhere}
+
+@media(max-width:1120px){
+  .page{grid-template-columns:1fr}
+  aside{position:static;border-left:0;border-top:1px solid var(--border)}
+  .rail,.side-rail{grid-column:span 12}
+}
+@media(max-width:640px){main,aside{padding:20px}h1{font-size:26px}}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a class="brand" href="index.html"><span class="mk"><svg viewBox="0 0 32 32" fill="none"><rect x="4" y="4" width="10" height="10" rx="2" stroke="#c75c2a" stroke-width="2"/><rect x="18" y="4" width="10" height="10" rx="2" stroke="#c75c2a" stroke-width="2"/><rect x="11" y="18" width="10" height="10" rx="2" stroke="#c75c2a" stroke-width="2"/><path d="M9 14v2.5h7V18M23 14v2.5h-7" stroke="#c75c2a" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span>ACOS</span></a>
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="adopt.html">Adopt</a>
+      <a href="blueprint.html">Blueprint</a>
+      <a class="here" href="cascade.html">Cascade</a>
+      <a class="btn" href="https://github.com/theProductPath/acos">GitHub</a>
+    </div>
+  </div>
+</nav>
+
+<div class="page">
+  <main>
+    <div class="kicker">Orientation</div>
+    <h1>Cascade Paths</h1>
+    <p class="subtitle">A worked example of how an agent dropped into client work climbs up to the company operating system, then descends into the relevant client, project, brand, stakeholder, and closeout instructions. Click any step to see what that file contributes and how the agent behaves.</p>
+    <p class="example-note">Example uses a fictional client, "Northwind Trades," on the tPPOS reference instance. Paths are illustrative.</p>
+
+    <div class="tabs">
+      <button class="tab active" type="button" data-mode="client">Start in the client folder</button>
+      <button class="tab" type="button" data-mode="dev">Start in a local dev project</button>
+    </div>
+
+    <section class="map">
+      <div class="rail" id="main-path"></div>
+      <div class="side-rail" id="branch-path"></div>
+    </section>
+  </main>
+
+  <aside id="detail" aria-live="polite"></aside>
+</div>
+
+<script>
+const nodes = {
+  tppos:{ id:"tppos", title:"Instance root README", type:"root instruction", cls:"step",
+    summary:"The agent starts here to understand the company instance, in-scope folders, and framework relationship.",
+    contributes:["Names tPPOS as the company's instance of ACOS.","Defines the folder map: Clients, Products, Projects, Brand, Research, Admin.","Tells agents where to go next based on the task."],
+    behavior:"Read first from anywhere in the tree. It tells the agent which sibling folder matters for the task.",
+    path:"README.md" },
+  clientsReadme:{ id:"clients-readme", title:"Clients README", type:"container instruction", cls:"step client",
+    summary:"Explains how all client folders work and what every client folder should contain.",
+    contributes:["Defines one folder per client engagement.","Requires a README, brief, manifest, and Brand where relevant.","Points to shared client workspace conventions."],
+    behavior:"Read when the task touches a client. It establishes the client-folder pattern before reading a specific client.",
+    path:"Clients/README.md" },
+  clientsWorkspace:{ id:"clients-workspace", title:"Clients workspace conventions", type:"shared client rule", cls:"step client",
+    summary:"Shared rules for client source folders, local dev roots, branding, and instance write-back at closeout.",
+    contributes:["Declares the client brief as the readable client record.","Defines local dev roots for active software work.","Tells dev-folder agents when and where to update the instance."],
+    behavior:"Read before substantial client dev or artifact work. It explains local dev roots and closeout updates.",
+    path:"Clients/workspace-conventions.md" },
+  clientReadme:{ id:"client-readme", title:"Northwind README", type:"client front door", cls:"step client",
+    summary:"Operational entry point for the Northwind Trades client folder.",
+    contributes:["Identifies Northwind as one of the more active engagements.","Lists key files: brief, manifest, workspace conventions, Brand, Admin, Proposals.","Points to the active local dev root and any external context."],
+    behavior:"Read before client-specific work. It is the operational front door for the client folder.",
+    path:"Clients/Northwind-Trades/README.md" },
+  clientBrief:{ id:"client-brief", title:"Northwind brief", type:"substantive client record", cls:"step client",
+    summary:"The canonical record for the relationship: people, active projects, pipeline, commitments, and interaction log.",
+    contributes:["Gives the agent the business context and current project state.","Lists active local dev projects and back-burner opportunities.","Carries the durable interaction log and open commitments."],
+    behavior:"Read for substantive context: people, projects, history, commitments, pipeline, and defaults.",
+    path:"Clients/Northwind-Trades/brief.md" },
+  clientWorkspace:{ id:"client-workspace", title:"Northwind workspace conventions", type:"client-specific path rules", cls:"step client",
+    summary:"Client-specific paths and rules for storage, local dev work, brand usage, and instance updates.",
+    contributes:["Names the canonical client knowledge folder.","Names any external shared context.","Names the active local dev root for this client."],
+    behavior:"Read for client-specific local paths, external context, active dev project rules, and instance update rules.",
+    path:"Clients/Northwind-Trades/workspace-conventions.md" },
+  devAgents:{ id:"dev-agents", title:"Local dev-root AGENTS.md", type:"local dev binding", cls:"step dev",
+    summary:"Instructions at the local dev root that bind every active dev project back to the instance client folder.",
+    contributes:["Tells agents not to do active development in cloud-synced folders.","Maps first-level dev folders to active client projects.","Requires durable client knowledge to be reflected back into the instance."],
+    behavior:"Read automatically when the agent starts from the local dev root. It binds code work back to the instance.",
+    path:"~/dev/northwind/AGENTS.md" },
+  projectFolder:{ id:"project-folder", title:"Active dev project", type:"working folder", cls:"step dev",
+    summary:"Example: ~/dev/northwind/northwind-costing-tool, or any first-level client dev project folder.",
+    contributes:["The working code and project context lives here.","The parent dev-root instructions explain how this folder relates to the client.","If work changes durable client state, the agent updates the instance before closeout."],
+    behavior:"Work happens here, but durable client knowledge gets written back to the instance client record.",
+    path:"~/dev/northwind/northwind-costing-tool" }
+};
+
+const branches = {
+  route:{ id:"manifest", title:"Manifest", type:"routing index", cls:"branch route",
+    summary:"Matches aliases, contacts, business units, and project keywords back to the client.",
+    contributes:["Routes transcripts that mention subsidiaries, product names, or project codenames to Northwind.","Prevents a subsidiary or project name from being mistaken for a separate client."],
+    behavior:"Use when routing transcripts, emails, or ambiguous project names to the correct client.",
+    path:"Clients/Northwind-Trades/manifest.md" },
+  brand:{ id:"brand", title:"Client brand kit", type:"brand source", cls:"branch brand",
+    summary:"Client-specific brand source for polished client-facing artifacts.",
+    contributes:["Defines the client's colors, typography, voice, logos, and any pending review warnings.","Gets read before producing client-facing deliverables."],
+    behavior:"Use before producing polished artifacts, web apps, decks, reports, screenshots, or client-facing copy.",
+    path:"Clients/Northwind-Trades/Brand/README.md" },
+  people:{ id:"stakeholders", title:"Stakeholder briefs", type:"person-level cascade", cls:"branch people",
+    summary:"Per-person briefs for the client's primary stakeholders.",
+    contributes:["Keeps person-level notes out of the organization-level client brief.","Splits transcript updates between org-level facts and stakeholder-specific facts."],
+    behavior:"Use when person-level context matters or a transcript names specific stakeholders.",
+    path:"Clients/Northwind-Trades/Stakeholders/README.md" },
+  closeout:{ id:"closeout", title:"Closeout update rule", type:"write-back rule", cls:"closeout",
+    summary:"The agent decides whether durable client knowledge changed and updates the instance before its final response.",
+    contributes:["Updates brief.md for project status, commitments, interaction log, and defaults.","Updates workspace-conventions.md for path or process changes.","Updates manifest.md for new aliases, project names, or routing terms."],
+    behavior:"Use before final response on substantial work to decide whether the instance needs updating.",
+    path:"Clients/workspace-conventions.md" }
+};
+
+const modes = {
+  client:{ main:["tppos","clientsReadme","clientsWorkspace","clientReadme","clientBrief","clientWorkspace"], initial:"client-brief" },
+  dev:{ main:["projectFolder","devAgents","tppos","clientsReadme","clientsWorkspace","clientReadme","clientBrief","clientWorkspace"], initial:"dev-agents" }
+};
+const branchOrder = ["route","brand","people","closeout"];
+
+const mainPath = document.querySelector("#main-path");
+const branchPath = document.querySelector("#branch-path");
+const detail = document.querySelector("#detail");
+const tabs = document.querySelectorAll("[data-mode]");
+
+function nodeButton(node){
+  return `<button class="${node.cls}" type="button" data-node="${node.id}">
+    <small>${node.type}</small><strong>${node.title}</strong><span>${node.summary}</span></button>`;
+}
+function renderMode(mode){
+  tabs.forEach(t=>t.classList.toggle("active", t.dataset.mode===mode));
+  const cfg = modes[mode];
+  mainPath.innerHTML = cfg.main.map((key,i)=>`${i?'<div class="connector"></div>':''}${nodeButton(nodes[key])}`).join("");
+  branchPath.innerHTML = `<div class="side-card"><h2>Optional branches</h2><p>Agents read these when the work touches routing, brand, stakeholders, or durable client updates.</p></div>`
+    + branchOrder.map(key=>nodeButton(branches[key])).join("");
+  document.querySelectorAll("[data-node]").forEach(b=>b.addEventListener("click",()=>selectNode(b.dataset.node)));
+  selectNode(cfg.initial);
+}
+function findNode(id){
+  return [...Object.values(nodes),...Object.values(branches)].find(n=>n.id===id);
+}
+function selectNode(id){
+  const node = findNode(id);
+  if(!node) return;
+  document.querySelectorAll("[data-node]").forEach(b=>b.classList.toggle("active", b.dataset.node===id));
+  detail.innerHTML = `
+    <p class="panel-kicker">${node.type}</p>
+    <h2>${node.title}</h2>
+    <p class="panel-text">${node.summary}</p>
+    <div class="detail-block"><strong>What this file contributes</strong><ul>${node.contributes.map(c=>`<li>${c}</li>`).join("")}</ul></div>
+    <div class="detail-block"><strong>Agent behavior</strong><span>${node.behavior}</span></div>
+    <div class="detail-block"><strong>Example path</strong><span class="path">${node.path}</span></div>`;
+}
+tabs.forEach(t=>t.addEventListener("click",()=>renderMode(t.dataset.mode)));
+renderMode("client");
+</script>
+</body>
+</html>
