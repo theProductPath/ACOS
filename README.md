@@ -18,6 +18,16 @@ Publishing model: GitHub Pages → Settings → Pages → **Deploy from a branch
 - `cascade.html` — interactive orientation explainer (fictional client "Northwind Trades" on the tPPOS reference instance).
 - `extras/` — supplementary marketing artifacts not linked in the site nav: the standalone landing page and the Squarespace embed snippet.
 
+## Git remote (SSH host alias)
+
+This repo's remote must use the **theProductPath** SSH host alias, not plain `github.com`:
+
+```
+git remote set-url origin git@github.com-tpp:theProductPath/ACOS.git
+```
+
+The `~/.ssh/config` defines a per-account alias (`github.com-tpp` → key `id_ed25519_tpp`, `IdentitiesOnly yes`). Plain `git@github.com` has no default key and fails with `Permission denied (publickey)`. All `theProductPath/Products/*` repos follow this convention. If git complains about a stale `.git/index.lock`, remove it with `rm .git/index.lock` (a Google Drive sync artifact).
+
 ## Editing workflow (once the repo exists)
 
 Ask the agent, or run yourself from the ACOS repo:
