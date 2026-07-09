@@ -155,6 +155,33 @@ p{margin:0}
 .nav-links .btn-primary:hover{background:#d56b39;color:#fff}
 .nav-links .btn-ghost{background:transparent;color:#e4eaf4;border-color:#3d4a5c}
 .nav-links .btn-ghost:hover{border-color:#e8865a;color:#e8865a}
+
+/* ===== Bright flagship sections (light, editorial) ===== */
+.section--bright{background:#f0ede8;border-top:1px solid #e5e2dd;border-bottom:1px solid #e5e2dd}
+.section--bright .eyebrow{color:#c75c2a}
+.section--bright h2{color:#1f2937}
+.bright-head{max-width:860px;margin:0 0 52px}
+.bright-head p{margin-top:18px;color:#374151;font-size:1.08rem}
+
+/* Section 1 — "What ACOS is": airy two-column editorial list, colored left rules */
+.ed-list{display:grid;grid-template-columns:1fr 1fr;column-gap:56px}
+.ed-item{display:flex;gap:18px;padding:26px 0 26px 22px;border-left:3px solid var(--edc);border-bottom:1px solid #e5e2dd}
+.ed-ico{flex:0 0 auto;width:34px;height:34px;display:grid;place-items:center;color:var(--edc)}
+.ed-ico svg{width:26px;height:26px}
+.ed-body h3{font-size:1.12rem;color:#1f2937;margin-bottom:7px}
+.ed-body p{color:#374151;font-size:.96rem;line-height:1.5}
+@media(max-width:760px){.ed-list{grid-template-columns:1fr;column-gap:0}}
+
+/* Section 2 — "What's included": two white panels, single top accent bar */
+.panels{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+.panel{background:#fff;border:1px solid #e5e2dd;border-top:4px solid var(--pc);border-radius:12px;padding:32px 34px}
+.panel h3{font-size:1.15rem;color:#1f2937;display:flex;align-items:center;gap:10px;margin-bottom:20px}
+.panel ul{margin:0;padding:0;list-style:none;display:grid;gap:15px}
+.panel li{display:flex;gap:12px;color:#374151;font-size:.98rem}
+.panel li b{color:#1f2937;font-weight:600}
+.mk{flex:0 0 auto;font-weight:800;color:var(--pc)}
+.mk-pos{flex:0 0 auto;font-weight:800;color:#22c55e}
+@media(max-width:760px){.panels{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -219,43 +246,55 @@ p{margin:0}
   </div>
 </section>
 
-<section class="section alt">
+<section class="section section--bright">
   <div class="wrap">
-    <div class="head-center">
+    <div class="bright-head">
       <span class="eyebrow">What ACOS is</span>
       <h2>A shared operating layer your whole business — and every agent — reads first.</h2>
       <p>ACOS is a small, opinionated set of conventions that make your company legible to AI. Point any tool at your folder tree, have it read the top-level README, and it can find the right context, follow your house rules, and get to work. Written once, honored by every agent, on every model, forever.</p>
     </div>
-    <div class="grid">
-      <div class="card">
-        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5h6l2 2h10v11a2 2 0 0 1-2 2H3z"/><path d="M3 9h18"/></svg></div>
-        <h3>README cascade</h3>
-        <p>Agents orient themselves top-down — instance root, to the folder in scope, to the specific item — so they always have the right context and never guess.</p>
+    <div class="ed-list">
+      <div class="ed-item" style="--edc:#c75c2a">
+        <div class="ed-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5h6l2 2h10v11a2 2 0 0 1-2 2H3z"/><path d="M3 9h18"/></svg></div>
+        <div class="ed-body">
+          <h3>README cascade</h3>
+          <p>Agents orient themselves top-down — instance root, to the folder in scope, to the specific item — so they always have the right context and never guess.</p>
+        </div>
       </div>
-      <div class="card">
-        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="7" height="7" rx="1"/><rect x="13" y="4" width="7" height="7" rx="1"/><rect x="4" y="13" width="7" height="7" rx="1"/><rect x="13" y="13" width="7" height="7" rx="1"/></svg></div>
-        <h3>Template library</h3>
-        <p>Ready-made scaffolds for the artifacts every company has — company brief, client brief, client manifest, dashboards. Copy in, fill out, done.</p>
+      <div class="ed-item" style="--edc:#38bdf8">
+        <div class="ed-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="7" height="7" rx="1"/><rect x="13" y="4" width="7" height="7" rx="1"/><rect x="4" y="13" width="7" height="7" rx="1"/><rect x="13" y="13" width="7" height="7" rx="1"/></svg></div>
+        <div class="ed-body">
+          <h3>Template library</h3>
+          <p>Ready-made scaffolds for the artifacts every company has — company brief, client brief, client manifest, dashboards. Copy in, fill out, done.</p>
+        </div>
       </div>
-      <div class="card">
-        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.4 4.9 5.4.8-3.9 3.8.9 5.4L12 14.3 7.2 16.9l.9-5.4L4.2 7.7l5.4-.8z"/></svg></div>
-        <h3>Skill library</h3>
-        <p>Reusable agent capabilities — brief processing, brand capture, dashboard refresh, integrity checks — that work against any ACOS instance out of the box.</p>
+      <div class="ed-item" style="--edc:#2dd4bf">
+        <div class="ed-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.4 4.9 5.4.8-3.9 3.8.9 5.4L12 14.3 7.2 16.9l.9-5.4L4.2 7.7l5.4-.8z"/></svg></div>
+        <div class="ed-body">
+          <h3>Skill library</h3>
+          <p>Reusable agent capabilities — brief processing, brand capture, dashboard refresh, integrity checks — that work against any ACOS instance out of the box.</p>
+        </div>
       </div>
-      <div class="card">
-        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M4 12h16M4 17h10"/></svg></div>
-        <h3>House rules</h3>
-        <p>Naming, markdown style, frontmatter, what to ignore, who to escalate to — codified once so every agent behaves consistently instead of improvising.</p>
+      <div class="ed-item" style="--edc:#22c55e">
+        <div class="ed-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M4 12h16M4 17h10"/></svg></div>
+        <div class="ed-body">
+          <h3>House rules</h3>
+          <p>Naming, markdown style, frontmatter, what to ignore, who to escalate to — codified once so every agent behaves consistently instead of improvising.</p>
+        </div>
       </div>
-      <div class="card">
-        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5 18 18M18 6l-2.5 2.5M8.5 15.5 6 18"/><circle cx="12" cy="12" r="2.5"/></svg></div>
-        <h3>Overlays</h3>
-        <p>Configure any skill for your business — account names, folder paths, routing quirks — without forking it. Your specifics, the framework's logic.</p>
+      <div class="ed-item" style="--edc:#a78bfa">
+        <div class="ed-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5 18 18M18 6l-2.5 2.5M8.5 15.5 6 18"/><circle cx="12" cy="12" r="2.5"/></svg></div>
+        <div class="ed-body">
+          <h3>Overlays</h3>
+          <p>Configure any skill for your business — account names, folder paths, routing quirks — without forking it. Your specifics, the framework's logic.</p>
+        </div>
       </div>
-      <div class="card">
-        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M7 20h10M8 12l2.5 2.5L16 9"/></svg></div>
-        <h3>Live dashboard</h3>
-        <p>A single state record — what's active, what's slipping, what needs you this week — refreshed automatically each morning from across your business.</p>
+      <div class="ed-item" style="--edc:#f59e0b">
+        <div class="ed-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M7 20h10M8 12l2.5 2.5L16 9"/></svg></div>
+        <div class="ed-body">
+          <h3>Live dashboard</h3>
+          <p>A single state record — what's active, what's slipping, what needs you this week — refreshed automatically each morning from across your business.</p>
+        </div>
       </div>
     </div>
   </div>
@@ -308,32 +347,32 @@ p{margin:0}
   </div>
 </section>
 
-<section class="section" id="included">
+<section class="section section--bright" id="included">
   <div class="wrap">
-    <div class="head-center">
+    <div class="bright-head">
       <span class="eyebrow">What's included</span>
       <h2>Opinionated where it counts. Out of your way everywhere else.</h2>
       <p>ACOS gives you the connective tissue and nothing you don't need. It's deliberately not a platform you're locked into.</p>
     </div>
-    <div class="spec">
-      <div class="spec-col">
-        <h3><span class="tick">✓</span> What ACOS provides</h3>
+    <div class="panels">
+      <div class="panel" style="--pc:#c75c2a">
+        <h3><span class="mk">✓</span> What ACOS provides</h3>
         <ul>
-          <li><span class="tick">✓</span><p>A set of four folder <b>README patterns</b> — root, container, item, asset.</p></li>
-          <li><span class="tick">✓</span><p>A <b>template library</b> for company brief, client brief, and client manifest.</p></li>
-          <li><span class="tick">✓</span><p>A <b>skill library</b> of reusable agent capabilities that run on any instance.</p></li>
-          <li><span class="tick">✓</span><p>An <b>overlay convention</b> so each business configures skills without forking them.</p></li>
-          <li><span class="tick">✓</span><p><b>House rules</b> for naming, markdown, frontmatter, and escalation.</p></li>
+          <li><span class="mk">✓</span><p>A set of four folder <b>README patterns</b> — root, container, item, asset.</p></li>
+          <li><span class="mk">✓</span><p>A <b>template library</b> for company brief, client brief, and client manifest.</p></li>
+          <li><span class="mk">✓</span><p>A <b>skill library</b> of reusable agent capabilities that run on any instance.</p></li>
+          <li><span class="mk">✓</span><p>An <b>overlay convention</b> so each business configures skills without forking them.</p></li>
+          <li><span class="mk">✓</span><p><b>House rules</b> for naming, markdown, frontmatter, and escalation.</p></li>
         </ul>
       </div>
-      <div class="spec-col">
-        <h3><span class="cross">—</span> What you bring</h3>
+      <div class="panel" style="--pc:#2dd4bf">
+        <h3><span class="mk">—</span> What you bring</h3>
         <ul>
-          <li><span class="cross">—</span><p><b>Storage.</b> Bring your own folder tree. ACOS rides on whatever you already use.</p></li>
-          <li><span class="cross">—</span><p><b>Tooling.</b> Any LLM or platform that can read markdown and walk a folder tree works.</p></li>
-          <li><span class="cross">—</span><p><b>Content.</b> Briefs are templates, not filled-in identities — your business fills them in.</p></li>
-          <li><span class="tick">✓</span><p>The payoff: <b>no lock-in.</b> Switch models or tools freely; your operating layer stays put.</p></li>
-          <li><span class="tick">✓</span><p>Open source under <b>Apache-2.0</b> — yours to adopt, extend, and keep.</p></li>
+          <li><span class="mk">—</span><p><b>Storage.</b> Bring your own folder tree. ACOS rides on whatever you already use.</p></li>
+          <li><span class="mk">—</span><p><b>Tooling.</b> Any LLM or platform that can read markdown and walk a folder tree works.</p></li>
+          <li><span class="mk">—</span><p><b>Content.</b> Briefs are templates, not filled-in identities — your business fills them in.</p></li>
+          <li><span class="mk-pos">✓</span><p>The payoff: <b>no lock-in.</b> Switch models or tools freely; your operating layer stays put.</p></li>
+          <li><span class="mk-pos">✓</span><p>Open source under <b>Apache-2.0</b> — yours to adopt, extend, and keep.</p></li>
         </ul>
       </div>
     </div>
