@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>ACOS Cascade Paths</title>
 <meta name="description" content="A worked example of how an AI agent dropped into a folder orients itself — climbing to the company root, then descending into the right client, project, brand, and routing instructions." />
-<link rel="icon" href="favicon.png" />
+<link rel="icon" type="image/svg+xml" href="favicon.svg" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
@@ -31,6 +31,14 @@ body{margin:0;min-height:100vh;background:var(--bg);color:var(--text)}
 .nav-links a:hover,.nav-links a.here{color:var(--text)}
 .nav-links .btn{background:var(--primary);color:#fff;padding:8px 16px;border-radius:8px;font-weight:700;font-size:.86rem}
 @media(max-width:820px){.nav-links a:not(.btn){display:none}}
+.brand-lockup{display:flex;align-items:center;gap:10px}
+.brand-mark{display:inline-flex;align-items:center;gap:8px}
+.brand-name{font-size:1.05rem;font-weight:800;letter-spacing:-.01em;color:var(--accent)}
+.brand-div{width:1px;height:22px;background:var(--border);flex:0 0 auto}
+.brand-wordmark{font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text);white-space:nowrap}
+.brand-wordmark .accent{color:var(--accent)}
+@media(max-width:820px){.brand-div,.brand-wordmark{display:none}}
+@media(max-width:560px){.nav-links .btn-ghost{display:none}}
 
 .page{max-width:1320px;margin:0 auto;display:grid;grid-template-columns:minmax(0,1fr) 380px}
 main{padding:34px 28px;min-width:0}
@@ -85,19 +93,52 @@ aside h2{margin:0 0 8px;font-size:24px;letter-spacing:-.01em}
   .rail,.side-rail{grid-column:span 12}
 }
 @media(max-width:640px){main,aside{padding:20px}h1{font-size:26px}}
+.footer{border-top:1px solid var(--border);background:var(--dark2);padding:30px 0}
+.footer-inner{display:flex;justify-content:space-between;align-items:center;gap:18px;flex-wrap:wrap}
+.footer-brand{font-size:.9rem;font-weight:700;color:var(--text)}
+.footer-brand .footer-tpp{color:var(--muted);font-weight:400}
+.footer-copy{font-size:.75rem;color:var(--muted);margin-top:5px}
+.footer a{color:var(--muted)}
+.footer a:hover{color:var(--text)}
+.footer-links{display:flex;gap:18px;flex-wrap:wrap;font-size:.82rem}
+.footer-links .current{color:var(--text);font-weight:700}
+.brand-name{color:var(--primary)}
+.brand-wordmark .accent{color:var(--primary)}
+.nav-links .btn-primary{background:var(--primary);color:#fff}
+.nav-links .btn-ghost{display:inline-block;background:transparent;color:var(--text);border:1px solid var(--border)}
+.nav-links .btn-ghost:hover{border-color:var(--primary-text);color:var(--primary-text)}
+@media(max-width:560px){.nav-links .btn-ghost{display:none}}
 </style>
 </head>
 <body>
 
 <nav class="nav">
   <div class="nav-inner">
-    <a class="brand" href="index.html"><span class="mk"><svg viewBox="0 0 32 32" fill="none"><rect x="4" y="4" width="10" height="10" rx="2" stroke="#c75c2a" stroke-width="2"/><rect x="18" y="4" width="10" height="10" rx="2" stroke="#c75c2a" stroke-width="2"/><rect x="11" y="18" width="10" height="10" rx="2" stroke="#c75c2a" stroke-width="2"/><path d="M9 14v2.5h7V18M23 14v2.5h-7" stroke="#c75c2a" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span>ACOS</span></a>
+    <div class="brand-lockup">
+      <a class="brand-mark" href="index.html" aria-label="ACOS — home">
+        <svg viewBox="0 0 256 256" width="30" height="30" aria-hidden="true">
+          <rect x="6" y="6" width="244" height="244" rx="50" fill="#ffffff" stroke="#e5e2dd" stroke-width="2"/>
+          <g fill="#ffffff" stroke="#c75c2a" stroke-width="9" stroke-linejoin="round">
+            <path d="M128 78 L202 108 L128 138 L54 108 Z"/>
+            <path d="M128 118 L202 148 L128 178 L54 148 Z"/>
+          </g>
+          <g transform="translate(92,98) scale(3.0)">
+            <path d="M12 2 C7.58 2 4 5.58 4 10 c0 6 8 12 8 12 s8 -6 8 -12 C20 5.58 16.42 2 12 2 Z" fill="#c75c2a"/>
+            <circle cx="12" cy="10" r="3" fill="#ffffff"/>
+          </g>
+        </svg>
+        <span class="brand-name">ACOS</span>
+      </a>
+      <span class="brand-div" aria-hidden="true"></span>
+      <span class="brand-wordmark"><span>THE</span><span class="accent">PRODUCT</span><span>PATH</span></span>
+    </div>
     <div class="nav-links">
       <a href="index.html">Home</a>
       <a href="adopt.html">Adopt</a>
       <a href="blueprint.html">Blueprint</a>
       <a class="here" href="cascade.html">Cascade</a>
-      <a class="btn" href="https://github.com/theProductPath/acos">GitHub</a>
+      <a class="btn btn-primary" href="https://www.theproductpath.com/contact" target="_blank" rel="noopener">Schedule a call</a>
+      <a class="btn btn-ghost" href="https://github.com/theProductPath/acos" target="_blank" rel="noopener">Download from GitHub</a>
     </div>
   </div>
 </nav>
@@ -232,5 +273,20 @@ function selectNode(id){
 tabs.forEach(t=>t.addEventListener("click",()=>renderMode(t.dataset.mode)));
 renderMode("client");
 </script>
+<footer class="footer">
+  <div class="wrap footer-inner">
+    <div>
+      <div class="footer-brand">ACOS <span class="footer-tpp">· theProductPath</span></div>
+      <div class="footer-copy">© 2026 theProductPath. All rights reserved.</div>
+    </div>
+    <nav class="footer-links">
+      <a href="https://airs.theproductpath.com/" target="_blank" rel="noopener">AIRS</a>
+      <span class="current">ACOS</span>
+      <a href="https://talent-cycle.theproductpath.com/" target="_blank" rel="noopener">Talent Cycle</a>
+      <a href="https://burner-apps.theproductpath.com/" target="_blank" rel="noopener">Burner Apps</a>
+      <a href="https://agentcomms.theproductpath.com/" target="_blank" rel="noopener">AgentComms</a>
+    </nav>
+  </div>
+</footer>
 </body>
 </html>
