@@ -59,6 +59,10 @@ p{margin:0}
 .hero-cta{display:flex;flex-wrap:wrap;gap:14px;align-items:center}
 .hero-note{margin-top:20px;color:var(--muted);font-size:.85rem;display:flex;align-items:center;gap:8px}
 .dot{width:7px;height:7px;border-radius:50%;background:var(--success);display:inline-block}
+.hero-grid{display:grid;grid-template-columns:1.02fr .98fr;gap:44px;align-items:center}
+.hero-viz{position:relative}
+.hero-viz svg{width:100%;max-width:520px;display:block;margin:0 auto}
+@media(max-width:900px){.hero-grid{grid-template-columns:1fr;gap:10px}.hero h1{max-width:22ch}.hero-lede{max-width:none}.hero-viz{margin-top:6px}}
 
 /* Problem */
 .lead-2col{display:grid;grid-template-columns:1.1fr 1fr;gap:56px;align-items:start}
@@ -218,15 +222,165 @@ p{margin:0}
 </nav>
 
 <header class="hero">
-  <div class="wrap">
-    <span class="hero-tag">Agentic Company Operating System · v0.1</span>
-    <h1>The operating system for running your business with <span class="hl">AI agents</span>.</h1>
-    <p class="hero-lede">Your company already runs on scattered folders, docs, and tools. ACOS turns that sprawl into one coherent context surface any AI agent can read, orient itself in, and act on — without you re-explaining your business every single time.</p>
-    <div class="hero-cta">
-      <a class="btn btn-primary" href="adopt.html">Get the framework</a>
-      <a class="btn btn-ghost" href="#how">See how it works</a>
+  <div class="wrap hero-grid">
+    <div class="hero-copy">
+      <span class="hero-tag">Agentic Company Operating System · v0.1</span>
+      <h1>The operating system for running your business with <span class="hl">AI agents</span>.</h1>
+      <p class="hero-lede">Your company already runs on scattered folders, docs, and tools. ACOS turns that sprawl into one coherent context surface any AI agent can read, orient itself in, and act on — without you re-explaining your business every single time.</p>
+      <div class="hero-cta">
+        <a class="btn btn-primary" href="adopt.html">Get the framework</a>
+        <a class="btn btn-ghost" href="#how">See how it works</a>
+      </div>
+      <p class="hero-note"><span class="dot"></span> LLM-agnostic · tool-agnostic · bring your own folders · Apache-2.0</p>
     </div>
-    <p class="hero-note"><span class="dot"></span> LLM-agnostic · tool-agnostic · bring your own folders · Apache-2.0</p>
+    <div class="hero-viz">
+<style>
+#acoshb-svg .hb-md{opacity:0;transition:opacity .45s ease}
+#acoshb-svg .hb-md.show{opacity:1}
+#acoshb-svg .hb-inner{transform-box:fill-box;transform-origin:center}
+#acoshb-svg .hb-md.lit-a .hb-inner{animation:hbpulse .55s ease both;filter:drop-shadow(0 0 4px #7dd3fc)}
+#acoshb-svg .hb-md.lit-b .hb-inner{animation:hbpulse .55s ease both;filter:drop-shadow(0 0 4px #86efac)}
+#acoshb-svg .hb-agent{opacity:0;transition:opacity .5s ease}
+#acoshb-svg .hb-agent.show{opacity:1}
+#acoshb-svg .hb-seg{opacity:0}
+#acoshb-svg .hb-seg.show{opacity:1;transition:opacity .25s ease}
+#acoshb-svg .hb-token{transform-box:fill-box;transform-origin:center}
+#acoshb-svg .hb-token.ready{animation:hbspin 1.3s cubic-bezier(.34,.02,.2,1) forwards}
+#acoshb-svg .hb-tokenA.ready{filter:drop-shadow(0 0 6px #38bdf8)}
+#acoshb-svg .hb-tokenB.ready{filter:drop-shadow(0 0 6px #22c55e)}
+#acoshb-svg .hb-ring{transform-box:fill-box;transform-origin:center;opacity:0}
+#acoshb-svg .hb-ring.on{animation:hbring 1.3s ease forwards}
+@keyframes hbpulse{0%{transform:scale(1)}45%{transform:scale(1.42)}100%{transform:scale(1)}}
+@keyframes hbspin{0%{transform:rotate(0) scale(1)}60%{transform:rotate(340deg) scale(1.3)}100%{transform:rotate(360deg) scale(1.12)}}
+@keyframes hbring{0%{opacity:0;transform:scale(.55)}40%{opacity:.85}100%{opacity:.45;transform:scale(1)}}
+</style>
+<svg id="acoshb-svg" viewBox="0 0 480 442" width="100%" role="img" aria-label="Animated build: your folders, ACOS markdown added to each, two agents reading up and becoming ready to work">
+<defs>
+<marker id="acoshb-ahB" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto-start-reverse"><path d="M1.5 1.5 L6.5 4 L1.5 6.5 Z" fill="#38bdf8"/></marker>
+<marker id="acoshb-ahG" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto-start-reverse"><path d="M1.5 1.5 L6.5 4 L1.5 6.5 Z" fill="#22c55e"/></marker>
+</defs>
+<g stroke="#33405a" stroke-width="1.5" fill="none">
+<path d="M240 66 V108"/><path d="M110 108 H380"/><path d="M110 108 V138"/><path d="M250 108 V138"/><path d="M380 108 V138"/>
+<path d="M110 156 V206"/><path d="M75 206 H160"/><path d="M75 206 V236"/><path d="M160 206 V236"/>
+<path d="M250 156 V206"/><path d="M215 206 H300"/><path d="M215 206 V236"/><path d="M300 206 V236"/>
+<path d="M75 252 V328"/><path d="M300 252 V328"/>
+</g>
+<g fill="#1d2635" stroke="#3d4a5c" stroke-width="1.5">
+<path transform="translate(96.775,134.525) scale(1.15)" d="M1 3.2 a1.5 1.5 0 0 1 1.5 -1.5 h4 l1.8 1.8 h7.5 a1.5 1.5 0 0 1 1.5 1.5 v6 a1.5 1.5 0 0 1 -1.5 1.5 H2.5 a1.5 1.5 0 0 1 -1.5 -1.5 z"/>
+<path transform="translate(236.775,134.525) scale(1.15)" d="M1 3.2 a1.5 1.5 0 0 1 1.5 -1.5 h4 l1.8 1.8 h7.5 a1.5 1.5 0 0 1 1.5 1.5 v6 a1.5 1.5 0 0 1 -1.5 1.5 H2.5 a1.5 1.5 0 0 1 -1.5 -1.5 z"/>
+<path transform="translate(366.775,134.525) scale(1.15)" d="M1 3.2 a1.5 1.5 0 0 1 1.5 -1.5 h4 l1.8 1.8 h7.5 a1.5 1.5 0 0 1 1.5 1.5 v6 a1.5 1.5 0 0 1 -1.5 1.5 H2.5 a1.5 1.5 0 0 1 -1.5 -1.5 z"/>
+<path transform="translate(63.5,233.5)" d="M1 3.2 a1.5 1.5 0 0 1 1.5 -1.5 h4 l1.8 1.8 h7.5 a1.5 1.5 0 0 1 1.5 1.5 v6 a1.5 1.5 0 0 1 -1.5 1.5 H2.5 a1.5 1.5 0 0 1 -1.5 -1.5 z"/>
+<path transform="translate(148.5,233.5)" d="M1 3.2 a1.5 1.5 0 0 1 1.5 -1.5 h4 l1.8 1.8 h7.5 a1.5 1.5 0 0 1 1.5 1.5 v6 a1.5 1.5 0 0 1 -1.5 1.5 H2.5 a1.5 1.5 0 0 1 -1.5 -1.5 z"/>
+<path transform="translate(203.5,233.5)" d="M1 3.2 a1.5 1.5 0 0 1 1.5 -1.5 h4 l1.8 1.8 h7.5 a1.5 1.5 0 0 1 1.5 1.5 v6 a1.5 1.5 0 0 1 -1.5 1.5 H2.5 a1.5 1.5 0 0 1 -1.5 -1.5 z"/>
+<path transform="translate(288.5,233.5)" d="M1 3.2 a1.5 1.5 0 0 1 1.5 -1.5 h4 l1.8 1.8 h7.5 a1.5 1.5 0 0 1 1.5 1.5 v6 a1.5 1.5 0 0 1 -1.5 1.5 H2.5 a1.5 1.5 0 0 1 -1.5 -1.5 z"/>
+<path transform="translate(64.65,326.15) scale(0.9)" d="M1 3.2 a1.5 1.5 0 0 1 1.5 -1.5 h4 l1.8 1.8 h7.5 a1.5 1.5 0 0 1 1.5 1.5 v6 a1.5 1.5 0 0 1 -1.5 1.5 H2.5 a1.5 1.5 0 0 1 -1.5 -1.5 z"/>
+<path transform="translate(289.65,326.15) scale(0.9)" d="M1 3.2 a1.5 1.5 0 0 1 1.5 -1.5 h4 l1.8 1.8 h7.5 a1.5 1.5 0 0 1 1.5 1.5 v6 a1.5 1.5 0 0 1 -1.5 1.5 H2.5 a1.5 1.5 0 0 1 -1.5 -1.5 z"/>
+</g>
+<circle cx="240" cy="50" r="28" fill="rgba(199,92,42,0.10)" stroke="#c75c2a" stroke-width="1.5" stroke-opacity="0.5"/>
+<path transform="translate(220.45,38.95) scale(1.7)" d="M1 3.2 a1.5 1.5 0 0 1 1.5 -1.5 h4 l1.8 1.8 h7.5 a1.5 1.5 0 0 1 1.5 1.5 v6 a1.5 1.5 0 0 1 -1.5 1.5 H2.5 a1.5 1.5 0 0 1 -1.5 -1.5 z" fill="#241a17" stroke="#c75c2a" stroke-width="1.7"/>
+<g font-family="'JetBrains Mono',ui-monospace,monospace" text-anchor="middle" fill="#97a3b6">
+<text x="240" y="88" font-size="15" font-weight="800" fill="#e8865a">company/</text>
+<text x="110" y="178" font-size="12" font-weight="700">clients/</text>
+<text x="250" y="178" font-size="12" font-weight="700">projects/</text>
+<text x="380" y="178" font-size="12" font-weight="700">brand/</text>
+<text x="75" y="270" font-size="10.5">acme/</text>
+<text x="160" y="270" font-size="10.5">globex/</text>
+<text x="215" y="270" font-size="10.5">app/</text>
+<text x="300" y="270" font-size="10.5">site/</text>
+<text x="75" y="352" font-size="10">briefs/</text>
+<text x="300" y="352" font-size="10">build/</text>
+</g>
+<g id="acoshb-mdRoot" class="hb-md" transform="translate(273,50)"><g class="hb-inner"><rect x="-9.5" y="-6.5" width="19" height="13" rx="2.5" fill="#c75c2a"/><text x="0" y="0" dominant-baseline="central" text-anchor="middle" font-family="Inter,sans-serif" font-size="7.8" font-weight="800" fill="#fff">MD</text></g></g>
+<g id="acoshb-mdClients" class="hb-md" transform="translate(136,142)"><g class="hb-inner"><rect x="-9.5" y="-6.5" width="19" height="13" rx="2.5" fill="#c75c2a"/><text x="0" y="0" dominant-baseline="central" text-anchor="middle" font-family="Inter,sans-serif" font-size="7.8" font-weight="800" fill="#fff">MD</text></g></g>
+<g id="acoshb-mdProjects" class="hb-md" transform="translate(276,142)"><g class="hb-inner"><rect x="-9.5" y="-6.5" width="19" height="13" rx="2.5" fill="#c75c2a"/><text x="0" y="0" dominant-baseline="central" text-anchor="middle" font-family="Inter,sans-serif" font-size="7.8" font-weight="800" fill="#fff">MD</text></g></g>
+<g id="acoshb-mdBrand" class="hb-md" transform="translate(404,142)"><g class="hb-inner"><rect x="-9.5" y="-6.5" width="19" height="13" rx="2.5" fill="#c75c2a"/><text x="0" y="0" dominant-baseline="central" text-anchor="middle" font-family="Inter,sans-serif" font-size="7.8" font-weight="800" fill="#fff">MD</text></g></g>
+<g id="acoshb-mdAcme" class="hb-md" transform="translate(99,240)"><g class="hb-inner"><rect x="-9.5" y="-6.5" width="19" height="13" rx="2.5" fill="#c75c2a"/><text x="0" y="0" dominant-baseline="central" text-anchor="middle" font-family="Inter,sans-serif" font-size="7.8" font-weight="800" fill="#fff">MD</text></g></g>
+<g id="acoshb-mdGlobex" class="hb-md" transform="translate(184,240)"><g class="hb-inner"><rect x="-9.5" y="-6.5" width="19" height="13" rx="2.5" fill="#c75c2a"/><text x="0" y="0" dominant-baseline="central" text-anchor="middle" font-family="Inter,sans-serif" font-size="7.8" font-weight="800" fill="#fff">MD</text></g></g>
+<g id="acoshb-mdApp" class="hb-md" transform="translate(239,240)"><g class="hb-inner"><rect x="-9.5" y="-6.5" width="19" height="13" rx="2.5" fill="#c75c2a"/><text x="0" y="0" dominant-baseline="central" text-anchor="middle" font-family="Inter,sans-serif" font-size="7.8" font-weight="800" fill="#fff">MD</text></g></g>
+<g id="acoshb-mdSite" class="hb-md" transform="translate(324,240)"><g class="hb-inner"><rect x="-9.5" y="-6.5" width="19" height="13" rx="2.5" fill="#c75c2a"/><text x="0" y="0" dominant-baseline="central" text-anchor="middle" font-family="Inter,sans-serif" font-size="7.8" font-weight="800" fill="#fff">MD</text></g></g>
+<g id="acoshb-mdBriefs" class="hb-md" transform="translate(97,332)"><g class="hb-inner"><rect x="-9.5" y="-6.5" width="19" height="13" rx="2.5" fill="#c75c2a"/><text x="0" y="0" dominant-baseline="central" text-anchor="middle" font-family="Inter,sans-serif" font-size="7.8" font-weight="800" fill="#fff">MD</text></g></g>
+<g id="acoshb-mdBuild" class="hb-md" transform="translate(322,332)"><g class="hb-inner"><rect x="-9.5" y="-6.5" width="19" height="13" rx="2.5" fill="#c75c2a"/><text x="0" y="0" dominant-baseline="central" text-anchor="middle" font-family="Inter,sans-serif" font-size="7.8" font-weight="800" fill="#fff">MD</text></g></g>
+<path id="acoshb-segA1" class="hb-seg" d="M97 322 Q 92 286 99 250" fill="none" stroke="#38bdf8" stroke-width="2.2" marker-start="url(#acoshb-ahB)" marker-end="url(#acoshb-ahB)"/>
+<path id="acoshb-segA2" class="hb-seg" d="M101 230 Q 110 186 130 152" fill="none" stroke="#38bdf8" stroke-width="2.2" marker-start="url(#acoshb-ahB)" marker-end="url(#acoshb-ahB)"/>
+<path id="acoshb-segA3" class="hb-seg" d="M146 135 Q 196 82 260 56" fill="none" stroke="#38bdf8" stroke-width="2.2" marker-start="url(#acoshb-ahB)" marker-end="url(#acoshb-ahB)"/>
+<path id="acoshb-segB1" class="hb-seg" d="M320 230 Q 300 186 284 152" fill="none" stroke="#22c55e" stroke-width="2.2" marker-start="url(#acoshb-ahG)" marker-end="url(#acoshb-ahG)"/>
+<path id="acoshb-segB2" class="hb-seg" d="M276 132 Q 290 92 274 58" fill="none" stroke="#22c55e" stroke-width="2.2" marker-start="url(#acoshb-ahG)" marker-end="url(#acoshb-ahG)"/>
+<g id="acoshb-agentA" class="hb-agent">
+<path d="M52 350 L70 336" stroke="#38bdf8" stroke-width="1.4"/>
+<g transform="translate(44,360)">
+<circle class="hb-ring" id="acoshb-ringA" r="20" fill="none" stroke="#38bdf8" stroke-width="2"/>
+<g id="acoshb-tokenA" class="hb-token hb-tokenA">
+<rect x="-13" y="-13" width="26" height="26" rx="7" fill="#38bdf8"/>
+<path d="M0 -8 Q1.6 -1.6 8 0 Q1.6 1.6 0 8 Q-1.6 1.6 -8 0 Q-1.6 -1.6 0 -8 Z" fill="#0a1622"/>
+</g>
+</g>
+<text x="44" y="392" text-anchor="middle" font-family="Inter,sans-serif" font-size="9.5" font-weight="800" fill="#7dd3fc">agent A</text>
+</g>
+<g id="acoshb-agentB" class="hb-agent">
+<path d="M338 240 L316 240" stroke="#22c55e" stroke-width="1.4"/>
+<g transform="translate(352,240)">
+<circle class="hb-ring" id="acoshb-ringB" r="20" fill="none" stroke="#22c55e" stroke-width="2"/>
+<g id="acoshb-tokenB" class="hb-token hb-tokenB">
+<circle r="13" fill="#22c55e"/>
+<g stroke="#0a1622" stroke-width="2.1" stroke-linecap="round"><path d="M0 -6.5 V6.5"/><path d="M-5.6 -3.2 L5.6 3.2"/><path d="M-5.6 3.2 L5.6 -3.2"/></g>
+</g>
+</g>
+<text x="352" y="270" text-anchor="middle" font-family="Inter,sans-serif" font-size="9.5" font-weight="800" fill="#86efac">agent B</text>
+</g>
+<text id="acoshb-cap" x="240" y="426" text-anchor="middle" font-family="Inter,sans-serif" font-size="12.5" font-weight="600" fill="#cdd6e6">1 · The folders you already have</text>
+</svg>
+<script>
+(function(){
+  var P='acoshb-';
+  function g(id){return document.getElementById(P+id);}
+  var svg=g('svg'); if(!svg) return;
+  var mdIds=['mdRoot','mdClients','mdProjects','mdBrand','mdAcme','mdGlobex','mdApp','mdSite','mdBriefs','mdBuild'];
+  var segIds=['segA1','segA2','segA3','segB1','segB2'];
+  var segLen={}; segIds.forEach(function(id){ segLen[id]=g(id).getTotalLength(); });
+  var cap=g('cap');
+  var timers=[];
+  function T(fn,ms){ timers.push(setTimeout(fn,ms)); }
+  function armSeg(id){ var sg=g(id); sg.classList.remove('show'); sg.style.transition='none'; sg.style.strokeDasharray=segLen[id]; sg.style.strokeDashoffset=segLen[id]; sg.getBoundingClientRect(); }
+  function drawSeg(id,dur){ var sg=g(id); sg.classList.add('show'); sg.style.transition='stroke-dashoffset '+dur+'ms ease-in-out'; sg.style.strokeDashoffset='0'; }
+  function reset(){
+    timers.forEach(clearTimeout); timers=[];
+    mdIds.forEach(function(id){ g(id).classList.remove('show','lit-a','lit-b'); });
+    g('agentA').classList.remove('show'); g('agentB').classList.remove('show');
+    g('tokenA').classList.remove('ready'); g('tokenB').classList.remove('ready');
+    g('ringA').classList.remove('on'); g('ringB').classList.remove('on');
+    segIds.forEach(armSeg);
+    cap.setAttribute('fill','#cdd6e6'); cap.setAttribute('font-weight','600'); cap.setAttribute('font-size','12.5');
+    cap.textContent='1 · The folders you already have';
+  }
+  function cycle(){
+    reset();
+    T(function(){
+      cap.textContent='2 · ACOS adds a README to every folder';
+      mdIds.forEach(function(id,i){ T(function(){ g(id).classList.add('show'); }, i*105); });
+    },1900);
+    T(function(){
+      cap.textContent='3 · Each agent reads the markdown up its own tree';
+      g('agentA').classList.add('show');
+      T(function(){ g('mdBriefs').classList.add('lit-a'); }, 250);
+      T(function(){ drawSeg('segA1',950); }, 500);  T(function(){ g('mdAcme').classList.add('lit-a'); }, 1450);
+      T(function(){ drawSeg('segA2',950); }, 1550); T(function(){ g('mdClients').classList.add('lit-a'); }, 2500);
+      T(function(){ drawSeg('segA3',1050); },2600);T(function(){ g('mdRoot').classList.add('lit-a'); }, 3650);
+      T(function(){ g('agentB').classList.add('show'); g('mdSite').classList.add('lit-b'); }, 700);
+      T(function(){ drawSeg('segB1',950); }, 950);  T(function(){ g('mdProjects').classList.add('lit-b'); }, 1900);
+      T(function(){ drawSeg('segB2',1050); },2000); T(function(){ g('mdRoot').classList.add('lit-b'); }, 3050);
+    },5400);
+    T(function(){
+      cap.setAttribute('fill','#ffffff'); cap.setAttribute('font-weight','800'); cap.setAttribute('font-size','13.2');
+      cap.textContent='Assembling all the context — the agent is ready to work';
+      g('tokenA').classList.add('ready'); g('ringA').classList.add('on');
+      g('tokenB').classList.add('ready'); g('ringB').classList.add('on');
+    },9400);
+    T(cycle,13200);
+  }
+  cycle();
+})();
+</script>
+    </div>
   </div>
 </header>
 
