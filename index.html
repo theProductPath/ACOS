@@ -59,10 +59,10 @@ p{margin:0}
 .hero-cta{display:flex;flex-wrap:wrap;gap:14px;align-items:center}
 .hero-note{margin-top:20px;color:var(--muted);font-size:.85rem;display:flex;align-items:center;gap:8px}
 .dot{width:7px;height:7px;border-radius:50%;background:var(--success);display:inline-block}
-.hero-grid{display:grid;grid-template-columns:1.02fr .98fr;gap:44px;align-items:center}
-.hero-viz{position:relative}
-.hero-viz svg{width:100%;max-width:520px;display:block;margin:0 auto}
-@media(max-width:900px){.hero-grid{grid-template-columns:1fr;gap:10px}.hero h1{max-width:22ch}.hero-lede{max-width:none}.hero-viz{margin-top:6px}}
+.hero-flow::after{content:"";display:table;clear:both}
+.hero-flow .hero-viz{float:right;width:47%;max-width:500px;margin:2px 0 14px 44px}
+.hero-viz svg{width:100%;max-width:500px;display:block}
+@media(max-width:900px){.hero-flow .hero-viz{float:none;width:100%;max-width:520px;margin:16px auto 4px}.hero h1{max-width:22ch}}
 
 /* Problem */
 .lead-2col{display:grid;grid-template-columns:1.1fr 1fr;gap:56px;align-items:start}
@@ -222,17 +222,7 @@ p{margin:0}
 </nav>
 
 <header class="hero">
-  <div class="wrap hero-grid">
-    <div class="hero-copy">
-      <span class="hero-tag">Agentic Company Operating System · v0.1</span>
-      <h1>The operating system for running your business with <span class="hl">AI agents</span>.</h1>
-      <p class="hero-lede">Your company already runs on scattered folders, docs, and tools. ACOS turns that sprawl into one coherent context surface any AI agent can read, orient itself in, and act on — without you re-explaining your business every single time.</p>
-      <div class="hero-cta">
-        <a class="btn btn-primary" href="adopt.html">Get the framework</a>
-        <a class="btn btn-ghost" href="#how">See how it works</a>
-      </div>
-      <p class="hero-note"><span class="dot"></span> LLM-agnostic · tool-agnostic · bring your own folders · Apache-2.0</p>
-    </div>
+  <div class="wrap hero-flow">
     <div class="hero-viz">
 <style>
 #acoshb-svg .hb-md{opacity:0;transition:opacity .45s ease}
@@ -381,6 +371,14 @@ p{margin:0}
 })();
 </script>
     </div>
+    <span class="hero-tag">Agentic Company Operating System · v0.1</span>
+    <h1>The operating system for running your business with <span class="hl">AI agents</span>.</h1>
+    <p class="hero-lede">Your company already runs on scattered folders, docs, and tools. ACOS turns that sprawl into one coherent context surface any AI agent can read, orient itself in, and act on — without you re-explaining your business every single time.</p>
+    <div class="hero-cta">
+      <a class="btn btn-primary" href="adopt.html">Get the framework</a>
+      <a class="btn btn-ghost" href="#how">See how it works</a>
+    </div>
+    <p class="hero-note"><span class="dot"></span> LLM-agnostic · tool-agnostic · bring your own folders · Apache-2.0</p>
   </div>
 </header>
 
