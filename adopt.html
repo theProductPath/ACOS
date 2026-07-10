@@ -109,9 +109,9 @@ code{font-family:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;fo
 .nav-links .btn-ghost:hover{border-color:#e8865a;color:#e8865a}
 
 .content{counter-reset:stepc}
-.step-sec{position:relative;padding-left:74px}
-.step-sec::before{counter-increment:stepc;content:counter(stepc);position:absolute;left:0;top:24px;width:50px;height:50px;border-radius:50%;background:var(--accentSoft);border:1.5px solid var(--accent);color:var(--accentText);display:grid;place-items:center;font-size:1.45rem;font-weight:800;font-family:Inter,sans-serif}
-@media(max-width:560px){.step-sec{padding-left:0}.step-sec::before{position:static;margin-bottom:14px}}
+.content .step-sec{position:relative;padding-left:76px}
+.content .step-sec::before{counter-increment:stepc;content:counter(stepc);position:absolute;left:0;top:18px;width:50px;height:50px;border-radius:50%;background:var(--accentSoft);border:1.5px solid var(--accent);color:var(--accentText);display:grid;place-items:center;font-size:1.45rem;font-weight:800;font-family:Inter,sans-serif;line-height:1}
+@media(max-width:560px){.content .step-sec{padding-left:0}.content .step-sec::before{position:static;margin-bottom:14px}}
 .filetree{background:var(--dark2);border:1px solid var(--border);border-radius:10px;padding:20px 22px;font-family:"JetBrains Mono",ui-monospace,monospace;font-size:.85rem;line-height:1.85;color:#cdd6e5;overflow-x:auto;margin:8px 0 22px}
 .filetree .d{color:var(--accentText)}
 .filetree .c{color:var(--muted)}
