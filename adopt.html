@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Adopting ACOS — the guide</title>
-<meta name="description" content="From an ordinary folder tree to a working ACOS instance in seven steps. The adoption guide for the Agentic Company Operating System." />
+<meta name="description" content="Start with a small day-one core; agents grow the instance as you work. The adoption guide for the Agentic Company Operating System." />
 <link rel="icon" type="image/svg+xml" href="favicon.svg" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -81,6 +81,9 @@ code{font-family:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;fo
 .next .k{font-size:.74rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--accentText)}
 .next h4{margin:8px 0 4px;font-size:1.1rem}
 .next p{color:var(--muted);font-size:.92rem;margin:0}
+.next-minor{display:flex;gap:12px;flex-wrap:wrap;margin-top:18px}
+.next-minor .btn{background:transparent;color:var(--muted);border:1px solid var(--border);padding:9px 18px;font-size:.88rem;font-weight:600}
+.next-minor .btn:hover{border-color:var(--accentText);color:var(--accentText);text-decoration:none}
 @media(max-width:900px){.layout{grid-template-columns:1fr;gap:0}.toc{display:none}.next{grid-template-columns:1fr}}
 
 .footer{border-top:1px solid var(--border);background:var(--dark);padding:30px 0;color:var(--muted);font-size:.86rem}
@@ -115,6 +118,62 @@ code{font-family:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;fo
 .filetree{background:var(--dark2);border:1px solid var(--border);border-radius:10px;padding:20px 22px;font-family:"JetBrains Mono",ui-monospace,monospace;font-size:.85rem;line-height:1.85;color:#cdd6e5;overflow-x:auto;margin:8px 0 22px}
 .filetree .d{color:var(--accentText)}
 .filetree .c{color:var(--muted)}
+
+/* "What ACOS asks of you" — top-accent-rule columns (matches index "Who it's for" treatment) */
+.asks{display:grid;grid-template-columns:repeat(3,1fr);gap:30px;margin:20px 0 4px}
+.ask{border-top:3px solid var(--accent);padding-top:16px}
+.ask h3{font-size:1.02rem;font-weight:700;margin:0 0 8px;color:var(--text);letter-spacing:-.01em}
+.ask p{color:var(--muted);font-size:.94rem;line-height:1.55;margin:0}
+.ask code{font-size:.84em}
+@media(max-width:700px){.asks{grid-template-columns:1fr;gap:22px}}
+
+/* Checklist — lighter two-column grid */
+.checklist{display:grid;grid-template-columns:1fr;column-gap:40px;row-gap:0}
+.checklist li{font-size:.95rem}
+.checklist li:last-child{border-bottom:0}
+.check-cols{display:grid;grid-template-columns:1fr 1fr;gap:8px 40px;margin-top:14px}
+.check-cols h3{font-size:.78rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--accentText);margin:0 0 4px}
+@media(max-width:700px){.check-cols{grid-template-columns:1fr;gap:22px}}
+
+/* Phase labels */
+.phase-label{display:block;font-size:.78rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--accentText);margin:0 0 8px}
+
+/* Phase A — bright band (accessible day-one core) */
+.phase-a{background:#f0ede8;border:1px solid #e5e2dd;border-radius:16px;padding:34px 38px 30px;margin:18px 0 8px;color:#374151}
+.phase-a .phase-label{color:#c75c2a}
+.phase-a h2{color:#1f2937}
+.phase-a p{color:#374151}
+.phase-a strong{color:#1f2937}
+.phase-a .phase-intro{color:#4b5563;margin:0 0 8px}
+.phase-a section{border-top:1px solid #ddd8d0;padding:26px 0}
+.phase-a code{background:#fff;border-color:#e5e2dd;color:#c75c2a}
+.phase-a .callout{background:#fff;border-color:#e5e2dd;border-left-color:var(--accent);color:#4b5563}
+.phase-a .callout b{color:#c75c2a}
+.phase-a .step-sec::before{background:rgba(199,92,42,.10);border-color:#c75c2a;color:#c75c2a}
+.phase-a a{color:#c75c2a}
+@media(max-width:560px){.phase-a{padding:26px 22px 22px;border-radius:12px}}
+
+/* Phase A payoff banner */
+.payoff{margin:24px 0 2px;background:var(--accent);color:#fff;border-radius:12px;padding:24px 28px;text-align:center;font-size:1.16rem;font-weight:700;line-height:1.45}
+.payoff .sub{display:block;font-weight:500;font-size:.95rem;margin-top:7px;color:rgba(255,255,255,.88)}
+
+/* Phase B — growth events with recurring agent glyph */
+.grow-list{list-style:none;margin:18px 0 0;padding:0}
+.grow{display:flex;gap:16px;padding:20px 0;border-bottom:1px solid var(--border)}
+.grow:last-child{border-bottom:0}
+.agent-badge{flex:0 0 auto;width:40px;height:40px;border-radius:50%;background:var(--accentSoft);border:1.5px solid var(--accent);display:grid;place-items:center;margin-top:2px}
+.agent-badge svg{width:22px;height:22px;display:block}
+.grow h3{font-size:1.05rem;font-weight:700;margin:0 0 6px;color:var(--text);letter-spacing:-.01em}
+.grow p{color:var(--muted);font-size:.95rem;margin:0}
+.grow p b{color:var(--text);font-weight:600}
+.who{display:inline-block;font-size:.66rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;padding:2px 9px;border-radius:999px;margin-left:8px;vertical-align:2px}
+.who-agent{color:var(--accentText);background:var(--accentSoft);border:1px solid rgba(199,92,42,.4)}
+.who-you{color:var(--muted);background:var(--card2);border:1px solid var(--border)}
+.proof-line{display:flex;align-items:center;gap:22px;margin:26px 0 0;padding:20px 26px;background:var(--card2);border:1px solid var(--border);border-left:4px solid var(--accent);border-radius:12px}
+.proof-line .n{font-size:2.2rem;font-weight:800;color:var(--accentText);flex:0 0 auto;line-height:1}
+.proof-line p{color:var(--muted);font-size:.95rem;margin:0}
+@media(max-width:560px){.proof-line{flex-direction:column;align-items:flex-start;gap:10px}}
+.bx svg{width:13px;height:13px;display:block}
 </style>
 </head>
 <body>
@@ -154,10 +213,10 @@ code{font-family:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;fo
   <div class="wrap">
     <div class="crumb">The adoption guide</div>
     <h1>Adopting ACOS</h1>
-    <p>From an ordinary folder tree to a company any AI agent can read, orient itself in, and act on — without being re-taught every time. Seven steps, in an order that keeps you unblocked.</p>
+    <p>Start with a small, useful core — a front door, an identity, one folder that matters. Agents grow the rest as real work demands it. This guide shows you the day-one core and the growth path that follows.</p>
     <div class="meta">
-      <span class="chip">Seven steps</span>
-      <span class="chip">~20 min read</span>
+      <span class="chip">Small day-one core</span>
+      <span class="chip">Grows as you work</span>
     </div>
   </div>
 </header>
@@ -167,29 +226,32 @@ code{font-family:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;fo
     <div class="lbl">On this page</div>
     <a href="#asks">What ACOS asks of you</a>
     <a href="#shape">The shape of an instance</a>
-    <a href="#step1">1 · Create the root</a>
-    <a href="#step2">2 · Company brief</a>
-    <a href="#step3">3 · Instrument folders</a>
-    <a href="#step4">4 · Briefs &amp; manifests</a>
-    <a href="#step5">5 · Skills &amp; overlays</a>
-    <a href="#step6">6 · The dashboard</a>
-    <a href="#step7">7 · Point agents in</a>
+    <a href="#day-one">Day one: the small core</a>
+    <a href="#grows">As you work: it grows</a>
     <a href="#checklist">Adoption checklist</a>
     <a href="#next">Where to go next</a>
   </nav>
 
   <main class="content">
-    <p class="lede">You don't need to read the whole framework manual first. Skim it for the vocabulary, then work through the steps below. When you want to see any pattern fully populated, tPPOS — theProductPath's own instance — is the reference implementation. This guide is for the person <em>setting up</em> an instance, not extending the framework itself.</p>
+    <p class="lede">ACOS is a company context system, not a README exercise — READMEs are just the front doors that route agents to the records underneath. You don't need to read the whole framework manual first: skim it for the vocabulary, then work through the day-one core below. When you want to see any pattern fully populated, tPPOS — theProductPath's own instance — is the reference implementation.</p>
 
     <section id="asks">
       <h2>What ACOS asks of you</h2>
-      <p>ACOS is deliberately thin. Before you start, know that it assumes three things and provides the rest:</p>
-      <ul>
-        <li>You keep your company's working context in a <strong>synced folder tree</strong>. Google Drive, OneDrive, Dropbox, or a git repo all work equally well — ACOS never touches the storage layer.</li>
-        <li>Your AI tools can <strong>read markdown and walk a folder tree</strong>. Any model or platform that can do that can use an ACOS instance.</li>
-        <li>You're willing to <strong>write down how your company works</strong>, once, so agents stop guessing.</li>
-      </ul>
-      <p>Everything else — the README patterns, the templates, the skills, the house rules — comes from the framework. You bring storage, tooling, and content.</p>
+      <p>ACOS is deliberately thin. It assumes three things and provides the rest — the README patterns, templates, skills, and house rules all come from the framework.</p>
+      <div class="asks">
+        <div class="ask">
+          <h3>A synced folder tree</h3>
+          <p>Google Drive, OneDrive, Dropbox, or a git repo — ACOS never touches the storage layer.</p>
+        </div>
+        <div class="ask">
+          <h3>Tools that read markdown</h3>
+          <p>Any model or platform that can read markdown and walk a folder tree can use your instance.</p>
+        </div>
+        <div class="ask">
+          <h3>A seed of judgment</h3>
+          <p>You supply the identity, scope, and decision-makers. Agents document the rest as work happens.</p>
+        </div>
+      </div>
     </section>
 
     <section id="shape">
@@ -205,73 +267,117 @@ code{font-family:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;fo
 ├─ <span class="d">Products/</span>
 ├─ <span class="d">Projects/</span>
 └─ <span class="d">Brand/</span></pre>
-      <div class="callout">Hold that picture in mind: everything below is just filling that shape in, in an order that keeps you unblocked.</div>
+      <div class="callout">Hold that picture in mind: everything below is about <b>seeding</b> that shape — not filling it all in yourself.</div>
     </section>
 
-    <section id="step1" class="step-sec">
-      <h2>Choose the tree and create the instance root</h2>
-      <p>Pick the folder that will be the top of your company's operating tree — usually the root of a synced drive or a dedicated company folder. The instance root is the folder that holds your identity and rules: often the same top folder, or a named subfolder like <code>companyOS/</code> if you want the operating layer visibly separate from the business folders.</p>
-      <p>Create the root <code>README.md</code> by copying the <code>folder-readme-root</code> template. Fill in what the instance is, list the sibling folders that are in scope, and point back at ACOS for the framework rules. This is the single most important file you'll write: it's what an agent reads before doing anything, and it decides where the agent goes next.</p>
-      <div class="callout">Every README opens with a small YAML frontmatter block — <code>type</code>, <code>status</code>, <code>last-updated</code>, <code>maintainer</code>, <code>purpose</code>. Fill those in honestly as you go; they're what lets a future tool report which files have gone stale without reading the prose.</div>
+    <section id="day-one">
+      <div class="phase-a">
+        <span class="phase-label">Phase one</span>
+        <h2>Day one: the small core</h2>
+        <p class="phase-intro">Four steps, one sitting. The goal isn't finished documentation — it's agents working inside your company by the end of the day.</p>
+
+        <section class="step-sec">
+          <h2>Choose your folder tree, create the instance root</h2>
+          <p>Pick the folder that will be the top of your company's operating tree — usually the root of a synced drive or a dedicated company folder. Then make a fresh copy of the framework's <code>folder-readme-root.md</code> template, save it in that folder as <code>README.md</code>, and fill in its sections for your company: what the instance is, which sibling folders are in scope, and the pointer back at ACOS for the framework rules. It's the front door every agent reads first.</p>
+        </section>
+
+        <section class="step-sec">
+          <h2>Fill in your company brief</h2>
+          <p>Copy the <code>brief-company.md</code> template into the root as <code>company-brief.md</code>, then work through its sections: positioning, offers, voice, defaults, and your <strong>principals</strong> — the humans agents act for and escalate to. If there's more than one principal, designate exactly one <strong>primary stakeholder</strong> so escalation is never ambiguous. This is the one record worth real care on day one: it gives every agent your identity, voice, and decision path.</p>
+        </section>
+
+        <section class="step-sec">
+          <h2>Instrument your first high-value area</h2>
+          <p>Pick the <em>one</em> folder where agents will do the most work — for most companies that's <code>Clients/</code> or <code>Products/</code>. Copy the <code>folder-readme-container.md</code> template into it as <code>README.md</code> and fill in its sections: an index of what's inside plus the conventions every child follows. You don't instrument everything; an unlabeled folder just means an agent has less context there, not that anything breaks.</p>
+        </section>
+
+        <section class="step-sec">
+          <h2>Point an agent at the root and run the first check</h2>
+          <p>Now prove the core works. Point an agent at your instance root and ask it to <strong>check instance health</strong>. The framework's <code>acos-integrity</code> skill walks your tree and confirms your READMEs, frontmatter, and naming follow the rules — and to do that, the agent first has to orient itself through the cascade. A clean report means your front door, brief, and container README are doing their jobs.</p>
+          <p>Have it save the report to <code>_progress/</code> — and that's your instance's first agent-generated artifact, minutes after setup. <a href="cascade.html">See exactly how the agent orients itself →</a></p>
+        </section>
+
+        <div class="payoff">That's the whole upfront ask.<span class="sub">Everything below happens as you operate — and mostly, agents do it.</span></div>
+      </div>
     </section>
 
-    <section id="step2" class="step-sec">
-      <h2>Fill in the company brief</h2>
-      <p>Copy the <code>brief-company</code> template to <code>company-brief.md</code> and populate it. The brief is your company's canonical identity: positioning, what you offer, your voice, your defaults, and — importantly — your <strong>principals</strong>, the humans on whose behalf agents act and who they escalate to.</p>
-      <p>The brief is stable content. It answers "who is this company and what does it sound like," and it's read by any task that produces writing in your voice — proposals, outreach, marketing, positioning. Get this right early, because a lot of downstream agent behavior keys off it. If you have more than one principal, designate exactly one as the <strong>primary stakeholder</strong> so escalation is never ambiguous.</p>
-    </section>
-
-    <section id="step3" class="step-sec">
-      <h2>Instrument your operating folders</h2>
-      <p>Now walk your sibling folders and give each one a README, choosing the pattern that fits what the folder <em>is</em>. ACOS uses four shapes, each with a template:</p>
-      <ul>
-        <li>The <strong>container</strong> pattern for folders that hold many similar children — <code>Clients/</code>, <code>Products/</code>, <code>Projects/</code>. The README is an index of children plus the conventions every child follows.</li>
-        <li>The <strong>item</strong> pattern for a specific child inside a container — one client, one product. The README is curated context for that one thing.</li>
-        <li>The <strong>asset</strong> pattern for a folder that is itself a source of truth — a brand kit, design tokens, a shared script library. The README is the substance, not an index.</li>
-        <li>The <strong>root</strong> pattern you already used in step 1.</li>
+    <section id="grows">
+      <span class="phase-label">Phase two</span>
+      <h2>As you work: the instance grows</h2>
+      <p class="lede" style="margin-bottom:6px">You keep working the way you always have. But now, when work reveals a durable need, your agents fortify the instance with the right kind of record — and every task that follows starts from a stronger foundation.</p>
+      <ul class="grow-list">
+        <li class="grow">
+          <span class="agent-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#e8865a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="9" width="14" height="10" rx="3"/><circle cx="9.5" cy="14" r="1" fill="#e8865a" stroke="none"/><circle cx="14.5" cy="14" r="1" fill="#e8865a" stroke="none"/><path d="M12 9V5"/><circle cx="12" cy="4" r="1.3" fill="#e8865a" stroke="none"/></svg></span>
+          <div>
+            <h3>A new client engagement lands<span class="who who-agent">agent</span><span class="who who-you">you review</span></h3>
+            <p>An agent scaffolds the client README, <b>brief</b> (<code>brief.md</code>, the substantive relationship record), and <b>manifest</b> from framework templates. The relationship record compounds from there.</p>
+          </div>
+        </li>
+        <li class="grow">
+          <span class="agent-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#e8865a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="9" width="14" height="10" rx="3"/><circle cx="9.5" cy="14" r="1" fill="#e8865a" stroke="none"/><circle cx="14.5" cy="14" r="1" fill="#e8865a" stroke="none"/><path d="M12 9V5"/><circle cx="12" cy="4" r="1.3" fill="#e8865a" stroke="none"/></svg></span>
+          <div>
+            <h3>Incoming material needs routing<span class="who who-agent">agent</span></h3>
+            <p>A <b>manifest</b> gives agents the aliases, email domains, and project keywords to match a stray transcript or email to the right client — instead of guessing or inventing a new one.</p>
+          </div>
+        </li>
+        <li class="grow">
+          <span class="agent-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#e8865a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="9" width="14" height="10" rx="3"/><circle cx="9.5" cy="14" r="1" fill="#e8865a" stroke="none"/><circle cx="14.5" cy="14" r="1" fill="#e8865a" stroke="none"/><path d="M12 9V5"/><circle cx="12" cy="4" r="1.3" fill="#e8865a" stroke="none"/></svg></span>
+          <div>
+            <h3>A company-specific quirk shows up<span class="who who-agent">agent</span></h3>
+            <p>It becomes an <b>overlay</b> at <code>overlays/&lt;skill&gt;.md</code> — not a fork. The shared skill stays reusable; your account names, paths, and routing quirks live in the overlay.</p>
+          </div>
+        </li>
+        <li class="grow">
+          <span class="agent-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#e8865a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="9" width="14" height="10" rx="3"/><circle cx="9.5" cy="14" r="1" fill="#e8865a" stroke="none"/><circle cx="14.5" cy="14" r="1" fill="#e8865a" stroke="none"/><path d="M12 9V5"/><circle cx="12" cy="4" r="1.3" fill="#e8865a" stroke="none"/></svg></span>
+          <div>
+            <h3>A recurring choice gets settled<span class="who who-agent">agent</span><span class="who who-you">you decide</span></h3>
+            <p>A <b>decision record</b> preserves why, the alternatives considered, and when to revisit — so future agents don't blindly reopen settled questions.</p>
+          </div>
+        </li>
+        <li class="grow">
+          <span class="agent-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#e8865a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="9" width="14" height="10" rx="3"/><circle cx="9.5" cy="14" r="1" fill="#e8865a" stroke="none"/><circle cx="14.5" cy="14" r="1" fill="#e8865a" stroke="none"/><path d="M12 9V5"/><circle cx="12" cy="4" r="1.3" fill="#e8865a" stroke="none"/></svg></span>
+          <div>
+            <h3>A deliverable repeats itself<span class="who who-agent">agent</span></h3>
+            <p>It becomes a <b>template</b> — the next proposal, invoice, or client area starts from a proven shape instead of a blank page.</p>
+          </div>
+        </li>
+        <li class="grow">
+          <span class="agent-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#e8865a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="9" width="14" height="10" rx="3"/><circle cx="9.5" cy="14" r="1" fill="#e8865a" stroke="none"/><circle cx="14.5" cy="14" r="1" fill="#e8865a" stroke="none"/><path d="M12 9V5"/><circle cx="12" cy="4" r="1.3" fill="#e8865a" stroke="none"/></svg></span>
+          <div>
+            <h3>You want a morning glance<span class="who who-agent">agent</span></h3>
+            <p>A <b>dashboard</b> (<code>dashboard.md</code>) carries current state — active work, slipping commitments, what needs a principal. The <code>dashboard-refresh</code> skill re-rolls its structured sections on a cadence where your environment supports it, propose-first elsewhere. The markdown stays canonical; every rendered view is a surface over the same company memory.</p>
+          </div>
+        </li>
       </ul>
-      <p>You don't have to instrument everything at once. Start with the one or two folders where agents will do the most work — for most companies that's <code>Clients/</code> or <code>Products/</code> — and add the rest as you go. An unlabeled folder just means an agent has less context there, not that anything breaks.</p>
-    </section>
-
-    <section id="step4" class="step-sec">
-      <h2>Add briefs and manifests where the work is substantive</h2>
-      <p>READMEs are operational front doors. When a folder needs to carry real substance — relationship history, contacts, engagement state — add a <strong>brief</strong> alongside the README. The clearest case is a client: copy the <code>brief-client</code> template into each active client folder as <code>brief.md</code>, and it becomes the source of truth for that relationship.</p>
-      <p>If agents will route incoming material — transcripts, emails, notes — to the right client, also add a <strong>manifest</strong> from the <code>manifest-client</code> template. The manifest lists the identifiers (company aliases, contact names, email domains, project keywords) that let a skill match a stray transcript to the correct client instead of guessing or inventing a new one.</p>
-      <div class="callout">The rule of thumb: <b>README</b> for "what's here and where to look," <b>brief</b> for "the substantive record," <b>manifest</b> for "how to route things to this folder."</div>
-    </section>
-
-    <section id="step5" class="step-sec">
-      <h2>Wire in skills and overlays</h2>
-      <p>ACOS ships a library of reusable agent capabilities — brief processing, brand capture, dashboard refresh and tune, integrity checks, README refresh. Each is a <code>SKILL.md</code> that works against any ACOS instance out of the box. Make them available to whatever agent tooling your company uses (how you install a skill depends on the tool).</p>
-      <p>When a skill needs something specific to your company — an account name, a folder path, a routing quirk — you don't fork the skill. You write a small <strong>overlay</strong> at <code>overlays/&lt;skill-name&gt;.md</code> that adds that configuration. The framework skill stays generic; your specifics live in the overlay. If you ever want an overlay to <em>change</em> what a skill does rather than configure it, that's a signal the framework skill itself should improve — raise it rather than working around it.</p>
-    </section>
-
-    <section id="step6" class="step-sec">
-      <h2>Stand up the dashboard</h2>
-      <p>Once briefs and READMEs exist, add a <code>dashboard.md</code> at the instance root from the <code>dashboard-company</code> template. Where the company brief carries stable identity, the dashboard carries <strong>current state</strong> — what's active, what's about to slip, what needs a principal's attention this week. It's the morning-glance record, and it's one of the first artifacts a new instance actually benefits from.</p>
-      <p>The <code>dashboard-refresh</code> skill keeps it current by re-rolling structured sections from your briefs and READMEs on a cadence, while preserving your hand-written narrative.</p>
-      <div class="callout">Remember the ACOS principle: the <b>markdown is canonical</b>, and any rendered view — an HTML export, a printed snapshot, a live artifact — is a presentation layer over that one source. (This very site is that principle in action: the guide you're reading renders <code>docs/adopting-acos.md</code>.)</div>
-    </section>
-
-    <section id="step7" class="step-sec">
-      <h2>Point your agents at the root</h2>
-      <p>With the tree instrumented, the workflow is simple and the same for every agent: read the instance root README first, cascade down into the folder the task touches, follow the house rules, and surface ambiguity instead of guessing. An agent dropped deep in the tree still walks <em>up</em> to the root and back down, in order.</p>
-      <p>From here, the system compounds. Improve a rule once and every agent, on every model, inherits it. Prove a pattern in your instance and — if it's general enough — promote it into the framework so the next adopter gets it for free.</p>
-      <p><a href="cascade.html">See exactly how that orientation works →</a></p>
+      <div class="proof-line">
+        <span class="n">~95%</span>
+        <p>In tPPOS — theProductPath's own instance — roughly 95% of these supporting records were created by agents in the course of real work, inside the instance's rules, with humans supplying judgment and approvals.</p>
+      </div>
+      <div class="callout" style="margin-top:22px">ACOS never asks you to predict every record your company will need. It gives agents the <b>vocabulary and the rules</b> to add the right kind of record when the work reveals the need — and each one leaves the company better documented than the task found it.</div>
     </section>
 
     <section id="checklist">
       <h2>Adoption checklist</h2>
-      <ul class="checklist">
-        <li><span class="bx">✓</span><span>Instance root chosen, with a <code>README.md</code> from the root template listing in-scope siblings.</span></li>
-        <li><span class="bx">✓</span><span><code>company-brief.md</code> populated, with at least one principal and a designated primary stakeholder.</span></li>
-        <li><span class="bx">✓</span><span>Container READMEs on the folders where agents will work most.</span></li>
-        <li><span class="bx">✓</span><span>Item READMEs and <code>brief.md</code> files on active clients or products.</span></li>
-        <li><span class="bx">✓</span><span>Manifests on any folder that needs incoming material routed to it.</span></li>
-        <li><span class="bx">✓</span><span>ACOS skills made available to your agent tooling, with overlays for anything company-specific.</span></li>
-        <li><span class="bx">✓</span><span><code>dashboard.md</code> in place and on a refresh cadence.</span></li>
-        <li><span class="bx">✓</span><span>House rules honored: kebab-case folder names, straight quotes, sentence-case headings, ISO dates, and underscore-prefixed folders left out of scope.</span></li>
-      </ul>
+      <div class="check-cols">
+        <div>
+          <h3>Day one — you</h3>
+          <ul class="checklist">
+            <li><span class="bx">✓</span><span>Instance root with a <code>README.md</code> listing in-scope siblings.</span></li>
+            <li><span class="bx">✓</span><span><code>company-brief.md</code> with principals and a primary stakeholder.</span></li>
+            <li><span class="bx">✓</span><span>Container README on your first high-value folder.</span></li>
+            <li><span class="bx">✓</span><span>First integrity check run — report saved by the agent.</span></li>
+          </ul>
+        </div>
+        <div>
+          <h3>Earned over time — mostly agent-built</h3>
+          <ul class="checklist">
+            <li><span class="bx"><svg viewBox="0 0 24 24" fill="none" stroke="#e8865a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="9" width="14" height="10" rx="3"/><circle cx="9.5" cy="14" r="1" fill="#e8865a" stroke="none"/><circle cx="14.5" cy="14" r="1" fill="#e8865a" stroke="none"/><path d="M12 9V5"/><circle cx="12" cy="4" r="1.3" fill="#e8865a" stroke="none"/></svg></span><span>Item READMEs, briefs, and manifests on active clients or products.</span></li>
+            <li><span class="bx"><svg viewBox="0 0 24 24" fill="none" stroke="#e8865a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="9" width="14" height="10" rx="3"/><circle cx="9.5" cy="14" r="1" fill="#e8865a" stroke="none"/><circle cx="14.5" cy="14" r="1" fill="#e8865a" stroke="none"/><path d="M12 9V5"/><circle cx="12" cy="4" r="1.3" fill="#e8865a" stroke="none"/></svg></span><span>Overlays for company specifics; templates for repeated deliverables.</span></li>
+            <li><span class="bx"><svg viewBox="0 0 24 24" fill="none" stroke="#e8865a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="9" width="14" height="10" rx="3"/><circle cx="9.5" cy="14" r="1" fill="#e8865a" stroke="none"/><circle cx="14.5" cy="14" r="1" fill="#e8865a" stroke="none"/><path d="M12 9V5"/><circle cx="12" cy="4" r="1.3" fill="#e8865a" stroke="none"/></svg></span><span>Decision records where recurring choices got settled.</span></li>
+            <li><span class="bx"><svg viewBox="0 0 24 24" fill="none" stroke="#e8865a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="9" width="14" height="10" rx="3"/><circle cx="9.5" cy="14" r="1" fill="#e8865a" stroke="none"/><circle cx="14.5" cy="14" r="1" fill="#e8865a" stroke="none"/><path d="M12 9V5"/><circle cx="12" cy="4" r="1.3" fill="#e8865a" stroke="none"/></svg></span><span><code>dashboard.md</code> in place, on a refresh cadence.</span></li>
+          </ul>
+        </div>
+      </div>
     </section>
 
     <section id="next">
@@ -279,8 +385,10 @@ code{font-family:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;fo
       <div class="next">
         <a href="blueprint.html"><div class="k">Architecture</div><h4>Instance Blueprint</h4><p>See how the framework, instance, operating folders, and views fit together.</p></a>
         <a href="cascade.html"><div class="k">Orientation</div><h4>Cascade Paths</h4><p>Watch an agent orient itself from a folder up to the root and back down.</p></a>
-        <a href="https://github.com/theProductPath/acos"><div class="k">Source</div><h4>Framework on GitHub</h4><p>Clone the templates, skills, and manual to start your own instance.</p></a>
-        <a href="index.html"><div class="k">Overview</div><h4>Back to home</h4><p>The one-page pitch for what ACOS is and who it's for.</p></a>
+      </div>
+      <div class="next-minor">
+        <a class="btn btn-ghost" href="https://github.com/theProductPath/acos" target="_blank" rel="noopener">Framework on GitHub</a>
+        <a class="btn btn-ghost" href="index.html">Back to home</a>
       </div>
     </section>
   </main>
