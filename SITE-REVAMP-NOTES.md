@@ -36,6 +36,17 @@
 - **Detail panel**: inner sticky wrapper (fixed the broken `position:sticky` — old aside had `min-height:100%`), and it now **adopts the selected node's accent color** (left stripe, kicker, gradient wash) via `detail.className` swap in `selectItem`.
 - Layer headers restructured to grid so descriptions span full box width (no premature wrap under the badge column).
 
+**cascade.html — sequence-diagram rework (2026-07-10)**
+- Reframed as a **sequence diagram** (blueprint = class diagram, cascade = one interaction traced through time). One concrete task per scenario, told end-to-end.
+- **Trigger banner**: distinct silhouette (solid circular icon badge + glow, TRIGGER chip, 2px mode-color border, tail arrow into the rail). Scenario A (client, green, envelope): "a Northwind transcript just landed"; Scenario B (dev, amber, code brackets): "a code review surfaced a new commitment." Mode switch retints banner/tabs and restructures the rail with phase labels (Outside the instance → Climb to the root → Descend to the client → The write).
+- **Folder groups**: each cascade hop is a dashed folder container with mono folder-tab (companyOS/ → Clients/ → Northwind-Trades/), indenting with depth; step cards carry **MD file chips** (orange = read, green ✎ = write). Selecting a step **dims the other folder groups**.
+- **Write-back finale** (the compounding-value closer): green band with the trigger icon in a green badge ("the event comes back as records"), "THE AGENT WRITES BACK" header, **diff-style record updates** per mode (brief.md gets commitment + log entry; manifest.md gets the NWT alias), payoff line "The next agent starts from a stronger company operating system, because every task compounds value ↺".
+- **Detail sidebar**: fixed sticky (same aside bug as blueprint), full-box accent treatment matching the clicked card (acc-* classes; fixed a nasty `.brand` class collision with leftover nav CSS), per-mode "In this task" story block, and the **"Markdown at this stop" block branded as the ACOS value-add** (orange tint + ACOS tag + framework note, MD badge inline with full path).
+- De-tPPOS'd (fictional client Northwind stays; the instance is "your company's"). Width caps removed.
+
+**index.html (minor, 2026-07-10)**
+- Hero caption step 2: "ACOS adds a README to every folder" → "ACOS adds **markdown** to every folder" (don't imply single-file).
+
 **Static asset for the Products page**
 - `Brand/logos/acos/acos-context-cascade.svg` + `.png` — a tall/portrait snapshot of the animation's final "ready" state, for the theProductPath **Products** page. (PNG rendered with fallback fonts in the sandbox; SVG is font-correct. For a pixel-perfect PNG, screenshot the live hero's final frame.)
 
@@ -43,7 +54,7 @@
 
 ## What's LEFT to do
 
-1. **cascade.html** — still Pass-1. Positioning-note direction: follow **one concrete task** (e.g. processing a transcript or preparing a client deliverable) through each cascade stop, showing the artifact AND its job at each stop, ending at the **write-back moment**. Carry over the blueprint's directional/agent vocabulary where it helps.
+1. **Copy review across all four pages** — the 2026-07-10 rework was heavy on structure and visuals; Steven wants a dedicated text pass before the next push.
 2. **Back-port the adopt reframe to `docs/adopting-acos.md` on `main`** — the markdown is canonical and still carries the old "seven steps" framing; the page and doc have now diverged.
 3. **index.html positioning pass** — the note wants "records that make agents useful" and "it gets better as you use it" sections (Orient → Understand → Improve) without overwhelming the visitor. Not started.
 4. **Products-page image** — decide final crop/placement; optionally regenerate the PNG in true brand fonts via a live-frame screenshot.
