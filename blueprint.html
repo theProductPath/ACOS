@@ -61,7 +61,7 @@ aside{border-left:1px solid var(--border);background:#1c222c;padding:0;min-heigh
 h1{margin:10px 0 8px;font-size:33px;line-height:1.1;font-weight:800;letter-spacing:-.01em}
 .subtitle{margin:0 0 26px;color:var(--muted);font-size:15.5px;line-height:1.55}
 
-.blueprint{display:grid;gap:16px}
+.blueprint{display:grid;gap:22px}
 .layer{--accent:var(--primary);border:1px solid color-mix(in srgb,var(--accent),var(--border) 58%);background:linear-gradient(90deg,color-mix(in srgb,var(--accent),transparent 90%),transparent 44%),#1c222c;border-radius:10px;padding:18px}
 .layer.framework{--accent:var(--e-framework)}
 .layer.instance{--accent:var(--e-instance)}
@@ -76,15 +76,14 @@ h1{margin:10px 0 8px;font-size:33px;line-height:1.1;font-weight:800;letter-spaci
 .layer-kicker{color:color-mix(in srgb,var(--accent),#fff 28%);text-transform:uppercase;font-weight:900;font-size:11px;letter-spacing:.08em;margin-bottom:5px}
 .layer h2{margin:0 0 6px;font-size:22px;letter-spacing:-.01em}
 .layer p{margin:0;color:var(--muted);font-size:13px;line-height:1.45}
-.badge{border:1px solid color-mix(in srgb,var(--accent),var(--border) 35%);background:color-mix(in srgb,var(--accent),transparent 86%);border-radius:999px;padding:5px 10px;font-size:11px;color:var(--text);white-space:nowrap;font-weight:600}
+.badge{border:none;background:none;padding:0;font-size:11.5px;line-height:1.4;color:color-mix(in srgb,var(--accent),#fff 25%);white-space:nowrap;text-align:right;font-weight:700}
 .cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
 .cards.operating-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
-.node{--node-accent:var(--accent);display:flex;flex-direction:column;border:1px solid color-mix(in srgb,var(--node-accent),var(--border) 50%);background:var(--card);border-radius:9px;padding:13px;color:var(--text);font:inherit;text-align:left;cursor:pointer;min-height:96px;position:relative;overflow:hidden;transition:transform 140ms ease,border-color 140ms ease,background 140ms ease}
+.node{--node-accent:var(--accent);display:flex;flex-direction:column;border:1px solid color-mix(in srgb,var(--node-accent),var(--border) 50%);background:var(--card);border-radius:9px;padding:12px 13px;color:var(--text);font:inherit;text-align:left;cursor:pointer;position:relative;overflow:hidden;transition:transform 140ms ease,border-color 140ms ease,background 140ms ease}
 .node::before{content:"";position:absolute;inset:0 auto 0 0;width:4px;background:var(--node-accent)}
 .node:hover,.node.active{transform:translateY(-2px);border-color:var(--node-accent);background:#303746}
-.node strong{display:block;font-size:14px;margin-bottom:6px;position:relative;z-index:1}
-.node span{color:var(--muted);display:block;font-size:12px;line-height:1.4;position:relative;z-index:1}
-.node .pill{margin-top:auto;padding-top:10px;position:relative;z-index:1}
+.node strong{display:block;font-size:14px;margin-bottom:0;position:relative;z-index:1}
+.node .pill{margin-top:9px;position:relative;z-index:1}
 .node .pill i{font-style:normal;border:1px solid color-mix(in srgb,var(--node-accent),var(--border) 42%);background:color-mix(in srgb,var(--node-accent),transparent 88%);border-radius:999px;color:color-mix(in srgb,var(--node-accent),#fff 28%);display:inline-flex;font-size:10px;font-weight:900;line-height:1;padding:5px 8px;text-transform:uppercase;letter-spacing:.06em}
 .node.n-framework{--node-accent:var(--e-framework)}
 .node.n-instance{--node-accent:var(--e-instance)}
@@ -100,34 +99,6 @@ h1{margin:10px 0 8px;font-size:33px;line-height:1.1;font-weight:800;letter-spaci
 .node.n-ghost strong{color:var(--muted)}
 .node.n-ghost:hover,.node.n-ghost.active{border-color:var(--muted);background:rgba(255,255,255,.03)}
 .node.n-ghost .pill i{border-style:dashed;background:transparent;color:var(--muted);border-color:var(--border-strong)}
-
-/* Directional rails — cascade down (left, orange) / learning loop up (right, green) */
-.blueprint-wrap{display:grid;grid-template-columns:46px minmax(0,1fr) 46px;gap:16px;align-items:stretch}
-.rail{position:relative;min-width:46px}
-.rail .line{position:absolute;left:50%;top:10px;bottom:10px;transform:translateX(-50%);width:22px}
-.rail-down .line{background:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="22" height="34" viewBox="0 0 22 34"><path d="M4 12 L11 20 L18 12" fill="none" stroke="%23c75c2a" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" opacity="0.7"/></svg>') center top/22px 34px repeat-y}
-.rail-up .line{background:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="22" height="34" viewBox="0 0 22 34"><path d="M4 22 L11 14 L18 22" fill="none" stroke="%233fb27f" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" opacity="0.7"/></svg>') center bottom/22px 34px repeat-y;-webkit-mask:linear-gradient(to bottom,#000 0,#000 70%,transparent 96%);mask:linear-gradient(to bottom,#000 0,#000 70%,transparent 96%)}
-.rail-label{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);writing-mode:vertical-rl;background:var(--bg);padding:14px 2px;font-size:10.5px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;white-space:nowrap;z-index:1}
-.rail-down .rail-label{color:var(--primary-text)}
-.rail-up .rail-label{color:var(--up);transform:translate(-50%,-50%) rotate(180deg)}
-@media(max-width:900px){.blueprint-wrap{grid-template-columns:1fr}.rail{display:none}}
-
-.flow{display:grid;grid-template-columns:1fr 1fr;gap:12px;color:var(--muted);font-size:12.5px;margin:-2px 0}
-.flow.single{grid-template-columns:1fr}
-.flow-pill{border:1px solid var(--border-strong);border-radius:999px;padding:7px 14px;background:var(--surface);text-align:center;line-height:1.35}
-.flow-pill.down{border-color:color-mix(in srgb,var(--primary),var(--border) 45%);color:var(--primary-text)}
-.flow-pill.up{border-color:color-mix(in srgb,var(--up),var(--border) 45%);color:var(--up)}
-.flow-pill .dir{font-weight:900;margin-right:6px}
-@media(max-width:640px){.flow{grid-template-columns:1fr}}
-
-.legend{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px}
-.legend-box{border:1px solid;border-radius:10px;padding:13px 16px;font-size:12.5px;line-height:1.5;color:var(--muted)}
-.legend-box b{display:block;margin-bottom:4px;font-size:11px;letter-spacing:.08em;text-transform:uppercase}
-.legend-box.down{border-color:color-mix(in srgb,var(--primary),var(--border) 55%);background:color-mix(in srgb,var(--primary),transparent 93%)}
-.legend-box.down b{color:var(--primary-text)}
-.legend-box.up{border-color:color-mix(in srgb,var(--up),var(--border) 55%);background:color-mix(in srgb,var(--up),transparent 93%)}
-.legend-box.up b{color:var(--up)}
-@media(max-width:640px){.legend{grid-template-columns:1fr}}
 
 aside .a-kicker{margin:0 0 8px;color:var(--primary-text);font-size:12px;text-transform:uppercase;font-weight:900;letter-spacing:.08em}
 aside h2{margin:0 0 10px;font-size:24px;letter-spacing:-.01em}
@@ -153,7 +124,7 @@ aside h2{margin:0 0 10px;font-size:24px;letter-spacing:-.01em}
   h1{font-size:26px}
   .cards,.cards.operating-grid{grid-template-columns:1fr}
   .layer-header{grid-template-columns:1fr}
-  .layer-header .badge{grid-column:1;grid-row:3;justify-self:start;margin-top:4px}
+  .layer-header .badge{grid-column:1;grid-row:3;justify-self:start;margin-top:4px;text-align:left;white-space:normal}
   .layer-header p{grid-row:4}
 }
 .footer{border-top:1px solid var(--border);background:var(--dark2);padding:30px 0}
@@ -221,43 +192,31 @@ aside h2{margin:0 0 10px;font-size:24px;letter-spacing:-.01em}
   <main>
     <div class="kicker">Architecture</div>
     <h1>ACOS Instance Blueprint</h1>
-    <p class="subtitle">A layered view of how the reusable ACOS framework, your company's instance built on it, the operating folders that hold real work, and the rendered views over them fit together. Work inside the instance creates and updates these records; patterns that prove general promote back into ACOS — the loop that makes the system compound. Click any block to see its role.</p>
+    <p class="subtitle">Here's how the pieces fit together: the reusable ACOS framework, your company's instance built on top of it, the operating folders where the real work happens, and the views that render it all. Work inside the instance updates these records as you go — and patterns that prove useful anywhere promote back into ACOS, so the whole system gets smarter over time. Click any block below to see how it fits into the Blueprint.</p>
 
-    <div class="blueprint-wrap">
-    <div class="rail rail-down" aria-hidden="true"><div class="line"></div><span class="rail-label">Rules cascade down</span></div>
     <section class="blueprint">
       <div class="layer framework">
         <div class="layer-header">
           <div>
             <div class="layer-kicker">Reusable framework</div>
             <h2>ACOS</h2>
-            <p>Rules, templates, skills, and conventions any company instance can adopt.</p>
+            <p>Rules, templates, skills, and conventions every company instance starts from.</p>
           </div>
-          <div class="badge">Products/ACOS</div>
+          <div class="badge">theProductPath/ACOS · Free on GitHub</div>
         </div>
         <div class="cards" id="framework-cards"></div>
-      </div>
-
-      <div class="flow">
-        <div class="flow-pill down"><span class="dir">↓</span>Rules, templates, and skills are inherited by your instance</div>
-        <div class="flow-pill up"><span class="dir">↑</span>Proven patterns promote into the framework — every future adopter inherits them</div>
       </div>
 
       <div class="layer instance">
         <div class="layer-header">
           <div>
             <div class="layer-kicker">Your company instance</div>
-            <h2>Your instance</h2>
-            <p>Your company's adoption of ACOS: the identity you seed, plus the overlays, decisions, and dashboard state that agents grow through work.</p>
+            <h2>Your Company Baseline</h2>
+            <p>Your instance starts by inheriting ACOS's rules, templates, and skills, then builds on them. You seed the identity; agents grow the rest — overlays, decisions, dashboard state — through real work.</p>
           </div>
-          <div class="badge">your instance root</div>
+          <div class="badge">Your instance root folder · Built by you on day 1</div>
         </div>
         <div class="cards" id="instance-cards"></div>
-      </div>
-
-      <div class="flow">
-        <div class="flow-pill down"><span class="dir">↓</span>Agents descend only into the relevant operating folder</div>
-        <div class="flow-pill up"><span class="dir">↑</span>Work writes records back — briefs, manifests, decisions, conventions</div>
       </div>
 
       <div class="layer operating">
@@ -265,34 +224,26 @@ aside h2{margin:0 0 10px;font-size:24px;letter-spacing:-.01em}
           <div>
             <div class="layer-kicker">Your operating folders</div>
             <h2>Context surface</h2>
-            <p>The sibling folders that hold your real work. Clients, products, projects, research, brand, admin — a common shape, not a prescription. Your tree holds whatever your company runs on.</p>
+            <p>The folders where your real work happens. Agents only descend into the one a task actually touches. Clients, products, projects, research, brand, admin — that's a common shape, not a rulebook. Your tree holds whatever your company actually runs on.</p>
           </div>
-          <div class="badge">your company tree</div>
+          <div class="badge">Your company folder tree · Agent-built over time</div>
         </div>
         <div class="cards operating-grid" id="operating-cards"></div>
       </div>
-
-      <div class="flow single"><div class="flow-pill down"><span class="dir">↓</span>Rendered views interpret canonical markdown — views never feed back; the markdown stays the source of truth</div></div>
 
       <div class="layer views">
         <div class="layer-header">
           <div>
             <div class="layer-kicker">Presentation layer</div>
             <h2>Views</h2>
-            <p>Visual surfaces over the operating system. They help humans and agents see patterns, but never replace the source files.</p>
+            <p>Visual surfaces that read the canonical markdown underneath and make its patterns easier to see, for humans and agents alike. They never write back or replace the source files.</p>
           </div>
-          <div class="badge">renders</div>
+          <div class="badge">Extend and customize to fit your needs</div>
         </div>
         <div class="cards" id="view-cards"></div>
       </div>
 
     </section>
-    <div class="rail rail-up" aria-hidden="true"><div class="line"></div><span class="rail-label">Proven patterns promote up</span></div>
-    </div>
-    <div class="legend">
-      <div class="legend-box down"><b>↓ Inheritance</b>Framework rules, templates, and skills flow down through your instance into the work. Views only render what's beneath them — the markdown is canonical.</div>
-      <div class="legend-box up"><b>↑ The learning loop</b>Work writes records back into your instance, and patterns that prove general promote into ACOS — where every future adopter inherits them.</div>
-    </div>
   </main>
 
   <aside><div class="aside-inner" id="detail" aria-live="polite"></div></aside>
@@ -302,26 +253,26 @@ aside h2{margin:0 0 10px;font-size:24px;letter-spacing:-.01em}
 const GH = "https://github.com/theProductPath/acos";
 const groups = {
   framework: [
-    { id:"framework-readme", title:"Framework manual", type:"docs", cls:"n-framework", summary:"Cascade rules, README patterns, frontmatter taxonomy, house rules, and skill conventions.", role:"The reusable operating manual any ACOS instance reads for framework-level rules.", contributes:["Defines the four README patterns and the read-order cascade.","Sets the house rules every agent follows across every instance."], link:GH+"/blob/main/framework/README.md", linkLabel:"framework/README.md" },
-    { id:"templates", title:"Templates", type:"library", cls:"n-framework", summary:"Company brief, client brief, manifests, dashboards, and folder README patterns.", role:"The copyable scaffolding that lets a company adopt ACOS without inventing structure.", contributes:["Gives every artifact a starting shape to fill in.","Keeps structure consistent across instances and agents."], link:GH+"/tree/main/framework/templates", linkLabel:"framework/templates" },
-    { id:"skills", title:"Skills", type:"capabilities", cls:"n-framework", summary:"Reusable agent capabilities such as brief processing, brand capture, and dashboard refresh.", role:"The behavioral layer agents run against any compatible instance.", contributes:["Turns recurring tasks into repeatable, portable capabilities.","Reads instance overlays for company-specific configuration."], link:GH+"/tree/main/framework/skills", linkLabel:"framework/skills" },
+    { id:"framework-readme", title:"Framework manual", type:"docs", cls:"n-framework", summary:"Cascade rules, README patterns, frontmatter taxonomy, house rules, and skill conventions.", role:"The operating manual every ACOS instance reads first — the rules that hold everywhere.", contributes:["Lays out the four README patterns and the order agents read them in.","Sets the house rules every agent follows, in every instance."], link:GH+"/blob/main/framework/README.md", linkLabel:"framework/README.md" },
+    { id:"templates", title:"Templates", type:"library", cls:"n-framework", summary:"Company brief, client brief, manifests, dashboards, and folder README patterns.", role:"Copyable scaffolding, so a company can adopt ACOS without inventing its own structure from scratch.", contributes:["Gives every artifact a starting shape to fill in.","Keeps structure consistent across instances and agents."], link:GH+"/tree/main/framework/templates", linkLabel:"framework/templates" },
+    { id:"skills", title:"Skills", type:"capabilities", cls:"n-framework", summary:"Reusable agent capabilities such as brief processing, brand capture, and dashboard refresh.", role:"The behaviors agents can run against any compatible instance.", contributes:["Turns recurring tasks into repeatable, portable capabilities.","Reads instance overlays for company-specific configuration."], link:GH+"/tree/main/framework/skills", linkLabel:"framework/skills" },
     { id:"extending", title:"Extension rules", type:"governance", cls:"n-framework", summary:"Decision rules for adding skills, templates, or new artifact categories.", role:"Keeps the framework coherent as new patterns emerge and get promoted.", contributes:["Defines the framework-vs-instance decision rule.","Documents the promotion path from instance to framework."], link:GH+"/blob/main/docs/extending-acos.md", linkLabel:"docs/extending-acos.md" }
   ],
   instance: [
-    { id:"company-brief", title:"Company brief", type:"identity", cls:"n-instance", summary:"The stable identity of your company: positioning, offers, voice, principals, defaults.", role:"Tells agents who your company is and what its outputs should represent. You seed this on day one.", contributes:["Read by any task that writes in your company's voice.","Declares principals and the primary stakeholder for escalation."] },
-    { id:"dashboard", title:"Dashboard", type:"state", cls:"n-instance", summary:"Morning-glance state record: active clients, products, commitments, and pipeline.", role:"Answers what your company is doing right now; intentionally volatile. Agents keep it current.", contributes:["Re-rolled on a cadence from briefs and READMEs.","Preserves hand-written narrative across refreshes."] },
-    { id:"overlays", title:"Overlays", type:"configuration", cls:"n-instance", summary:"Your company's configuration for the reusable ACOS skills.", role:"Lets your instance use framework skills without forking them. Agents add these as quirks surface.", contributes:["Holds account names, paths, and routing quirks.","Keeps the framework skills generic and shareable."] },
-    { id:"decisions", title:"Decisions", type:"log", cls:"n-instance", summary:"An append-only record of your company's ACOS customizations and tradeoffs.", role:"Keeps your instance's evolution explainable over time.", contributes:["Captures why a choice was made, not just what.","Feeds candidates for promotion back into ACOS — the green rail."] }
+    { id:"company-brief", title:"Company brief", type:"identity", cls:"n-instance", summary:"Your company's stable identity: positioning, offers, voice, principals, defaults.", role:"Tells agents who your company is and what its work should sound like. You write this on day one.", contributes:["Read by any task that writes in your company's voice.","Names your principals and who to escalate to."] },
+    { id:"dashboard", title:"Dashboard", type:"state", cls:"n-instance", summary:"Morning-glance state record: active clients, products, commitments, and pipeline.", role:"Answers what your company is doing right now. It's meant to change often — agents keep it current.", contributes:["Refreshed on a cadence, pulled from briefs and READMEs.","Preserves hand-written narrative across refreshes."] },
+    { id:"overlays", title:"Overlays", type:"configuration", cls:"n-instance", summary:"Your company's configuration for the reusable ACOS skills.", role:"Lets your instance use framework skills without forking them — agents add overlays as quirks come up.", contributes:["Holds account names, paths, and routing quirks.","Keeps the framework skills generic and shareable."] },
+    { id:"decisions", title:"Decisions", type:"log", cls:"n-instance", summary:"An append-only record of your company's ACOS customizations and tradeoffs.", role:"Keeps your instance's evolution explainable — a paper trail for why things are the way they are.", contributes:["Captures why a choice was made, not just what.","Feeds candidates for promotion back into ACOS, when a pattern proves general."] }
   ],
   operating: [
-    { id:"root", title:"Instance root", type:"entry point", cls:"n-instance", summary:"The front door: root README, company brief, overlays, decisions.", role:"The first thing every agent reads, from anywhere in the tree.", contributes:["Names the in-scope sibling folders.","Routes agents to the right slice of the business."] },
-    { id:"clients", title:"Clients", type:"engagements", cls:"n-clients", summary:"One folder per client engagement: briefs, manifests, work artifacts, brand.", role:"Where client-specific context and active obligations live.", contributes:["Each client carries a README, brief, and manifest.","Routing keeps incoming material tied to the right client."] },
-    { id:"products", title:"Products", type:"owned IP", cls:"n-products", summary:"Your products and the assets that ship them.", role:"Where shipped assets and credibility products live.", contributes:["Holds product docs, assessments, and marketing sites.","A natural first high-value area to instrument."] },
-    { id:"projects", title:"Projects", type:"internal work", cls:"n-projects", summary:"Internal initiatives that aren't client work and aren't shipped products.", role:"Holds build and operating initiatives that may later become products or patterns.", contributes:["A staging ground for work-in-progress.","Feeds the promotion path when a pattern proves general."] },
-    { id:"research", title:"Research", type:"sensing", cls:"n-research", summary:"Experiments, notes, and exploratory threads.", role:"Feeds future offers, products, and points of view.", contributes:["Low-stakes space to explore.","Harvested into decisions when actionable."] },
-    { id:"brand", title:"Brand", type:"asset library", cls:"n-brand", summary:"Logos, colors, typography, design tokens, and templates.", role:"Required pre-flight for any polished or public artifact.", contributes:["A lateral-cascade reference read before client-facing output.","Keeps every deliverable on-brand regardless of folder."] },
-    { id:"admin", title:"Admin", type:"operations", cls:"n-admin", summary:"Accounting, legal, finances, and company operations.", role:"The business-reality layer behind the operating surface.", contributes:["Kept out of scope for most agent work by default.","Surfaced into the dashboard only where useful."] },
-    { id:"yours", title:"Your folders…", type:"anything else", cls:"n-ghost", summary:"Whatever else your company runs on — Ops/, Partners/, Content/, Vendors/…", role:"The context surface is yours. These seven are a common shape, not a requirement — your tree holds whatever your business actually runs on.", contributes:["Add a folder when the business needs it; a container README is all it takes to bring it into the cascade.","Skip what you don't have — an absent folder costs nothing."] }
+    { id:"root", title:"Instance root", type:"entry point", cls:"n-products", summary:"The front door: root README, company brief, overlays, decisions.", role:"The first thing every agent reads, from anywhere in the tree.", contributes:["Names which sibling folders are in scope.","Routes agents to the right slice of the business."] },
+    { id:"clients", title:"Clients", type:"engagements", cls:"n-products", summary:"One folder per client engagement: briefs, manifests, work artifacts, brand.", role:"Where client-specific context and active obligations live.", contributes:["Each client carries a README, brief, and manifest.","Routing keeps incoming material tied to the right client."] },
+    { id:"products", title:"Products", type:"owned IP", cls:"n-products", summary:"Your products and the assets that ship them.", role:"Where shipped assets and credibility products live.", contributes:["Holds product docs, assessments, and marketing sites.","Usually the first place worth instrumenting."] },
+    { id:"projects", title:"Projects", type:"internal work", cls:"n-products", summary:"Internal initiatives that aren't client work and aren't shipped products.", role:"Holds build and operating initiatives that may later become products or patterns.", contributes:["A staging ground for work-in-progress.","Feeds the promotion path when a pattern proves general."] },
+    { id:"research", title:"Research", type:"sensing", cls:"n-products", summary:"Experiments, notes, and exploratory threads.", role:"Feeds future offers, products, and points of view.", contributes:["Low-stakes space to explore.","Gets pulled into decisions once it's actionable."] },
+    { id:"brand", title:"Brand", type:"asset library", cls:"n-products", summary:"Logos, colors, typography, design tokens, and templates.", role:"Checked before any polished or public artifact goes out.", contributes:["Read before client-facing output, wherever that work happens to live.","Keeps every deliverable on-brand regardless of folder."] },
+    { id:"admin", title:"Admin", type:"operations", cls:"n-products", summary:"Accounting, legal, finances, and company operations.", role:"The business-reality layer behind the operating surface.", contributes:["Kept out of scope for most agent work by default.","Surfaced into the dashboard only where useful."] },
+    { id:"yours", title:"Your folders…", type:"anything else", cls:"n-ghost", summary:"Whatever else your company runs on — Ops/, Partners/, Content/, Vendors/…", role:"This surface is yours to shape. The other seven are a common pattern, not a requirement — your tree holds whatever your business actually runs on.", contributes:["Add a folder whenever the business needs one — a container README is all it takes to bring it into the cascade.","Skip what you don't have — an absent folder costs nothing."] }
   ],
   views: [
     { id:"company-atlas", title:"Company Atlas", type:"spatial map", cls:"n-views", summary:"Your whole company on one map — operating territories, activity concentration, live links to source files.", role:"Shows the whole company at once, so you can see where activity concentrates without scanning tables.", contributes:["Each territory stays connected to the canonical files beneath it.","Not canonical — it reads from the dashboard and folder READMEs."] },
@@ -336,7 +287,6 @@ const detail = document.querySelector("#detail");
 function nodeCard(groupName, item){
   return `<button class="node ${item.cls}" type="button" data-group="${groupName}" data-id="${item.id}">
     <strong>${item.title}</strong>
-    <span>${item.summary}</span>
     <div class="pill"><i>${item.type}</i></div>
   </button>`;
 }

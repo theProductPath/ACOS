@@ -14,7 +14,7 @@
   --bg:#181d26;--surface:#222831;--card:#2a303c;--border:#2e3848;--border-strong:#3d4a5c;
   --primary:#c75c2a;--primary-text:#e8865a;--text:#e4eaf4;--muted:#8895aa;
   --e-instance:#38bdf8;--e-clients:#22c55e;--e-projects:#f59e0b;--e-brand:#2dd4bf;
-  --e-route:#a78bfa;--e-people:#60a5fa;--e-admin:#94a3b8;--up:#3fb27f;--mode-accent:#22c55e;
+  --e-route:#a78bfa;--e-people:#60a5fa;--e-admin:#94a3b8;--up:#3fb27f;--e-write:#f472b6;--mode-accent:#22c55e;
   font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
 }
 *{box-sizing:border-box}
@@ -40,20 +40,28 @@ body[data-mode="dev"]{--mode-accent:var(--e-projects)}
 @media(max-width:820px){.brand-div,.brand-wordmark{display:none}}
 @media(max-width:560px){.nav-links .btn-ghost{display:none}}
 
-.page{max-width:1320px;margin:0 auto;display:grid;grid-template-columns:minmax(0,1fr) 380px}
+.page{max-width:1360px;margin:0 auto}
 main{padding:34px 28px;min-width:0}
-aside{border-left:1px solid var(--border);background:#1c222c;padding:14px;min-height:100%}
-.aside-inner{--detail-accent:var(--e-instance);position:sticky;top:78px;padding:22px 20px;max-height:calc(100vh - 92px);overflow-y:auto;border:1px solid color-mix(in srgb,var(--detail-accent),var(--border) 45%);border-left:4px solid var(--detail-accent);border-radius:12px;background:linear-gradient(90deg,color-mix(in srgb,var(--detail-accent),transparent 91%),transparent 52%),var(--card);transition:border-color .25s,background .25s}
-.aside-inner.acc-instance{--detail-accent:var(--e-instance)}
-.aside-inner.acc-client{--detail-accent:var(--e-clients)}
-.aside-inner.acc-dev{--detail-accent:var(--e-projects)}
-.aside-inner.acc-brand{--detail-accent:var(--e-brand)}
-.aside-inner.acc-route{--detail-accent:var(--e-route)}
-.aside-inner.acc-people{--detail-accent:var(--e-people)}
-.aside-inner.acc-closeout{--detail-accent:var(--up)}
-.aside-inner .panel-kicker{color:color-mix(in srgb,var(--detail-accent),#fff 28%)}
-.aside-inner .detail-block{border-left:3px solid color-mix(in srgb,var(--detail-accent),var(--border) 55%)}
+
+/* Detail modal — replaces the old persistent sidebar so the two-column flow below can breathe */
+.modal-backdrop{position:fixed;inset:0;background:rgba(10,13,18,.72);z-index:100;opacity:0;pointer-events:none;transition:opacity .18s}
+.modal-backdrop.open{opacity:1;pointer-events:auto}
+.modal{--detail-accent:var(--e-instance);position:fixed;top:50%;left:50%;transform:translate(-50%,-46%);width:min(600px,92vw);max-height:84vh;overflow-y:auto;background:var(--card);border:1px solid color-mix(in srgb,var(--detail-accent),var(--border) 45%);border-left:4px solid var(--detail-accent);border-radius:14px;padding:28px 26px;z-index:101;opacity:0;pointer-events:none;transition:opacity .18s,transform .18s;box-shadow:0 30px 70px rgba(0,0,0,.55)}
+.modal.open{opacity:1;pointer-events:auto;transform:translate(-50%,-50%)}
+.modal.acc-instance{--detail-accent:var(--e-instance)}
+.modal.acc-client{--detail-accent:var(--e-clients)}
+.modal.acc-dev{--detail-accent:var(--e-projects)}
+.modal.acc-brand{--detail-accent:var(--e-brand)}
+.modal.acc-route{--detail-accent:var(--e-route)}
+.modal.acc-people{--detail-accent:var(--e-people)}
+.modal.acc-closeout{--detail-accent:var(--e-write)}
+.modal .panel-kicker{color:color-mix(in srgb,var(--detail-accent),#fff 28%)}
+.modal .detail-block{border-left:3px solid color-mix(in srgb,var(--detail-accent),var(--border) 55%)}
+.modal h2{margin:0 0 10px;font-size:23px;letter-spacing:-.01em}
+.modal-close{position:absolute;top:14px;right:14px;width:32px;height:32px;border-radius:50%;border:1px solid var(--border-strong);background:var(--surface);color:var(--text);font-size:16px;line-height:1;cursor:pointer;display:grid;place-items:center}
+.modal-close:hover{border-color:var(--primary-text);color:var(--primary-text)}
 .detail-block.story{border:1px solid color-mix(in srgb,var(--detail-accent),var(--border) 40%);background:color-mix(in srgb,var(--detail-accent),var(--surface) 90%)}
+@media(max-width:640px){.modal{width:92vw;padding:22px 18px;max-height:88vh}}
 
 .kicker{color:var(--primary-text);font-size:.78rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase}
 h1{margin:10px 0 8px;font-size:33px;line-height:1.1;font-weight:800;letter-spacing:-.01em}
@@ -65,95 +73,168 @@ h1{margin:10px 0 8px;font-size:33px;line-height:1.1;font-weight:800;letter-spaci
 .tab[data-mode="client"]:hover,.tab[data-mode="client"].active{border-color:var(--e-clients);background:color-mix(in srgb,var(--e-clients),var(--surface) 84%)}
 .tab[data-mode="dev"]:hover,.tab[data-mode="dev"].active{border-color:var(--e-projects);background:color-mix(in srgb,var(--e-projects),var(--surface) 84%)}
 
-/* Task banner — the TRIGGER event; visually distinct from the file-step cards below */
-.task-banner{display:flex;gap:18px;align-items:flex-start;border:2px solid var(--mode-accent);background:color-mix(in srgb,var(--mode-accent),var(--bg) 88%);border-radius:14px;padding:18px 22px;margin:0 0 34px;position:relative;transition:border-color .3s,background .3s}
-.task-banner::after{content:"";position:absolute;left:41px;bottom:-26px;height:26px;border-left:2px solid var(--mode-accent)}
-.task-banner::before{content:"▼";position:absolute;left:36.5px;bottom:-34px;color:var(--mode-accent);font-size:10px;line-height:1}
-.task-ico{flex:0 0 auto;width:46px;height:46px;border-radius:50%;background:var(--mode-accent);display:grid;place-items:center;color:#fff;box-shadow:0 0 0 5px color-mix(in srgb,var(--mode-accent),transparent 80%)}
-.task-ico svg{width:24px;height:24px}
+/* Task banner — the TRIGGER event. Frozen while you scroll the flow below so you never lose the thread. */
+.task-banner{display:block;border:2px solid var(--mode-accent);background:var(--bg);background-image:linear-gradient(color-mix(in srgb,var(--mode-accent),var(--bg) 88%),color-mix(in srgb,var(--mode-accent),var(--bg) 88%));border-radius:14px;padding:16px 22px;margin:0 0 26px;position:sticky;top:78px;z-index:40;box-shadow:0 14px 30px rgba(8,10,14,.45);transition:border-color .3s,background .3s}
+.tb-top{display:flex;gap:18px;align-items:flex-start}
+.task-ico{flex:0 0 auto;width:44px;height:44px;border-radius:50%;background:var(--mode-accent);display:grid;place-items:center;color:#fff;box-shadow:0 0 0 5px color-mix(in srgb,var(--mode-accent),transparent 80%)}
+.task-ico svg{width:23px;height:23px}
 .task-banner small{display:block;font-size:10.5px;font-weight:900;letter-spacing:.12em;text-transform:uppercase;color:color-mix(in srgb,var(--mode-accent),#fff 25%);margin-bottom:6px}
 .task-banner small .trig{display:inline-block;background:var(--mode-accent);color:#fff;border-radius:4px;padding:2px 7px;margin-right:8px}
-.task-banner .task{font-size:17px;font-weight:800;line-height:1.4;margin:0 0 5px;letter-spacing:-.01em}
-.task-banner .start{color:var(--muted);font-size:13px;margin:0}
-@media(max-width:560px){.task-banner{flex-direction:column;gap:12px}.task-banner::after,.task-banner::before{display:none}}
+.task-banner .task{font-size:16.5px;font-weight:800;line-height:1.4;margin:0 0 5px;letter-spacing:-.01em}
+.task-banner .start{color:var(--muted);font-size:12.5px;margin:0}
+/* Split strip — previews the two-column flow below, right inside the banner, so the split is obvious before scrolling */
+.tb-split{display:flex;gap:10px;margin-top:14px;padding-top:12px;border-top:1px dashed color-mix(in srgb,var(--mode-accent),var(--border-strong) 40%)}
+.tb-split .split-seg{flex:1;display:flex;align-items:center;gap:8px;font-size:10.5px;font-weight:900;letter-spacing:.09em;text-transform:uppercase;padding:8px 12px;border-radius:8px;min-width:0}
+.tb-split .split-seg .n{flex:0 0 auto;width:18px;height:18px;border-radius:50%;display:grid;place-items:center;font-size:9.5px;font-weight:900;color:#fff}
+.tb-split .split-seg.reads{color:color-mix(in srgb,var(--mode-accent),#fff 30%);background:color-mix(in srgb,var(--mode-accent),transparent 88%)}
+.tb-split .split-seg.reads .n{background:var(--mode-accent)}
+.tb-split .split-seg.writes{color:color-mix(in srgb,var(--e-write),#fff 25%);background:color-mix(in srgb,var(--e-write),transparent 88%)}
+.tb-split .split-seg.writes .n{background:var(--e-write)}
+@media(max-width:900px){.task-banner{position:static;top:auto}}
+@media(max-width:560px){.tb-top{flex-direction:column;gap:12px}.tb-split{flex-direction:column;gap:6px}}
 
 /* Folder groups — each hop of the cascade is a folder; steps inside are its files */
 .fgroup{--d:0;margin-left:calc(var(--d)*28px);border:1px dashed var(--border-strong);border-radius:11px;padding:10px 12px 12px;background:rgba(255,255,255,.015)}
 .fgroup-tab{display:flex;align-items:center;gap:7px;font-family:"JetBrains Mono",ui-monospace,monospace;font-size:11.5px;color:var(--muted);margin:0 0 10px 2px}
 .fgroup-tab svg{width:15px;height:15px;flex:0 0 auto;color:var(--primary-text)}
-.fgroup.write{border-color:color-mix(in srgb,var(--up),var(--border-strong) 40%)}
-.fgroup.write .fgroup-tab svg{color:var(--up)}
+.fgroup.outside{border-color:var(--border-strong);background:rgba(255,255,255,.006)}
+.fgroup.outside .fgroup-tab{color:color-mix(in srgb,var(--muted),var(--bg) 15%)}
+.fgroup.outside .fgroup-tab svg{color:var(--muted)}
+
+/* Company-instance frame (dev scenario) — visually encloses everything governed by ACOS */
+.instance-frame{border:1.5px solid color-mix(in srgb,var(--e-instance),var(--border-strong) 45%);border-radius:14px;padding:18px 14px 14px;background:linear-gradient(180deg,color-mix(in srgb,var(--e-instance),transparent 94%),transparent 160px);display:grid;gap:12px;margin:2px 0}
+.instance-frame-label{display:flex;align-items:center;gap:8px;font-size:10.5px;font-weight:900;letter-spacing:.12em;text-transform:uppercase;color:color-mix(in srgb,var(--e-instance),#fff 25%);margin:-4px 0 0 2px}
+.instance-frame-label::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--e-instance);box-shadow:0 0 0 3px color-mix(in srgb,var(--e-instance),transparent 78%)}
+.instance-frame.outside{border-color:var(--border-strong);background:rgba(255,255,255,.018)}
+.instance-frame.outside .instance-frame-label{color:var(--muted)}
+.instance-frame.outside .instance-frame-label::before{background:var(--muted);box-shadow:0 0 0 3px rgba(255,255,255,.07)}
 .fgroup [data-node]{display:block;width:100%}
 .fgroup [data-node]+[data-node]{margin-top:8px}
 .connector{margin-left:calc(22px + var(--d,0)*28px)}
-@media(max-width:640px){.fgroup{margin-left:calc(var(--d)*12px)}.connector{margin-left:calc(22px + var(--d,0)*12px)}}
+@media(max-width:640px){.fgroup{margin-left:calc(var(--d)*12px)}.connector{margin-left:calc(22px + var(--d,0)*12px)}.connector.up{margin-left:calc(22px + var(--d,0)*12px)}}
 
 /* File chips — the markdown actually consumed (or written) at this stop.
    Scoped as .files .fchip so card/detail `span` rules (.step span, .detail-block span) can't override the flex display. */
-.files{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.files{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:7px}
+.carry-dots{display:inline-flex;align-items:center;gap:4px;margin-right:2px;padding-right:8px;border-right:1px solid var(--border-strong)}
+.cdot{width:6px;height:6px;border-radius:50%;background:var(--mode-accent);opacity:.55;flex:0 0 auto}
+.cmore{font-size:9.5px;color:var(--muted);font-weight:700}
 .files .fchip{display:inline-flex;align-items:center;gap:8px;font-family:"JetBrains Mono",ui-monospace,monospace;font-size:10.5px;color:var(--muted);border:1px solid var(--border-strong);background:var(--bg);border-radius:5px;padding:3px 9px 3px 7px;line-height:1.6}
 .files .fchip i{font-style:normal;background:var(--primary);color:#fff;font-size:7.5px;font-weight:900;border-radius:3px;padding:2px 3.5px;letter-spacing:.04em;line-height:1}
 .files .fchip b{font-weight:400}
-.files .fchip.write{border-color:color-mix(in srgb,var(--up),var(--border-strong) 40%);color:var(--text)}
-.files .fchip.write i{background:var(--up)}
+.files .fchip.write{border-color:color-mix(in srgb,var(--e-write),var(--border-strong) 40%);color:var(--text)}
+.files .fchip.write i{background:var(--e-write)}
 .detail-block .files{margin:4px 0 10px}
-.wb-line .files{margin:0}
 
-/* Write-back finale — the agent, fully oriented, strengthens the OS */
-.writeback{display:block;width:100%;text-align:left;font:inherit;cursor:pointer;color:var(--text);border:2px solid color-mix(in srgb,var(--up),var(--border-strong) 25%);background:linear-gradient(135deg,color-mix(in srgb,var(--up),transparent 88%),transparent 55%),var(--card);border-radius:12px;padding:20px 22px;transition:transform .14s,border-color .14s,box-shadow .14s}
-.writeback:hover,.writeback.active{transform:translateY(-2px);border-color:var(--up);box-shadow:0 0 26px color-mix(in srgb,var(--up),transparent 76%)}
-.wb-head{display:flex;gap:15px;align-items:flex-start;margin-bottom:15px}
-.wb-badge{flex:0 0 auto;width:46px;height:46px;border-radius:50%;background:var(--up);color:#fff;display:grid;place-items:center;box-shadow:0 0 0 5px color-mix(in srgb,var(--up),transparent 80%)}
-.wb-badge svg{width:24px;height:24px;display:block}
-.wb-head small{display:block;font-size:10.5px;font-weight:900;letter-spacing:.12em;text-transform:uppercase;color:var(--up);margin-bottom:4px}
-.wb-head strong{display:block;font-size:16.5px;line-height:1.3;margin-bottom:6px;letter-spacing:-.01em}
-.wb-head p{margin:0;color:var(--muted);font-size:12.5px;line-height:1.5}
-.wb-diff{display:grid;gap:7px;margin:0 0 15px}
-.wb-line{display:flex;align-items:flex-start;gap:11px;flex-wrap:wrap;background:var(--bg);border:1px solid color-mix(in srgb,var(--up),var(--border) 62%);border-radius:7px;padding:8px 11px}
-.wb-line .pluses{display:grid;gap:4px;padding-top:2px}
-.wb-line .plus{font-family:"JetBrains Mono",ui-monospace,monospace;font-size:11px;color:var(--up)}
-.wb-payoff{text-align:center;font-weight:800;color:var(--up);font-size:13.5px}
+/* Write cards — one per file the agent updates at closeout, stacked in the Writes column */
+.col-heading{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:10.5px;font-weight:900;letter-spacing:.12em;text-transform:uppercase;margin:0 0 14px}
+.col-heading .n{flex:0 0 auto;width:20px;height:20px;border-radius:50%;display:grid;place-items:center;font-size:10px;font-weight:900;color:#fff}
+.col-heading.reads .n{background:var(--mode-accent)}
+.col-heading.writes .n{background:var(--e-write)}
+/* Completion banner — the big "this task is done" moment, ties back to the original trigger up top */
+.write-complete{display:flex;gap:16px;align-items:flex-start;border:2px solid var(--e-write);border-radius:14px;padding:18px 20px;margin:0 0 18px;background:linear-gradient(135deg,color-mix(in srgb,var(--e-write),transparent 85%),transparent 60%),var(--card);box-shadow:0 0 32px color-mix(in srgb,var(--e-write),transparent 82%)}
+.write-complete .wc-big-badge{flex:0 0 auto;width:52px;height:52px;border-radius:50%;background:var(--e-write);color:#fff;display:grid;place-items:center;box-shadow:0 0 0 5px color-mix(in srgb,var(--e-write),transparent 80%)}
+.write-complete .wc-big-badge svg{width:27px;height:27px;display:block;stroke-width:3.4}
+.write-complete small{display:block;font-size:10.5px;font-weight:900;letter-spacing:.12em;text-transform:uppercase;color:var(--e-write);margin-bottom:6px}
+.write-complete strong{display:block;font-size:16.5px;font-weight:800;line-height:1.35;margin-bottom:5px;letter-spacing:-.01em}
+.write-complete p{margin:0;color:var(--muted);font-size:12.5px;line-height:1.5}
+
+.write-lead{color:var(--muted);font-size:12.5px;line-height:1.5;margin:0 0 12px}
+.write-stack{display:grid;gap:12px}
+.write-card{display:block;width:100%;text-align:left;font:inherit;cursor:pointer;color:var(--text);border:1.5px solid color-mix(in srgb,var(--e-write),var(--border-strong) 30%);background:linear-gradient(135deg,color-mix(in srgb,var(--e-write),transparent 90%),transparent 60%),var(--card);border-radius:11px;padding:14px 16px;transition:transform .14s,border-color .14s,box-shadow .14s}
+.write-card:hover,.write-card.active{transform:translateY(-2px);border-color:var(--e-write);box-shadow:0 0 22px color-mix(in srgb,var(--e-write),transparent 78%)}
+.wc-head{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.wc-badge{flex:0 0 auto;width:28px;height:28px;border-radius:8px;background:var(--e-write);color:#fff;display:grid;place-items:center;box-shadow:0 0 0 4px color-mix(in srgb,var(--e-write),transparent 82%)}
+.wc-badge svg{width:15px;height:15px;display:block}
+.write-card strong{font-family:"JetBrains Mono",ui-monospace,monospace;font-size:13.5px;font-weight:600;color:var(--text)}
+.wc-diff{display:grid;gap:4px}
+.wc-diff .plus{font-family:"JetBrains Mono",ui-monospace,monospace;font-size:11px;color:var(--e-write);line-height:1.5}
+.write-payoff{display:flex;align-items:center;gap:10px;border-top:1px dashed color-mix(in srgb,var(--e-write),var(--border) 60%);margin-top:8px;padding-top:15px;font-weight:800;color:var(--e-write);font-size:12.5px;line-height:1.5}
+.write-payoff .pcheck{flex:0 0 auto;width:22px;height:22px;border-radius:50%;background:var(--e-write);display:grid;place-items:center}
+.write-payoff .pcheck svg{width:12px;height:12px;color:#fff}
 
 /* Rail phase labels */
 .rail-label-row{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:10.5px;font-weight:900;letter-spacing:.12em;text-transform:uppercase;margin:2px 0}
 .rail-label-row::after{content:"";flex:1;height:1px;background:var(--border-strong)}
-.rail-label-row.up-label{color:var(--up)}
-.rail-label-row.up-label::after{background:color-mix(in srgb,var(--up),var(--border-strong) 50%)}
+.rail-label-row.up-label{color:var(--e-write)}
+.rail-label-row.up-label::after{background:color-mix(in srgb,var(--e-write),var(--border-strong) 50%)}
+.rail-label-row.climb-label{color:var(--muted)}
+.rail-label-row.climb-label::after{background:var(--border-strong)}
+.rail-label-row.jump-label{color:color-mix(in srgb,var(--e-instance),#fff 20%)}
+.rail-label-row.jump-label::after{background:color-mix(in srgb,var(--e-instance),var(--border-strong) 40%)}
 
 /* Write-back connector + closeout finale */
-.connector.up{border-left:2px dashed var(--up);margin-left:22px;height:34px}
-.connector.up::after{content:"↑";position:absolute;left:-7px;top:-2px;width:auto;height:auto;background:none;border-radius:0;color:var(--up);font-weight:900;font-size:13px}
-.closeout{--accent:var(--up)}
+.connector.up{border-left:2.5px dashed var(--e-write);margin-left:calc(22px + var(--d,0)*28px);height:34px}
+.connector.up .carrow{color:var(--e-write);filter:drop-shadow(0 0 4px color-mix(in srgb,var(--e-write),transparent 40%))}
+.closeout{--accent:var(--e-write)}
 
 /* Mode switch: rail crossfade */
 @keyframes railIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
-.rail.animate,.side-rail.animate{animation:railIn .3s ease}
+.reads-col.animate,.writes-col.animate{animation:railIn .3s ease}
 
-.map{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:14px;align-items:start}
-.rail{grid-column:span 8;display:grid;gap:12px}
-.side-rail{grid-column:span 4;display:grid;gap:12px}
+.flow{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:22px;align-items:stretch;position:relative}
+/* Panels — shaded, full-height containers so the two-column split reads instantly, even before the shorter writes column has content at the top */
+.flow-panel{border-radius:16px;padding:20px 20px 22px;display:flex;flex-direction:column;min-width:0}
+.reads-panel{border:1px solid color-mix(in srgb,var(--mode-accent),var(--border) 55%);background:linear-gradient(180deg,color-mix(in srgb,var(--mode-accent),transparent 93%),transparent 260px),var(--surface)}
+.writes-panel{border:1px solid color-mix(in srgb,var(--e-write),var(--border) 50%);background:linear-gradient(180deg,color-mix(in srgb,var(--e-write),transparent 91%),transparent 260px),var(--surface)}
+.panel-wait{margin:-2px 0 16px;color:var(--muted);font-size:12px;font-style:italic;line-height:1.5}
+.reads-col{display:grid;gap:12px}
+.writes-col{display:grid;gap:12px;transition:margin-top .25s ease}
+/* Transition row — a stable full-width band under both panels, replacing a floating arrow that used to overlap card content */
+.flow-transition{display:flex;align-items:center;justify-content:center;gap:12px;margin:20px 0 0;padding:14px 22px;border-radius:12px;border:1px dashed color-mix(in srgb,var(--e-write),var(--border-strong) 45%);background:linear-gradient(90deg,transparent,color-mix(in srgb,var(--e-write),transparent 84%) 30%,color-mix(in srgb,var(--e-write),transparent 84%) 70%,transparent)}
+.flow-transition .ft-badge{flex:0 0 auto;width:38px;height:38px;border-radius:50%;background:var(--e-write);display:grid;place-items:center;box-shadow:0 8px 20px rgba(0,0,0,.4)}
+.flow-transition .ft-badge svg{width:19px;height:19px;color:#fff;display:block}
+.flow-transition span.ft-label{font-size:10.5px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:color-mix(in srgb,var(--e-write),#fff 25%)}
+@media(max-width:980px){.flow{grid-template-columns:1fr}.writes-col{margin-top:0 !important}.panel-wait{display:none}}
+@media(max-width:560px){.flow-transition{flex-direction:column;text-align:center;gap:8px}}
 
-.step,.branch,.closeout{--accent:var(--e-instance);border:1px solid color-mix(in srgb,var(--accent),var(--border) 50%);background:linear-gradient(90deg,color-mix(in srgb,var(--accent),transparent 90%),transparent 48%),var(--card);border-radius:9px;color:var(--text);cursor:pointer;font:inherit;min-height:96px;padding:13px 14px 13px 16px;position:relative;text-align:left;transition:transform 140ms ease,border-color 140ms ease,background 140ms ease}
-.step::before,.branch::before,.closeout::before{content:"";position:absolute;inset:0 auto 0 0;width:5px;background:var(--accent)}
-.step:hover,.step.active,.branch:hover,.branch.active,.closeout:hover,.closeout.active{transform:translateY(-2px);border-color:var(--accent);background:linear-gradient(90deg,color-mix(in srgb,var(--accent),transparent 84%),transparent 52%),#303746}
-.step strong,.branch strong,.closeout strong{display:block;font-size:15px;line-height:1.25;margin-bottom:6px}
-.step span,.branch span,.closeout span{display:block;color:var(--muted);font-size:12px;line-height:1.4}
-.step small,.branch small,.closeout small{display:inline-flex;margin-bottom:7px;color:color-mix(in srgb,var(--accent),#fff 28%);font-size:10px;font-weight:900;letter-spacing:.06em;text-transform:uppercase}
+/* Optional branches — a clearly secondary but still substantial section below the flow, not a nav bar */
+.branches-row{margin-top:42px;padding:26px 28px 24px;border:1px solid var(--border);border-radius:16px;background:linear-gradient(180deg,rgba(255,255,255,.016),transparent 160px),var(--surface)}
+.branches-row-head{margin:0 0 18px}
+.branches-row-head .kicker{display:block;margin-bottom:7px}
+.branches-row-label{color:var(--muted);font-size:12.5px;line-height:1.55;margin:0}
+.branch-cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px}
+@media(max-width:820px){.branch-cards{grid-template-columns:1fr}}
+.branch-card{--accent:var(--e-route);display:block;width:100%;text-align:left;font:inherit;cursor:pointer;border:1px solid color-mix(in srgb,var(--accent),var(--border) 55%);background:linear-gradient(120deg,color-mix(in srgb,var(--accent),transparent 91%),transparent 55%),var(--card);border-radius:11px;padding:14px 15px;color:var(--text);position:relative;overflow:hidden;transition:transform .14s,border-color .14s,background .14s}
+.branch-card::before{content:"";position:absolute;inset:0 auto 0 0;width:4px;background:var(--accent)}
+.branch-card:hover,.branch-card.active{transform:translateY(-2px);border-color:var(--accent);background:linear-gradient(120deg,color-mix(in srgb,var(--accent),transparent 84%),transparent 55%),#303746}
+.branch-card small{display:block;font-size:9.5px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:color-mix(in srgb,var(--accent),#fff 28%);margin-bottom:6px}
+.branch-card strong{display:block;font-size:14.5px;margin-bottom:6px}
+.branch-card p{margin:0;color:var(--muted);font-size:12px;line-height:1.5}
+.branch-card.route{--accent:var(--e-route)}
+.branch-card.brand{--accent:var(--e-brand)}
+.branch-card.people{--accent:var(--e-people)}
+
+.step{--accent:var(--e-instance);border:1px solid color-mix(in srgb,var(--accent),var(--border) 50%);background:linear-gradient(90deg,color-mix(in srgb,var(--accent),transparent 90%),transparent 48%),var(--card);border-radius:9px;color:var(--text);cursor:pointer;font:inherit;padding:12px 14px;position:relative;text-align:left;transition:transform 140ms ease,border-color 140ms ease,background 140ms ease}
+.step::before{content:"";position:absolute;inset:0 auto 0 0;width:5px;background:var(--accent)}
+.step:hover,.step.active{transform:translateY(-2px);border-color:var(--accent);background:linear-gradient(90deg,color-mix(in srgb,var(--accent),transparent 84%),transparent 52%),#303746}
+.step strong{display:block;font-size:15px;line-height:1.25;margin-bottom:0}
+.step small{display:inline-flex;margin-bottom:6px;color:color-mix(in srgb,var(--accent),#fff 28%);font-size:10px;font-weight:900;letter-spacing:.06em;text-transform:uppercase}
 .step.client{--accent:var(--e-clients)}
 .step.dev{--accent:var(--e-projects)}
-.branch.brand{--accent:var(--e-brand)}
-.branch.route{--accent:var(--e-route)}
-.branch.people{--accent:var(--e-people)}
-.closeout{--accent:var(--e-admin)}
 
-.connector{height:26px;margin-left:22px;border-left:1px solid var(--border-strong);position:relative}
-.connector::after{content:"";position:absolute;left:-4px;bottom:0;width:7px;height:7px;border-radius:999px;background:var(--border-strong)}
+.connector{height:26px;border-left:2.5px solid var(--e-write);position:relative}
+.connector .carrow{position:absolute;left:-6px;bottom:-12px;width:14px;height:10px;display:block;color:var(--e-write);filter:drop-shadow(0 0 4px color-mix(in srgb,var(--e-write),transparent 40%))}
+.connector.climb{border-left:2.5px dashed var(--e-write)}
+.connector.jump{height:34px;border-left:2.5px dashed var(--e-write)}
+.connector.has-track{height:78px}
+.connector.jump.has-track{height:88px}
+.connector.trailing.has-track{height:74px}
+.agent-track{position:absolute;left:20px;top:50%;transform:translateY(-50%);display:flex;align-items:center;gap:12px;white-space:nowrap;pointer-events:none;background:var(--card);border:1px solid color-mix(in srgb,var(--e-write),var(--border-strong) 35%);border-radius:12px;padding:10px 16px 10px 10px;box-shadow:0 8px 22px rgba(6,8,12,.4);z-index:2}
+.a-ico{width:32px;height:32px;border-radius:9px;background:var(--e-write);color:#fff;display:grid;place-items:center;flex:0 0 auto;box-shadow:0 0 0 3px color-mix(in srgb,var(--e-write),transparent 80%)}
 
-.side-card{border:1px solid var(--border);background:#1c222c;border-radius:9px;padding:15px}
-.side-card h2{margin:0 0 8px;font-size:18px;letter-spacing:-.01em}
-.side-card p{margin:0;color:var(--muted);font-size:13px;line-height:1.5}
+/* Agent starts cold — the lead-in card at the top of every reads column, the counterpoint to "context grows" */
+.agent-start{display:flex;align-items:center;gap:14px;border:1.5px dashed color-mix(in srgb,var(--e-write),var(--border-strong) 40%);border-radius:12px;padding:14px 16px;margin:0 0 18px;background:rgba(255,255,255,.012)}
+.agent-start .a-label{display:block;font-size:10px;font-weight:900;letter-spacing:.09em;text-transform:uppercase;color:var(--e-write);margin-bottom:5px}
+.agent-start p{margin:0;color:var(--muted);font-size:12px;line-height:1.5}
+@media(max-width:560px){.agent-start{flex-direction:column;align-items:flex-start;gap:10px}}
+.a-ico svg{width:18px;height:18px;display:block}
+.a-info{display:grid;gap:6px}
+.a-label{font-size:10px;font-weight:900;letter-spacing:.09em;text-transform:uppercase;color:var(--e-write)}
+.a-mds{display:flex;flex-wrap:wrap;gap:4px;max-width:190px}
+.mdmini{font-style:normal;display:inline-block;background:var(--primary);color:#fff;font-size:8px;font-weight:900;border-radius:3px;padding:3px 4.5px;letter-spacing:.03em;line-height:1}
+@media(max-width:640px){.agent-track{position:static;transform:none;margin:10px 0;width:fit-content}.connector.has-track,.connector.jump.has-track{height:26px}}
 
-aside h2{margin:0 0 8px;font-size:24px;letter-spacing:-.01em}
 .panel-kicker{margin:0 0 8px;color:var(--primary-text);font-size:12px;text-transform:uppercase;font-weight:900;letter-spacing:.08em}
 .panel-text{color:var(--muted);line-height:1.55;font-size:14px;margin:0 0 18px}
 .detail-block{border:1px solid var(--border);background:var(--surface);border-radius:9px;padding:13px;margin-bottom:10px}
@@ -164,26 +245,25 @@ aside h2{margin:0 0 8px;font-size:24px;letter-spacing:-.01em}
 .path{font-family:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;color:var(--primary-text);background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:6px 10px 6px 8px;display:inline-flex;align-items:flex-start;gap:8px}
 .path i{font-style:normal;background:var(--primary);color:#fff;font-size:7.5px;font-weight:900;border-radius:3px;padding:2px 3.5px;letter-spacing:.04em;line-height:1;flex:0 0 auto;margin-top:3px}
 .path b{font-weight:400;overflow-wrap:anywhere;min-width:0}
-.path.write i{background:var(--up)}
+.path.write i{background:var(--e-write)}
 
 /* "Markdown at this stop" — branded as the ACOS value-add */
-.aside-inner .detail-block.acos{border:1px solid color-mix(in srgb,var(--primary),var(--border) 35%);background:linear-gradient(135deg,color-mix(in srgb,var(--primary),transparent 89%),transparent 55%),var(--surface)}
+.modal .detail-block.acos{border:1px solid color-mix(in srgb,var(--primary),var(--border) 35%);background:linear-gradient(135deg,color-mix(in srgb,var(--primary),transparent 89%),transparent 55%),var(--surface)}
 .acos-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}
 .acos-head strong{margin-bottom:0}
 .acos-tag{flex:0 0 auto;font-size:9px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;background:var(--primary);color:#fff;border-radius:4px;padding:3px 7px}
 .acos-note{display:block;margin-top:9px;color:var(--muted);font-size:11.5px;line-height:1.45;font-style:italic}
+/* Neutral variant for stops that aren't ACOS markdown records — e.g. the dev project's own code folder */
+.modal .detail-block.acos.code{border-color:var(--border-strong);background:linear-gradient(135deg,rgba(255,255,255,.05),transparent 55%),var(--surface)}
+.acos-tag.code{background:var(--muted);color:#161b22}
+.path.code{color:var(--muted)}
+.path.code i{background:var(--muted);color:#161b22}
 
 /* Focus: dim the folder groups the selection isn't in */
 .fgroup{transition:opacity .25s ease}
 .fgroup.dim{opacity:.4}
 
-@media(max-width:1120px){
-  .page{grid-template-columns:1fr}
-  aside{border-left:0;border-top:1px solid var(--border)}
-  .aside-inner{position:static;max-height:none;overflow:visible}
-  .rail,.side-rail{grid-column:span 12}
-}
-@media(max-width:640px){main,aside{padding:20px}h1{font-size:26px}}
+@media(max-width:640px){main{padding:20px}h1{font-size:26px}}
 .footer{border-top:1px solid var(--border);background:var(--dark2);padding:30px 0}
 .footer-inner{display:flex;justify-content:space-between;align-items:center;gap:18px;flex-wrap:wrap}
 .footer-brand{font-size:.9rem;font-weight:700;color:var(--text)}
@@ -259,13 +339,41 @@ aside h2{margin:0 0 8px;font-size:24px;letter-spacing:-.01em}
 
     <div class="task-banner" id="task-banner"></div>
 
-    <section class="map">
-      <div class="rail" id="main-path"></div>
-      <div class="side-rail" id="branch-path"></div>
-    </section>
-  </main>
+    <div class="flow">
+      <div class="flow-panel reads-panel">
+        <div class="col-heading reads"><span class="n">1</span>The reads — traversing the folders, gathering context</div>
+        <div class="reads-col" id="reads-col">
+          <div id="main-path"></div>
+        </div>
+      </div>
+      <div class="flow-panel writes-panel">
+        <div class="col-heading writes"><span class="n">2</span>The writes — doing the work, closing the loop</div>
+        <p class="panel-wait">Writes land once the agent has gathered enough context to act →</p>
+        <div class="writes-col" id="writes-col">
+          <div id="write-path"></div>
+        </div>
+      </div>
+    </div>
 
-  <aside><div class="aside-inner" id="detail" aria-live="polite"></div></aside>
+    <div class="flow-transition" id="flowTransition" aria-hidden="true">
+      <span class="ft-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg></span>
+      <span class="ft-label">Context gathered — writing back</span>
+    </div>
+
+    <div class="branches-row">
+      <div class="branches-row-head">
+        <span class="kicker">Optional branches</span>
+        <p class="branches-row-label">Read only when the task touches routing, brand, or specific people — not on every task. Click one to see what it adds.</p>
+      </div>
+      <div class="branch-cards" id="branch-chips"></div>
+    </div>
+  </main>
+</div>
+
+<div class="modal-backdrop" id="modalBackdrop"></div>
+<div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+  <button class="modal-close" id="modalClose" type="button" aria-label="Close">✕</button>
+  <div id="modalBody"></div>
 </div>
 
 <script>
@@ -274,12 +382,16 @@ const modeMeta = {
     label:"Scenario A — process incoming material",
     task:"A meeting transcript from Northwind Trades just landed. Process it and update the client record.",
     start:"The agent is pointed at the instance. Time flows down: every stop is a read, and the sequence ends with a write.",
+    closeHead:"The transcript is handled.",
+    closeSub:"Every open question in that meeting now has a home in the record — the next agent won't have to ask again.",
     icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>'
   },
   dev:{
-    label:"Scenario B — capture knowledge from code work",
-    task:"You're deep in Northwind's costing-tool repo, and a code review just surfaced a new commitment. Capture it before it evaporates.",
-    start:"The agent starts outside the instance entirely — inside a local dev project. First it has to climb to the root.",
+    label:"Scenario B — turn a dev milestone into a client commitment",
+    task:"The team signs off on a data-import feature for Northwind's costing tool — something the client asked for, due by end of month. It needs to be captured in the client brief, not just the project backlog.",
+    start:"The agent starts outside the instance entirely — inside a local dev project, where client-facing commitments quietly get made and just as quietly get lost. First it has to climb to the root, then descend into the record built to hold exactly this kind of promise.",
+    closeHead:"The commitment is captured.",
+    closeSub:"A decision made inside the project is now an open commitment in the client record — visible to account management, not just the team that signed off.",
     icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6l-6 6 6 6"/><path d="M16 6l6 6-6 6"/></svg>'
   }
 };
@@ -312,7 +424,7 @@ const nodes = {
   clientReadme:{ id:"client-readme", title:"Northwind README", type:"client front door", cls:"step client",
     summary:"Operational entry point for the Northwind Trades client folder.",
     contributes:["Identifies Northwind as one of the more active engagements.","Lists key files: brief, manifest, workspace conventions, Brand, Admin, Proposals.","Points to the active local dev root and any external context."],
-    behavior:"Read before client-specific work. It is the operational front door for the client folder.",
+    behavior:"Read before client-specific work — it's the front door for anything Northwind-specific.",
     story:{ client:"Northwind confirmed active; the README points at the brief, the manifest, and the Brand folder if a deliverable comes out of this.",
             dev:"The agent arrives at the folder its repo belongs to and finds the record it needs to update." },
     files:["README.md"],
@@ -344,18 +456,18 @@ const nodes = {
     summary:"Example: ~/dev/northwind/northwind-costing-tool, or any first-level client dev project folder.",
     contributes:["The working code and project context lives here.","The parent dev-root instructions explain how this folder relates to the client.","If work changes durable client state, the agent updates the instance before closeout."],
     behavior:"Work happens here, but durable client knowledge gets written back to the instance client record.",
-    story:{ dev:"Where the task starts: the code review just revealed Northwind expects a data-import feature by end of month — a commitment no record knows about yet." },
+    story:{ dev:"Where the task starts: the team just signed off on a data-import feature for Northwind — a commitment no record knows about yet." },
     path:"~/dev/northwind/northwind-costing-tool" },
   closeout:{ id:"closeout", title:"Write-back: the record gets stronger", type:"write-back moment", cls:"closeout",
     summary:"Before its final response, the agent updates the records the task changed — the moment the cascade pays for itself.",
     contributes:["brief.md gains the new commitment and an interaction-log entry.","manifest.md gains any new alias, contact, or project term the material revealed.","workspace-conventions.md updated if a path or process changed."],
-    behavior:"On substantial work, decide whether durable client knowledge changed; if so, write it back before responding.",
+    behavior:"On substantial work, the agent checks whether durable client knowledge changed — and if so, writes it back before responding.",
     story:{ client:"The transcript changed durable knowledge: the brief gets the new commitment and the log entry, and the manifest learns “NWT” as a Northwind alias — the next transcript routes itself. That compounding step is what the whole cascade exists for.",
-            dev:"The commitment lands in the brief's open commitments — so the next agent preparing for a Northwind meeting already knows about the data-import deadline. Code work just made the company smarter." },
+            dev:"The commitment lands in the brief's open commitments — so the next agent preparing for a Northwind meeting already knows about the data-import deadline. That work just made the company smarter." },
     updates:{
       client:[["brief.md",["+ Open commitment: data-import feature — end of month","+ Interaction log: 2026-07-10 — pricing review call"]],
               ["manifest.md",["+ Alias: “NWT” → Northwind Trades"]]],
-      dev:[["brief.md",["+ Open commitment: data-import feature — end of month","+ Note: costing-tool scope expanded in code review"]]] },
+      dev:[["brief.md",["+ Open commitment: data-import feature — end of month","+ Note: costing-tool scope expanded — data-import feature signed off"]]] },
     writes:["brief.md","manifest.md"],
     path:"Clients/Northwind-Trades/brief.md · manifest.md" }
 };
@@ -389,96 +501,167 @@ const modes = {
     seq:[ {label:"The reads — descending folder by folder"},
           {folder:"companyOS/", depth:0, nodes:["root"]},
           {folder:"companyOS/Clients/", depth:1, nodes:["clientsReadme","clientsWorkspace"]},
-          {folder:"companyOS/Clients/Northwind-Trades/", depth:2, nodes:["clientReadme","clientBrief","clientWorkspace"]},
-          {label:"The write — closing the loop", up:true},
-          {folder:"companyOS/Clients/Northwind-Trades/", depth:2, write:true, nodes:["closeout"]} ],
+          {folder:"companyOS/Clients/Northwind-Trades/", depth:2, nodes:["clientReadme","clientBrief","clientWorkspace"], writeTarget:true} ],
     initial:"root" },
   dev:{
     seq:[ {label:"Outside the instance — where the task starts"},
-          {folder:"~/dev/northwind/northwind-costing-tool/", depth:1, nodes:["projectFolder"]},
-          {folder:"~/dev/northwind/", depth:0, nodes:["devAgents"]},
-          {label:"Climb to the instance root"},
+          {frame:"start", kind:"outside", title:"Local filesystem"},
+          {folder:"~/dev/northwind/northwind-costing-tool/", depth:1, nodes:["projectFolder"], outside:true},
+          {label:"Climb", arrow:"climb"},
+          {folder:"~/dev/northwind/", depth:0, nodes:["devAgents"], outside:true},
+          {frame:"end"},
+          {label:"Jump to the instance root", arrow:"jump"},
+          {frame:"start", kind:"instance", title:"Your instance"},
           {folder:"companyOS/", depth:0, nodes:["root"]},
           {folder:"companyOS/Clients/", depth:1, nodes:["clientsReadme","clientsWorkspace"]},
-          {label:"Descend to the client"},
-          {folder:"companyOS/Clients/Northwind-Trades/", depth:2, nodes:["clientReadme","clientBrief"]},
-          {label:"The write — closing the loop", up:true},
-          {folder:"companyOS/Clients/Northwind-Trades/", depth:2, write:true, nodes:["closeout"]} ],
+          {label:"Descend to the client", arrow:"down"},
+          {folder:"companyOS/Clients/Northwind-Trades/", depth:2, nodes:["clientReadme","clientBrief"], writeTarget:true},
+          {frame:"end"} ],
     initial:"project-folder" }
 };
 const branchOrder = ["route","brand","people"];
 
 const mainPath = document.querySelector("#main-path");
-const branchPath = document.querySelector("#branch-path");
-const detail = document.querySelector("#detail");
+const writePath = document.querySelector("#write-path");
+const readsCol = document.querySelector("#reads-col");
+const writesCol = document.querySelector("#writes-col");
+const branchChipsEl = document.querySelector("#branch-chips");
+const modal = document.querySelector("#modal");
+const modalBackdrop = document.querySelector("#modalBackdrop");
+const modalBody = document.querySelector("#modalBody");
+const modalCloseBtn = document.querySelector("#modalClose");
 const banner = document.querySelector("#task-banner");
 const tabs = document.querySelectorAll(".tab[data-mode]");
 let currentMode = "client";
 
 const FOLDER_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>';
 
-function fileChips(node){
+function carryDots(n){
+  if(!n) return "";
+  const capped = Math.min(n,6);
+  const dots = '<span class="cdot"></span>'.repeat(capped);
+  const extra = n>6 ? `<span class="cmore">+${n-6}</span>` : "";
+  return `<span class="carry-dots" title="${n} file${n===1?'':'s'} already gathered">${dots}${extra}</span>`;
+}
+function fileChips(node, carried){
+  const dots = carryDots(carried||0);
   const reads=(node.files||[]).map(f=>`<span class="fchip"><i>MD</i><b>${f}</b></span>`).join("");
   const writes=(node.writes||[]).map(f=>`<span class="fchip write"><i>MD</i><b>${f} ✎</b></span>`).join("");
-  return (reads||writes) ? `<div class="files">${reads}${writes}</div>` : "";
+  return (reads||writes||dots) ? `<div class="files">${dots}${reads}${writes}</div>` : "";
 }
-function nodeButton(node){
+function nodeButton(node, carried){
   return `<button class="${node.cls}" type="button" data-node="${node.id}">
-    <small>${node.type}</small><strong>${node.title}</strong><span>${node.summary}</span>${fileChips(node)}</button>`;
+    <small>${node.type}</small><strong>${node.title}</strong>${fileChips(node, carried)}</button>`;
 }
-const AGENT_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="#3fb27f" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="9" width="14" height="10" rx="3"/><circle cx="9.5" cy="14" r="1" fill="#3fb27f" stroke="none"/><circle cx="14.5" cy="14" r="1" fill="#3fb27f" stroke="none"/><path d="M12 9V5"/><circle cx="12" cy="4" r="1.3" fill="#3fb27f" stroke="none"/></svg>';
+const AGENT_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="9" width="14" height="10" rx="3"/><circle cx="9.5" cy="14" r="1" fill="currentColor" stroke="none"/><circle cx="14.5" cy="14" r="1" fill="currentColor" stroke="none"/><path d="M12 9V5"/><circle cx="12" cy="4" r="1.3" fill="currentColor" stroke="none"/></svg>';
+const CHECK_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>';
 
-function writeBackHtml(node){
-  const lines = (node.updates[currentMode]||[]).map(([file,changes])=>
-    `<div class="wb-line"><span class="files"><span class="fchip write"><i>MD</i><b>${file}</b></span></span><span class="pluses">${changes.map(c=>`<span class="plus">${c}</span>`).join("")}</span></div>`).join("");
-  return `<button class="writeback" type="button" data-node="${node.id}">
-    <div class="wb-head">
-      <span class="wb-badge" aria-hidden="true">${modeMeta[currentMode].icon}</span>
+function writeStackHtml(node){
+  const meta = modeMeta[currentMode];
+  const items = node.updates[currentMode] || [];
+  const cards = items.map(([file,changes])=>
+    `<button class="write-card" type="button" data-node="${node.id}">
+      <div class="wc-head"><span class="wc-badge" aria-hidden="true">${AGENT_ICON}</span><div class="files"><span class="fchip write"><i>MD</i><b>${file}</b></span></div></div>
+      <div class="wc-diff">${changes.map(c=>`<span class="plus">${c}</span>`).join("")}</div>
+    </button>`).join("");
+  return `<div class="write-complete">
+      <span class="wc-big-badge" aria-hidden="true">${CHECK_ICON}</span>
       <div>
-        <small>The agent writes back</small>
-        <strong>Fully oriented — and carrying what this task just revealed</strong>
-        <p>Everything the cascade assembled, plus the new facts from the task, flows back into the operating system:</p>
+        <small>Task complete — writing back</small>
+        <strong>${meta.closeHead}</strong>
+        <p>${meta.closeSub}</p>
       </div>
     </div>
-    <div class="wb-diff">${lines}</div>
-    <div class="wb-payoff">The next agent starts from a stronger company operating system, because every task compounds value&nbsp;&nbsp;↺</div>
+    <p class="write-lead">Before its final response, the agent updates the records this task changed:</p>
+    <div class="write-stack">${cards}</div>
+    <p class="write-payoff"><span class="pcheck" aria-hidden="true">${CHECK_ICON}</span>The next agent starts from a stronger record than this one did — that's what makes every task compound</p>`;
+}
+function branchCardHtml(node){
+  const kind = node.cls.split(" ")[1] || "";
+  return `<button class="branch-card ${kind}" type="button" data-node="${node.id}">
+    <small>${node.type}</small>
+    <strong>${node.title}</strong>
+    <p>${node.summary}</p>
   </button>`;
 }
-function groupHtml(g){
-  return `<div class="fgroup${g.write?' write':''}" style="--d:${g.depth}">
-    <div class="fgroup-tab">${FOLDER_ICON}<span>${g.folder}</span></div>
-    ${g.nodes.map(k=> k==="closeout" ? writeBackHtml(nodes[k]) : nodeButton(nodes[k])).join("")}</div>`;
+const CARROW = '<svg class="carrow" viewBox="0 0 14 10" aria-hidden="true"><path d="M1.5 1.5L7 8L12.5 1.5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const AGENT_START_HTML = `<div class="agent-start">
+  <span class="a-ico" aria-hidden="true">${AGENT_ICON}</span>
+  <div class="a-info">
+    <span class="a-label">Agent starts cold — no context yet</span>
+    <p>Drop it in any folder, in any company instance running ACOS — the cascade gets it oriented from wherever it lands.</p>
+  </div>
+</div>`;
+function connectorHtml(kind, depth, carried, trailing){
+  const hasTrack = carried>0;
+  const cls = (kind ? `connector ${kind}` : "connector") + (hasTrack ? " has-track" : "") + (trailing ? " trailing" : "");
+  const mds = hasTrack ? '<i class="mdmini">MD</i>'.repeat(carried) : "";
+  const track = hasTrack ? `<span class="agent-track"><span class="a-ico" aria-hidden="true">${AGENT_ICON}</span><span class="a-info"><span class="a-label">Agent context grows</span><span class="a-mds">${mds}</span></span></span>` : "";
+  const arrow = trailing ? "" : CARROW;
+  return `<div class="${cls}" style="--d:${depth}">${track}${arrow}</div>`;
 }
+function groupHtml(g, carried){
+  return `<div class="fgroup${g.outside?' outside':''}"${g.writeTarget?' data-write-target="true"':''} style="--d:${g.depth}">
+    <div class="fgroup-tab">${FOLDER_ICON}<span>${g.folder}</span></div>
+    ${g.nodes.map((k,i)=>nodeButton(nodes[k], i===0?carried:0)).join("")}</div>`;
+}
+function alignWritesColumn(){
+  writesCol.style.marginTop = "";
+  if(window.innerWidth <= 980) return;
+  const target = mainPath.querySelector('.fgroup[data-write-target="true"]');
+  if(!target) return;
+  // Reference writes-col's own natural top (not the shared grid top) so panel padding
+  // and the writes-panel header/wait-note don't throw the math off.
+  const writesTop = writesCol.getBoundingClientRect().top;
+  const targetRect = target.getBoundingClientRect();
+  const offset = targetRect.top - writesTop;
+  writesCol.style.marginTop = Math.max(offset, 0) + "px";
+}
+
 function renderMode(mode){
+  closeModal();
   currentMode = mode;
   document.body.dataset.mode = mode;
   tabs.forEach(t=>t.classList.toggle("active", t.dataset.mode===mode));
   const meta = modeMeta[mode];
-  banner.innerHTML = `<span class="task-ico" aria-hidden="true">${meta.icon}</span><div><small><span class="trig">Trigger</span>${meta.label}</small><p class="task">${meta.task}</p><p class="start">${meta.start}</p></div>`;
+  banner.innerHTML = `<div class="tb-top"><span class="task-ico" aria-hidden="true">${meta.icon}</span><div><small><span class="trig">Trigger</span>${meta.label}</small><p class="task">${meta.task}</p><p class="start">${meta.start}</p></div></div><div class="tb-split" aria-hidden="true"><span class="split-seg reads"><span class="n">1</span>Reads — gathering context</span><span class="split-seg writes"><span class="n">2</span>Writes — doing the work</span></div>`;
   const cfg = modes[mode];
-  let html = "", prevWasGroup = false;
-  cfg.seq.forEach(entry=>{
+  const seq = cfg.seq;
+  let html = "", prevWasGroup = false, carried = 0, lastDepth = 0;
+  for(let i=0;i<seq.length;i++){
+    const entry = seq[i];
+    if(entry.frame === "start"){ html += `<div class="instance-frame${entry.kind==="outside"?' outside':''}"><div class="instance-frame-label">${entry.title}</div>`; prevWasGroup = false; continue; }
+    if(entry.frame === "end"){ html += `</div>`; continue; }
     if(entry.label !== undefined){
-      html += `<div class="rail-label-row${entry.up?' up-label':''}">${entry.label}</div>`;
-      if(entry.up) html += `<div class="connector up" style="--d:${2}"></div>`;
+      const a = entry.arrow;
+      const rowCls = a==="up" ? " up-label" : a==="jump" ? " jump-label" : a==="climb" ? " climb-label" : "";
+      html += `<div class="rail-label-row${rowCls}">${entry.label}</div>`;
+      const next = seq[i+1];
+      const nextDepth = (next && next.depth!==undefined) ? next.depth : 0;
+      if(a==="jump") html += connectorHtml("jump", nextDepth, carried);
+      else if(a==="climb") html += connectorHtml("climb", nextDepth, carried);
+      else if(a==="down") html += connectorHtml("", nextDepth, carried);
       prevWasGroup = false;
     } else {
-      if(prevWasGroup) html += `<div class="connector" style="--d:${entry.depth}"></div>`;
-      html += groupHtml(entry);
+      if(prevWasGroup) html += connectorHtml("", entry.depth, carried);
+      html += groupHtml(entry, carried);
+      carried += entry.nodes.reduce((sum,k)=>sum + (nodes[k].files||[]).length, 0);
+      lastDepth = entry.depth;
       prevWasGroup = true;
     }
-  });
-  mainPath.innerHTML = html;
-  branchPath.innerHTML = `<div class="side-card"><h2>Optional branches</h2><p>Read only when the task touches routing, brand, or specific people — the cascade loads context on demand, not all at once.</p></div>`
-    + branchOrder.map(key=>nodeButton(branches[key])).join("");
-  [mainPath,branchPath].forEach(el=>{el.classList.remove("animate");void el.offsetWidth;el.classList.add("animate");});
-  document.querySelectorAll("[data-node]").forEach(b=>b.addEventListener("click",()=>selectNode(b.dataset.node)));
-  selectNode(cfg.initial);
+  }
+  if(prevWasGroup) html += connectorHtml("", lastDepth, carried, true);
+  mainPath.innerHTML = AGENT_START_HTML + html;
+  writePath.innerHTML = writeStackHtml(nodes.closeout);
+  branchChipsEl.innerHTML = branchOrder.map(key=>branchCardHtml(branches[key])).join("");
+  [readsCol,writesCol].forEach(el=>{el.classList.remove("animate");void el.offsetWidth;el.classList.add("animate");});
+  document.querySelectorAll("[data-node]").forEach(b=>b.addEventListener("click",()=>openNodeModal(b.dataset.node)));
+  alignWritesColumn();
 }
 function findNode(id){
   return [...Object.values(nodes),...Object.values(branches)].find(n=>n.id===id);
 }
-function selectNode(id){
+function openNodeModal(id){
   const node = findNode(id);
   if(!node) return;
   document.querySelectorAll("[data-node]").forEach(b=>b.classList.toggle("active", b.dataset.node===id));
@@ -486,18 +669,35 @@ function selectNode(id){
   const ownerGroup = activeBtn ? activeBtn.closest(".fgroup") : null;
   document.querySelectorAll(".fgroup").forEach(g=>g.classList.toggle("dim", !!ownerGroup && g!==ownerGroup));
   const accentClass = {"step":"acc-instance","step client":"acc-client","step dev":"acc-dev","branch route":"acc-route","branch brand":"acc-brand","branch people":"acc-people","closeout":"acc-closeout"};
-  detail.className = "aside-inner " + (accentClass[node.cls] || "acc-instance");
+  modal.className = "modal open " + (accentClass[node.cls] || "acc-instance");
+  modalBackdrop.classList.add("open");
   const story = node.story && (node.story[currentMode] || node.story.client || node.story.dev);
   const storyHtml = story ? `<div class="detail-block story"><strong>In this task</strong><span>${story}</span></div>` : "";
-  detail.innerHTML = `
+  // Only frame a stop as an ACOS markdown record if it actually reads or writes one — the dev
+  // project folder is plain working code, not a record, and shouldn't get an "MD" chip.
+  const isRecord = !!((node.files && node.files.length) || (node.writes && node.writes.length));
+  const stopBlock = isRecord
+    ? `<div class="detail-block acos"><div class="acos-head"><strong>Markdown at this stop</strong><span class="acos-tag">ACOS</span></div><span class="path${node.writes?' write':''}"><i>MD</i><b>${node.path}</b></span><span class="acos-note">An ACOS-patterned record: predictable name, predictable place, readable by any agent — that's the framework doing its job.</span></div>`
+    : `<div class="detail-block acos code"><div class="acos-head"><strong>Where this stop happens</strong><span class="acos-tag code">CODE</span></div><span class="path code"><i>DIR</i><b>${node.path}</b></span><span class="acos-note">Not an ACOS record — this is the working folder where the code itself lives. Nothing here is markdown the agent reads; the commitment only becomes durable once it's captured in the client brief, downstream.</span></div>`;
+  modalBody.innerHTML = `
     <p class="panel-kicker">${node.type}</p>
-    <h2>${node.title}</h2>
+    <h2 id="modalTitle">${node.title}</h2>
     <p class="panel-text">${node.summary}</p>
     ${storyHtml}
-    <div class="detail-block"><strong>What this file contributes</strong><ul>${node.contributes.map(c=>`<li>${c}</li>`).join("")}</ul></div>
+    <div class="detail-block"><strong>${isRecord ? "What this file contributes" : "What this stop contributes"}</strong><ul>${node.contributes.map(c=>`<li>${c}</li>`).join("")}</ul></div>
     <div class="detail-block"><strong>Agent behavior</strong><span>${node.behavior}</span></div>
-    <div class="detail-block acos"><div class="acos-head"><strong>Markdown at this stop</strong><span class="acos-tag">ACOS</span></div><span class="path${node.writes?' write':''}"><i>MD</i><b>${node.path}</b></span><span class="acos-note">An ACOS-patterned record: predictable name, predictable place, readable by any agent — that's the framework doing its job.</span></div>`;
+    ${stopBlock}`;
 }
+function closeModal(){
+  modal.classList.remove("open");
+  modalBackdrop.classList.remove("open");
+  document.querySelectorAll("[data-node].active").forEach(b=>b.classList.remove("active"));
+  document.querySelectorAll(".fgroup.dim").forEach(g=>g.classList.remove("dim"));
+}
+modalBackdrop.addEventListener("click", closeModal);
+modalCloseBtn.addEventListener("click", closeModal);
+document.addEventListener("keydown", e=>{ if(e.key==="Escape") closeModal(); });
+window.addEventListener("resize", alignWritesColumn);
 tabs.forEach(t=>t.addEventListener("click",()=>renderMode(t.dataset.mode)));
 renderMode("client");
 </script>
