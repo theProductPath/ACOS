@@ -223,14 +223,49 @@ The instance dashboard ([`<instance-root>/dashboard.md`](#dashboards--the-single
 - *Why:* The dashboard is high-visibility internal collateral the principal looks at daily. It's exactly the artifact where brand consistency builds reflexive recognition over time, and exactly the artifact whose drift would be noticed first.
 - *How to apply:* The markdown `dashboard.md` is exempt — it carries no styling. Any skill, agent, or human producing a rendered view of the dashboard reads the instance's Brand asset README first and applies tokens accordingly. If the instance declares a render destination but has no Brand asset library, surface the gap rather than improvising styling.
 
-### Folder naming — no spaces, use dashes
+### Folder naming — three buckets
 
-New folders should use **`kebab-case`** — words separated by dashes, no spaces.
+Folder names fall into three buckets, and the right convention depends on which bucket the folder is in. There is no single house style, and pretending there is one was a framework bug: ACOS v0.1 mandated kebab-case everywhere while simultaneously prescribing `Clients/`, `Products/`, `Brand/` and telling adopters to name a client folder after the client. A naming rule the framework's own prescribed names violate is worse than no rule — it trains everyone to ignore the validator.
 
-- Good: `acme-industries/`, `q3-strategy-review/`
-- Avoid: `Acme Industries/`, `Q3 Strategy Review/`
+| Bucket | What it is | Convention | Examples |
+|---|---|---|---|
+| **Instance root** | The single folder holding `company-brief.md`. | Named for the instance. Any style the company likes. | `tPPOS/`, `acme-os/`, `companyOS/` |
+| **Container folders** | The top-level organizing folders — the siblings of the instance root listed in the root README's folder map. | **Capitalized.** Starts with a capital letter, no spaces, no underscores. Multi-word containers use dashes: `Design-System/`. | `Clients/`, `Products/`, `Projects/`, `Brand/`, `Research/`, `Admin/`, `Suppliers/` |
+| **Item folders** | A specific child inside a container — one client, one product, one project, one supplier. | **The real-world proper name**, spelled the way the world spells it, with spaces replaced by dashes. Case follows the name, not a style rule. No spaces, no underscores. | `Heartland-Paving-Partners/`, `ACOS/`, `AIRS/`, `Sprout.ai/`, `madefor-solutions/`, `1H26-AI-Growth/` |
+| **Everything else** | Files, sub-folders below the item level, skills, templates, overlays, decisions, stakeholder briefs. | **`kebab-case`** — lowercase words joined by single dashes. This is the default; when in doubt, kebab. | `company-brief.md`, `client-brief-processor/`, `overlays/acos-integrity.md`, `decisions/0014-repos-out-of-drive.md` |
 
-Some legacy folders may predate this rule and still contain spaces. Don't rename them on sight — they're load-bearing in scripts, links, and references — but apply the rule to anything new.
+The reasoning, in one line each:
+
+- **Containers are Capitalized** because they are the company's own filing cabinet, not code. They read as proper categories in a Finder window and in a Drive sidebar, which is where humans meet them.
+- **Items take their proper name** because mangling `Heartland Paving Partners` into `heartland-paving-partners` destroys the one thing the folder name is for: matching a real-world entity an agent has to recognize in a transcript, an email, or an invoice. Don't mangle a proper noun to satisfy a style rule.
+- **Everything else is kebab** because it is machine-facing: paths in scripts, links in markdown, skill names in tool configs. Case-insensitive filesystems, URLs, and shells all punish anything else.
+
+Two things are forbidden in **every** bucket, and this is the part the original rule got right: **no spaces and no underscores in folder names.** They break shell paths, markdown links, and URLs. Some legacy folders may predate this rule and still contain them — don't rename them on sight, they're load-bearing in scripts and references — but never create a new one, and record any you're keeping in the `naming-exempt` key of the [`acos-integrity`](skills/acos-integrity/SKILL.md) overlay so the finding stays visible rather than silently accepted.
+
+This rule is mechanically enforced at the container and item levels by [`scripts/acos-integrity-check.py`](../scripts/acos-integrity-check.py) (check 4.1). Below the item level, ACOS does not govern the tree — that's the owner's working space — so kebab-case there is a recommendation the validator does not police.
+
+To decide which bucket a new folder is in, ask: *does it appear as a row in the instance root's folder map?* If yes, it's a container. *Is it a direct child of one of those, standing for one real-world thing?* If yes, it's an item. Otherwise it's kebab.
+
+### Status vocabulary
+
+The `status` field in frontmatter is drawn from a fixed vocabulary so a tool can filter on it. Which values are legal depends on the document type; the [templates](templates/) carry the per-type list in an inline comment on the `status` line, and that is the source of truth for what to write in a given file. The union of legal values across the framework:
+
+| Status | Means | Used by |
+|---|---|---|
+| `skeleton` | Scaffolded from the template, not yet filled in. | Root, container, company brief, dashboard |
+| `drafting` | Being written; content is partial and not yet trustworthy. | Any |
+| `active` | Current and trustworthy. | Any |
+| `paused` | Real but not moving right now; expected to resume. | Item, client brief |
+| `dormant` | Not moving and not expected to resume soon. | Client brief, stakeholder brief |
+| `prospect` | Not yet a real engagement. | Client brief |
+| `exploratory` | Speculative work; may never become active. | Item (projects, research) |
+| `wrapped` | Finished cleanly. | Item, client brief |
+| `alumni` | The person has moved on. | Stakeholder brief |
+| `stale` | Known to be out of date; read with suspicion. | Any |
+| `archived` | Retired; kept for the record. | Any |
+| `deprecated` | Superseded by something else; do not extend. | Any |
+
+An instance that needs a status this list doesn't carry declares it in the `custom-statuses` key of the `acos-integrity` overlay — and if the same custom status shows up in a second instance, promote it here.
 
 ### Markdown style
 

@@ -93,7 +93,7 @@ From here, the system compounds. Improve a rule once and every agent, on every m
 - Manifests on any folder that needs incoming material routed to it.
 - ACOS skills made available to your agent tooling, with overlays for anything company-specific.
 - `dashboard.md` in place and on a refresh cadence.
-- House rules honored: kebab-case folder names, straight quotes, sentence-case headings, ISO dates, and underscore-prefixed folders (`_archive/`, `_progress/`) left out of scope.
+- House rules honored: [folder naming](../framework/README.md#folder-naming--three-buckets) (Capitalized containers, proper-name items, kebab-case for everything else, and never a space or an underscore), straight quotes, sentence-case headings, ISO dates, and underscore-prefixed folders (`_archive/`, `_progress/`) left out of scope.
 
 ## Where to go next
 

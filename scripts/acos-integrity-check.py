@@ -66,15 +66,53 @@ PENDING_TYPES = {
     "skill-audit",
 }
 
-# SKILL.md check 3.2 lists active/drafting/archived/deprecated; `dormant` is in
-# use across instances and is accepted here. Instances may add more via the
-# overlay's custom-statuses key.
-KNOWN_STATUSES = {"active", "drafting", "dormant", "archived", "deprecated"}
+# The status vocabulary, as documented in framework/README.md ("Status
+# vocabulary"). The manual is the source of truth; the per-type subsets live in
+# the templates. Instances may add more via the overlay's custom-statuses key.
+KNOWN_STATUSES = {
+    "skeleton",
+    "drafting",
+    "active",
+    "paused",
+    "dormant",
+    "prospect",
+    "exploratory",
+    "wrapped",
+    "alumni",
+    "stale",
+    "archived",
+    "deprecated",
+}
 
-# kebab-case: lowercase alphanumeric words joined by single dashes.
-# Good: "acme-industries", "q3-strategy-review", "brand". Bad: "Acme Industries",
-# "MyFolder", "my_folder", "MYFOLDER", "my--folder", "Sprout.ai".
+# --- The three naming buckets (framework/README.md, "Folder naming") ---
+#
+# Bucket 3 / default — kebab-case: lowercase alphanumeric words joined by single
+# dashes. Good: "acme-industries", "q3-strategy-review", "brand".
+# Bad: "Acme Industries", "MyFolder", "my_folder", "MYFOLDER", "my--folder".
 KEBAB_RE = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
+
+# Bucket 1 — container folders: the top-level organizing folders (the siblings of
+# the instance root, listed in the root README's folder map). Capitalized, no
+# spaces, no underscores, dashes between words.
+# Good: "Clients", "Products", "Brand", "Design-System". Bad: "clients",
+# "File Cabinet", "my_stuff".
+CONTAINER_RE = re.compile(r"^[A-Z][A-Za-z0-9]*(?:-[A-Za-z0-9]+)*$")
+
+# Bucket 2 — item folders: a specific child of a container, named for the
+# real-world thing it stands for. Any case (it's a proper noun, not a style
+# choice), dots allowed (real company names have them), no spaces, no
+# underscores, no leading/trailing/doubled dashes.
+# Good: "Heartland-Paving-Partners", "ACOS", "Sprout.ai", "madefor-solutions",
+# "1H26-AI-Growth". Bad: "AI Gateways", "SME_Brain_Dump", "-leading".
+ITEM_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9.]*(?:-[A-Za-z0-9][A-Za-z0-9.]*)*$")
+
+CONTAINER, ITEM, DEFAULT = "container", "item", "default"
+
+BUCKET_EXPECTATION = {
+    CONTAINER: "container folders are Capitalized",
+    ITEM: "item folders take the real-world proper name, dashes for spaces",
+    DEFAULT: "expected kebab-case",
+}
 
 FRONTMATTER_RE = re.compile(r"\A---[ \t]*\r?\n(.*?)\r?\n---[ \t]*(?:\r?\n|\Z)", re.DOTALL)
 
@@ -127,25 +165,74 @@ def parse_frontmatter_text(text):
 
 
 def is_kebab_case(name):
-    """True only for lowercase kebab-case names (framework/README.md house rule)."""
+    """True only for lowercase kebab-case names — the default naming bucket."""
     if not isinstance(name, str) or not name:
         return False
     return bool(KEBAB_RE.match(name))
 
 
-def kebab_violation(name):
-    """Describe why `name` is not kebab-case, or None if it is."""
-    if is_kebab_case(name):
-        return None
+def is_container_name(name):
+    """True for Capitalized container-folder names (Clients, Products, Design-System)."""
+    if not isinstance(name, str) or not name:
+        return False
+    return bool(CONTAINER_RE.match(name))
+
+
+def is_item_name(name):
+    """True for proper-name item folders (ACOS, Heartland-Paving-Partners, Sprout.ai)."""
+    if not isinstance(name, str) or not name:
+        return False
+    return bool(ITEM_RE.match(name))
+
+
+def _universal_violation(name):
+    """The two things forbidden in every bucket."""
     if " " in name or "\t" in name:
         return "contains spaces"
-    if any(c.isupper() for c in name):
-        return "contains uppercase characters"
     if "_" in name:
         return "contains underscores"
+    return None
+
+
+def naming_violation(name, bucket=DEFAULT):
+    """Describe why `name` breaks its naming bucket's rule, or None if it doesn't.
+
+    Buckets (framework/README.md, "Folder naming — three buckets"):
+      container — the top-level organizing folders. Capitalized.
+      item      — a specific child of a container. Real-world proper name.
+      default   — everything else. kebab-case.
+    """
+    if not isinstance(name, str) or not name:
+        return "is not a usable folder name"
+
+    universal = _universal_violation(name)
+    if universal:
+        return universal
+
+    if bucket == CONTAINER:
+        if is_container_name(name):
+            return None
+        if name[0].islower():
+            return "is a container folder but is not Capitalized"
+        return "is not a valid container name"
+
+    if bucket == ITEM:
+        if is_item_name(name):
+            return None
+        return "is not a usable item name (leading/trailing/doubled dash, or an illegal character)"
+
+    if is_kebab_case(name):
+        return None
+    if any(c.isupper() for c in name):
+        return "contains uppercase characters"
     if "." in name:
         return "contains dots"
     return "is not kebab-case"
+
+
+def kebab_violation(name):
+    """Back-compat shim: the default bucket's rule."""
+    return naming_violation(name, DEFAULT)
 
 
 def validate_date(date_str):
@@ -363,12 +450,15 @@ class ACOSIntegrityChecker:
         if path.name in self.config.exclude_folders:
             return
 
-        # 4.1 Folder naming — kebab-case house rule.
+        # 4.1 Folder naming — the three-bucket house rule. A folder walked as a
+        # container is in the container bucket; its direct children are items.
+        # Anything deeper is the owner's working space and ACOS doesn't police it.
         if not self.config.is_naming_exempt(path.name):
-            reason = kebab_violation(path.name)
+            bucket = CONTAINER if is_container else ITEM
+            reason = naming_violation(path.name, bucket)
             if reason:
-                rel = self.rel(path)
-                self.log("4.1", "Kebab-case naming", "warning", f"'{rel}' {reason} (expected kebab-case)")
+                self.log("4.1", "Folder naming", "warning",
+                         f"'{self.rel(path)}' {reason} ({BUCKET_EXPECTATION[bucket]})")
 
         readme_path = path / "README.md"
         if readme_path.exists():

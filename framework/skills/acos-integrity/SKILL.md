@@ -126,7 +126,7 @@ Every `type:` value in frontmatter across the instance must be one of the recogn
 
 **Check 3.2 — Status values are valid**
 
-`status` in frontmatter should be one of: `active`, `drafting`, `archived`, `deprecated`.
+`status` in frontmatter must be one of the values in the framework [status vocabulary](../../README.md#status-vocabulary) — that list is the source of truth and this skill defers to it rather than restating it. Instances may add their own via the overlay's `custom-statuses`.
 
 - **Pass:** All status values are recognized.
 - **Warning:** Unusual but plausible status value (list it).
@@ -149,13 +149,19 @@ Flag READMEs or briefs with `status: active` whose `last-updated` date is older 
 
 ### Category 4: Folder naming
 
-**Check 4.1 — No spaces in new folder names**
+**Check 4.1 — Folder names match their bucket**
 
-Folder names should use kebab-case (words separated by dashes, no spaces). Legacy folders with spaces are expected but flagged as known exceptions.
+Folder names are checked against the three-bucket rule in [`framework/README.md`](../../README.md#folder-naming--three-buckets), which is the source of truth:
 
-- **Pass:** All folder names use kebab-case or single words.
-- **Warning:** Folder name contains spaces (note whether it appears to be legacy or recent).
-- **Fail:** Recently created folder (within 30 days) with spaces in its name.
+- **Container folders** (the siblings of the instance root, listed in the root folder map) are **Capitalized** — an initial capital, no spaces, no underscores, dashes between words.
+- **Item folders** (direct children of a container) carry the **real-world proper name** of the thing they stand for — any case, no spaces, no underscores.
+- **Everything else** is **kebab-case**. Below the item level ACOS doesn't govern the tree, so the check stops there.
+- The instance root folder itself is exempt (it's named for the instance), as is any name listed in the overlay's `naming-exempt`.
+
+Spaces and underscores are illegal in every bucket. Legacy folders that carry them are expected; they're flagged rather than renamed, and an instance records the ones it's keeping in `naming-exempt`.
+
+- **Pass:** Folder name matches the convention for its bucket.
+- **Warning:** Folder name violates its bucket's convention (report the bucket and the reason).
 
 ### Category 5: Agent-ignore compliance
 

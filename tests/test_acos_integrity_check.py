@@ -26,8 +26,69 @@ sys.modules["acos_integrity_check"] = aic
 _spec.loader.exec_module(aic)
 
 
+class TestContainerBucket(unittest.TestCase):
+    """Bucket 1: the top-level organizing folders are Capitalized."""
+
+    def test_accepts_capitalized_containers(self):
+        for name in ["Clients", "Products", "Projects", "Brand", "Research", "Admin",
+                     "Suppliers", "Design-System", "Q3-Reviews", "C"]:
+            with self.subTest(name=name):
+                self.assertTrue(aic.is_container_name(name))
+                self.assertIsNone(aic.naming_violation(name, aic.CONTAINER))
+
+    def test_rejects_lowercase_containers(self):
+        # The framework prescribes Clients/, not clients/.
+        for name in ["clients", "brand", "design-system"]:
+            with self.subTest(name=name):
+                self.assertFalse(aic.is_container_name(name))
+                self.assertEqual(aic.naming_violation(name, aic.CONTAINER),
+                                 "is a container folder but is not Capitalized")
+
+    def test_rejects_spaces_and_underscores_in_containers(self):
+        self.assertEqual(aic.naming_violation("File Cabinet", aic.CONTAINER), "contains spaces")
+        self.assertEqual(aic.naming_violation("File_Cabinet", aic.CONTAINER), "contains underscores")
+
+    def test_rejects_malformed_containers(self):
+        for name in ["-Clients", "Clients-", "Clients--Old", "Sprout.ai", ""]:
+            with self.subTest(name=name):
+                self.assertIsNotNone(aic.naming_violation(name, aic.CONTAINER))
+
+
+class TestItemBucket(unittest.TestCase):
+    """Bucket 2: an item folder carries the real-world proper name of its thing."""
+
+    def test_accepts_proper_names(self):
+        # Every one of these is a name ACOS itself, or a real instance, prescribes.
+        for name in [
+            "ACOS", "AIRS", "ATP", "LAIR", "RAG",
+            "Heartland-Paving-Partners", "Lock-8-Partners", "Objective-Partners",
+            "Sprout.ai", "madefor-solutions", "1H26-AI-Growth", "tPP-website",
+            "Anthropic-Academy", "Accounting", "colors",
+        ]:
+            with self.subTest(name=name):
+                self.assertTrue(aic.is_item_name(name))
+                self.assertIsNone(aic.naming_violation(name, aic.ITEM))
+
+    def test_rejects_spaces_and_underscores_in_items(self):
+        # These are the violations the narrowed rule still cares about.
+        self.assertEqual(aic.naming_violation("AI Gateways", aic.ITEM), "contains spaces")
+        self.assertEqual(aic.naming_violation("File Cabinet", aic.ITEM), "contains spaces")
+        self.assertEqual(aic.naming_violation("SME_Brain_Dump_Build-Experiment", aic.ITEM),
+                         "contains underscores")
+
+    def test_rejects_malformed_items(self):
+        for name in ["-leading", "trailing-", "my--folder", "", "a/b"]:
+            with self.subTest(name=name):
+                self.assertIsNotNone(aic.naming_violation(name, aic.ITEM))
+
+    def test_an_item_is_not_forced_to_be_kebab(self):
+        # The whole point of the narrowing: kebab-checking a proper noun is wrong.
+        self.assertFalse(aic.is_kebab_case("Heartland-Paving-Partners"))
+        self.assertIsNone(aic.naming_violation("Heartland-Paving-Partners", aic.ITEM))
+
+
 class TestKebabCase(unittest.TestCase):
-    """The house rule: folder names are lowercase words joined by single dashes."""
+    """Bucket 3 (the default): everything else is lowercase words joined by dashes."""
 
     def test_valid_kebab_case(self):
         for name in [
@@ -81,6 +142,46 @@ class TestKebabCase(unittest.TestCase):
         self.assertEqual(aic.kebab_violation("my_folder"), "contains underscores")
         self.assertEqual(aic.kebab_violation("sprout.ai"), "contains dots")
         self.assertEqual(aic.kebab_violation("my--folder"), "is not kebab-case")
+
+    def test_the_default_bucket_still_rejects_container_and_item_styling(self):
+        # A skill, template, or overlay named "Clients" or "Sprout.ai" is wrong.
+        self.assertEqual(aic.naming_violation("Clients", aic.DEFAULT), "contains uppercase characters")
+        self.assertEqual(aic.naming_violation("Sprout.ai", aic.DEFAULT), "contains uppercase characters")
+        self.assertEqual(aic.naming_violation("sprout.ai", aic.DEFAULT), "contains dots")
+        self.assertIsNone(aic.naming_violation("client-brief-processor", aic.DEFAULT))
+
+    def test_naming_violation_defaults_to_the_kebab_bucket(self):
+        self.assertEqual(aic.naming_violation("MyFolder"), "contains uppercase characters")
+
+
+class TestStatusVocabulary(unittest.TestCase):
+    """The statuses the templates prescribe must be the statuses the checker accepts."""
+
+    def test_every_status_the_templates_prescribe_is_accepted(self):
+        # The bug this guards: templates shipped `status: skeleton` while the
+        # checker only knew active/drafting/dormant/archived/deprecated, so a
+        # freshly-scaffolded instance failed the framework's own validator.
+        config = aic.InstanceConfig("/tmp/instance")
+        prescribed = set()
+        for template in (REPO_ROOT / "framework" / "templates").glob("*.md"):
+            fm_match = re.match(r"\A---\n(.*?)\n---", template.read_text(encoding="utf-8"), re.DOTALL)
+            if not fm_match:
+                continue
+            for line in fm_match.group(1).split("\n"):
+                if line.startswith("status:"):
+                    value, _, comment = line[len("status:"):].partition("#")
+                    prescribed.add(value.strip())
+                    prescribed.update(v.strip() for v in comment.split("|") if v.strip())
+        self.assertGreaterEqual(len(prescribed), 8)
+        self.assertIn("skeleton", prescribed)
+        missing = prescribed - config.known_statuses()
+        self.assertEqual(missing, set(),
+                         f"statuses prescribed by framework/templates/ but rejected by the checker: {missing}")
+
+    def test_unknown_status_is_still_rejected(self):
+        config = aic.InstanceConfig("/tmp/instance")
+        self.assertNotIn("on hold", config.known_statuses())
+        self.assertNotIn("in-progress", config.known_statuses())
 
 
 class TestFrontmatterParsing(unittest.TestCase):
@@ -256,28 +357,28 @@ class TestWalkOnFixtureInstance(unittest.TestCase):
             readme("folder-readme-root", "Acme OS")
             + "\n## Folder map\n\n| Folder | What |\n|---|---|\n"
             "| `acme-os/` | You are here. |\n"
-            "| `clients/` | Client work. |\n"
-            "| `brand/` | Assets. |\n"
-            "| `repos/` | Codebases. |\n"
+            "| `Clients/` | Client work. |\n"
+            "| `Brand/` | Assets. |\n"
+            "| `Repos/` | Codebases. |\n"
             "\n## Next section\n\nnot part of the map\n",
         )
-        write(tree / "clients" / "README.md", readme("folder-readme-container", "Clients"))
-        # A well-formed client.
-        write(tree / "clients" / "good-client" / "README.md", readme("folder-readme-item", "Good"))
-        write(tree / "clients" / "good-client" / "brief.md", readme("brief-client", "Good"))
-        write(tree / "clients" / "good-client" / "manifest.md", readme("client-manifest", "Good"))
+        write(tree / "Clients" / "README.md", readme("folder-readme-container", "Clients"))
+        # A well-formed client, named for the real-world thing it stands for.
+        write(tree / "Clients" / "Acme-Industries" / "README.md", readme("folder-readme-item", "Acme"))
+        write(tree / "Clients" / "Acme-Industries" / "brief.md", readme("brief-client", "Acme"))
+        write(tree / "Clients" / "Acme-Industries" / "manifest.md", readme("client-manifest", "Acme"))
         # A badly named client with a missing brief and a bogus status.
-        write(tree / "clients" / "Bad Client" / "README.md", readme("folder-readme-item", "Bad", status="on hold"))
-        write(tree / "clients" / "Bad Client" / "manifest.md", readme("client-manifest", "Bad"))
+        write(tree / "Clients" / "Bad Client" / "README.md", readme("folder-readme-item", "Bad", status="on hold"))
+        write(tree / "Clients" / "Bad Client" / "manifest.md", readme("client-manifest", "Bad"))
         # Agent-ignored: must never be walked.
-        write(tree / "clients" / "_archive" / "README.md", readme("nonsense-type", "Archived"))
-        write(tree / "clients" / "_archive" / "MyBadName" / "README.md", "no frontmatter\n")
+        write(tree / "Clients" / "_archive" / "README.md", readme("nonsense-type", "Archived"))
+        write(tree / "Clients" / "_archive" / "MyBadName" / "README.md", "no frontmatter\n")
         # Asset library.
-        write(tree / "brand" / "README.md", readme("folder-readme-asset", "Brand"))
-        write(tree / "brand" / "colors" / "README.md", readme("folder-readme-item", "Colors"))
+        write(tree / "Brand" / "README.md", readme("folder-readme-asset", "Brand"))
+        write(tree / "Brand" / "colors" / "README.md", readme("folder-readme-item", "Colors"))
         # Repo container: children carry codebase READMEs with no frontmatter.
-        write(tree / "repos" / "README.md", readme("folder-readme-container", "Repos"))
-        write(tree / "repos" / "widget" / "README.md", "# widget\n\nA codebase README.\n")
+        write(tree / "Repos" / "README.md", readme("folder-readme-container", "Repos"))
+        write(tree / "Repos" / "widget" / "README.md", "# widget\n\nA codebase README.\n")
 
         self.tree = tree
 
@@ -292,7 +393,7 @@ class TestWalkOnFixtureInstance(unittest.TestCase):
 
     def test_folder_map_extraction(self):
         checker, _ = self.run_checker()
-        self.assertEqual(checker.in_scope_folders, ["acme-os", "clients", "brand", "repos"])
+        self.assertEqual(checker.in_scope_folders, ["acme-os", "Clients", "Brand", "Repos"])
 
     def test_agent_ignore_rule_skips_underscore_folders(self):
         _, lines = self.run_checker()
@@ -301,23 +402,35 @@ class TestWalkOnFixtureInstance(unittest.TestCase):
         self.assertNotIn("MyBadName", joined)
         self.assertNotIn("nonsense-type", joined)
 
-    def test_kebab_case_violation_is_reported(self):
+    def test_only_the_real_naming_violation_is_reported(self):
+        # Capitalized containers and a proper-name item are correct, not findings.
         _, lines = self.run_checker()
         hits = [line for line in lines if "4.1" in line]
         self.assertEqual(len(hits), 1, hits)
         self.assertIn("Bad Client", hits[0])
         self.assertIn("contains spaces", hits[0])
 
+    def test_lowercase_container_is_reported(self):
+        (self.tree / "Clients").rename(self.tree / "vendors")
+        readme_path = self.root / "README.md"
+        readme_path.write_text(
+            readme_path.read_text(encoding="utf-8").replace("| `Clients/` |", "| `vendors/` |"),
+            encoding="utf-8",
+        )
+        _, lines = self.run_checker()
+        self.assertTrue([line for line in lines if "4.1" in line and "vendors" in line
+                         and "not Capitalized" in line])
+
     def test_instance_root_folder_is_naming_exempt(self):
         _, lines = self.run_checker({"instance-name": "AcmeOS"})
         self.assertFalse([line for line in lines if "AcmeOS" in line and "4.1" in line])
 
     def test_naming_exempt_suppresses_a_known_legacy_name(self):
-        _, lines = self.run_checker({"client-containers": ["clients"], "naming-exempt": ["Bad Client"]})
+        _, lines = self.run_checker({"naming-exempt": ["Bad Client"]})
         self.assertFalse([line for line in lines if "4.1" in line])
 
     def test_missing_client_brief_is_flagged(self):
-        _, lines = self.run_checker({"client-containers": ["clients"]})
+        _, lines = self.run_checker()
         self.assertTrue([line for line in lines if "2.2" in line and "Bad Client" in line])
 
     def test_client_checks_do_not_run_without_a_client_container(self):
@@ -334,13 +447,13 @@ class TestWalkOnFixtureInstance(unittest.TestCase):
         self.assertFalse([line for line in lines if "3.2" in line])
 
     def test_asset_folder_children_expect_asset_type(self):
-        _, lines = self.run_checker({"asset-folders": ["brand"]})
+        _, lines = self.run_checker({"asset-folders": ["Brand"]})
         hits = [line for line in lines if "3.1" in line and "colors" in line]
         self.assertEqual(len(hits), 1, hits)
         self.assertIn("expected 'folder-readme-asset'", hits[0])
 
     def test_repo_child_readme_is_frontmatter_exempt_when_configured(self):
-        _, lines = self.run_checker({"repo-child-containers": ["repos"]})
+        _, lines = self.run_checker({"repo-child-containers": ["Repos"]})
         self.assertTrue([line for line in lines if line.startswith("✅ 2.5") and "widget" in line])
         self.assertFalse([line for line in lines if line.startswith("❌ 2.5") and "widget" in line])
 
@@ -349,31 +462,31 @@ class TestWalkOnFixtureInstance(unittest.TestCase):
         self.assertTrue([line for line in lines if line.startswith("❌ 2.5") and "widget" in line])
 
     def test_missing_readme_is_a_failure(self):
-        (self.tree / "clients" / "orphan-client").mkdir()
+        (self.tree / "Clients" / "Orphan-Client").mkdir()
         _, lines = self.run_checker()
-        self.assertTrue([line for line in lines if "1.4" in line and "orphan-client" in line])
+        self.assertTrue([line for line in lines if "1.4" in line and "Orphan-Client" in line])
 
     def test_suppress_checks_from_overlay(self):
         _, lines = self.run_checker({"suppress-checks": ["4.1", "3.2"]})
         self.assertFalse([line for line in lines if "4.1" in line or "3.2" in line])
 
     def test_exclude_folders_from_overlay(self):
-        _, lines = self.run_checker({"exclude-folders": ["clients"]})
+        _, lines = self.run_checker({"exclude-folders": ["Clients"]})
         self.assertFalse([line for line in lines if "Bad Client" in line])
 
     def test_missing_in_scope_folder_fails(self):
-        shutil.rmtree(self.tree / "brand")
+        shutil.rmtree(self.tree / "Brand")
         _, lines = self.run_checker()
-        self.assertTrue([line for line in lines if line.startswith("❌ 1.2") and "brand" in line])
+        self.assertTrue([line for line in lines if line.startswith("❌ 1.2") and "Brand" in line])
 
     def test_overlay_is_read_from_disk(self):
         write(
             self.root / "overlays" / "acos-integrity.md",
-            "# overlay\n\n```acos-config\nasset-folders: [brand]\nsuppress-checks: [4.1]\n```\n",
+            "# overlay\n\n```acos-config\nasset-folders: [Brand]\nsuppress-checks: [4.1]\n```\n",
         )
         config = aic.InstanceConfig.load(self.root)
         self.assertTrue(config.overlay_loaded)
-        self.assertEqual(config.asset_folders, ["brand"])
+        self.assertEqual(config.asset_folders, ["Brand"])
         checker = aic.ACOSIntegrityChecker(self.root, config=config)
         checker.run_checks()
         lines = [line for _, line in checker.report]
@@ -388,8 +501,8 @@ class TestWalkOnFixtureInstance(unittest.TestCase):
         self.assertTrue(checker.report)
 
     def test_find_instance_root(self):
-        found = aic.find_instance_root(self.tree / "clients" / "good-client")
-        self.assertIsNone(found)  # company-brief.md is not above clients/
+        found = aic.find_instance_root(self.tree / "Clients" / "Acme-Industries")
+        self.assertIsNone(found)  # company-brief.md is not above Clients/
         self.assertEqual(aic.find_instance_root(self.root), self.root)
 
     def test_main_exit_codes(self):
@@ -397,7 +510,7 @@ class TestWalkOnFixtureInstance(unittest.TestCase):
             self.assertEqual(aic.main(["--root", str(self.root)]), 0)
             # widget/README.md has no frontmatter and no exemption configured.
             self.assertEqual(aic.main(["--root", str(self.root), "--strict"]), 1)
-            self.assertEqual(aic.main(["--root", str(self.tree / "clients")]), 1)  # not an instance root
+            self.assertEqual(aic.main(["--root", str(self.tree / "Clients")]), 1)  # not an instance root
 
 
 if __name__ == "__main__":
