@@ -294,6 +294,8 @@ An instance that needs a status this list doesn't carry declares it in the `cust
 
 Generated and edited markdown files across an ACOS instance follow these rules so the system stays consistent across files and across agents. Apply silently; no need to ask permission per occurrence.
 
+These are rules for an agent *writing* a file, and that is the only thing they are. **The validator does not police them**, deliberately: nothing breaks when a heading is title case, and a checker that spends its warnings on prose style teaches everyone to ignore its warnings — the same reasoning that removed the case mandate above. See [what the integrity checker deliberately does not check](skills/acos-integrity/SKILL.md#what-this-checker-deliberately-does-not-check).
+
 - **No horizontal-rule dividers (`---`) between sections.** Section headings (`##`, `###`) provide enough visual separation. The only place `---` should appear is as the YAML frontmatter delimiters at the very top of a file.
 - **Straight quotes only.** Use `'` and `"`, never the curly variants. Straight quotes are grep-friendly, copy-paste-safe, and survive editor round-trips. If a tool inserts curly quotes, normalize them on the next edit.
 - **Sentence case for section headings.** "What this folder is" — not "What This Folder Is." Acronyms and proper nouns keep their natural case.

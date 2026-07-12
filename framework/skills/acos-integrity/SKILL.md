@@ -1,11 +1,13 @@
 ---
 name: acos-integrity
-description: Run integrity checks on an ACOS instance to confirm that folder structure, READMEs, briefs, manifests, frontmatter, naming conventions, and cross-references comply with the ACOS framework rules. Use when asked to check instance health, run an integrity audit, validate an ACOS tree, or when a scheduled trigger fires an integrity check.
+description: Run integrity checks on an ACOS instance to confirm that folder structure, READMEs, briefs, manifests, frontmatter, folder naming, overlays, and internal links comply with the ACOS framework rules. Use when asked to check instance health, run an integrity audit, validate an ACOS tree, or when a scheduled trigger fires an integrity check.
 ---
 
 # ACOS Integrity
 
 Walk an ACOS instance tree and report violations of the framework conventions. The skill is a diagnostic — it reads the tree, checks each convention, and produces a structured report. It does not modify files.
+
+**This spec and the script are one thing.** Every check below is implemented in [`scripts/acos-integrity-check.py`](../../../scripts/acos-integrity-check.py), and every check the script implements is documented below. There are no aspirational checks here: a spec that describes a tool that does not exist is the same "documentation that lies" failure ACOS was built to prevent, so the two are kept in lockstep by a test (`tests/test_acos_integrity_check.py`) that fails the build if they drift. If you add a check, document it here in the same change. If you delete one, delete it from both.
 
 ## When this skill triggers
 
@@ -25,7 +27,7 @@ Before doing anything else, look for an instance overlay:
 
 ## What the skill checks
 
-The skill runs a series of discrete checks, each producing pass/warning/fail results. Checks are organized by category.
+23 checks, organized by category. Each produces pass, warning, fail, or info.
 
 ### Category 0: Membership
 
@@ -39,6 +41,21 @@ The `## Folder map` table in the instance root README is the membership allowlis
 - **Fail:** No `## Folder map` section, or it doesn't parse as a table. Without it, nothing is in scope.
 - **Never a finding:** A folder on disk that is *not* in the table. It is not part of the OS. Do not report it, do not count it, do not suggest adding it. Say nothing.
 
+**Check 0.3 — Instance overlay**
+
+Report whether an `acos-integrity` overlay was found and whether it carried a parseable `acos-config` block.
+
+- **Pass:** Overlay found and config loaded.
+- **Warning:** Overlay file exists but carries no `acos-config` block, so the run silently fell back to framework defaults.
+- **Info:** No overlay. This is a valid, fully-conformant state.
+
+**Check 0.4 — The walk itself**
+
+Report how many folders were inspected and how many OS documents were read. This check exists because **a conformant instance emits almost no findings**, which makes it look exactly like a run where the walk did nothing — the failure the folder-map format can cause (reformat the table and the checker walks nothing and reports a cheerful pass).
+
+- **Pass:** The walk inspected at least one folder; the message says how many.
+- **Fail:** The roster was empty, or the roster named folders and the walk inspected none of them. **A run that walked nothing is never a pass**, in any report and in any exit code, even without `--strict`.
+
 ### Category 1: README cascade completeness
 
 These checks confirm the README cascade is populated **for the folders that are in the OS**.
@@ -47,8 +64,8 @@ These checks confirm the README cascade is populated **for the folders that are 
 
 The instance root (the folder containing `company-brief.md`) must have a `README.md`.
 
-- **Pass:** `README.md` exists and is non-empty.
-- **Fail:** `README.md` is missing or empty.
+- **Pass:** `README.md` exists.
+- **Fail:** `README.md` is missing.
 
 **Check 1.2 — Folders on the roster have READMEs**
 
@@ -57,12 +74,12 @@ Every folder listed in the root README's folder map must exist and must contain 
 - **Pass:** Every folder in the map exists and has a `README.md`.
 - **Fail:** A folder in the map doesn't exist on disk, or exists with no `README.md`.
 
-**Check 1.3 — Container folders have container-type READMEs**
+**Check 1.3 — A folder's declared type matches its position**
 
-A folder whose README says `type: folder-readme-container` is declaring that **its children are OS items**. That declaration is what makes check 1.4 apply to them.
+The `type` in a folder README's frontmatter is what tells an agent whether to descend into that folder, so a wrong one sends the whole cascade the wrong way. A roster folder is expected to be a container (or an asset library, if it says so); a child of a container is expected to be an item.
 
-- **Pass:** Container README has `type: folder-readme-container`.
-- **Warning:** Container README has a different type than its position suggests.
+- **Pass:** The declared type matches what the folder's position implies.
+- **Warning:** The type is legal but not the one this position implies (for example a container README typed `folder-readme-item`). Never a failure — the frontmatter is allowed to be the authority on what a folder is; this check just says the two disagree.
 
 **Check 1.4 — A container's child without a README is not an OS item**
 
@@ -76,9 +93,9 @@ A folder inside a container with no `README.md` has **not opted into the OS**. T
 
 A folder whose README says `type: folder-readme-asset` — or that the overlay names in `asset-folders` — is an **asset library**. Its children are *material*: files, images, scanned documents, sub-folders of assets. They are not OS items.
 
-- **Pass:** Asset README has `type: folder-readme-asset`. Validate that README, then **stop**.
+- **Info:** Validate the asset README, then **stop**, and say where the walk stopped. A reader who sees no findings for a folder full of logos should be able to tell that the checker deliberately ended the walk there rather than silently skipping it.
 - **Do not walk into an asset library's children, at any depth.** They never need READMEs and never carry frontmatter. Produce **no findings** for anything inside one.
-- **Fail:** The folder is on the roster and has no README at all (that's 1.2).
+- An asset library on the roster with no README at all is still a 1.2 failure.
 
 ### Category 2: Brief and manifest presence
 
@@ -88,75 +105,70 @@ These checks confirm that the substantive companion documents exist where the fr
 
 The instance root must contain `company-brief.md`.
 
-- **Pass:** `company-brief.md` exists and is non-empty.
-- **Fail:** `company-brief.md` is missing or empty.
+- **Pass:** `company-brief.md` exists.
+- **Fail:** `company-brief.md` is missing.
 
 **Check 2.2 — Client folders have briefs**
 
-Every client folder inside `Clients/` should contain a `brief.md`.
+Every client folder inside a client container (`Clients/` by default; overlay key `client-containers`) should contain a `brief.md`.
 
 - **Pass:** Client has `brief.md`.
 - **Warning:** Client folder exists but has no `brief.md` (may be a newly scaffolded client).
-- **Fail:** `brief.md` exists but is empty or contains only frontmatter with no substantive content.
 
 **Check 2.3 — Client folders have manifests**
 
-Every client folder inside `Clients/` should contain a `manifest.md`.
+Every client folder inside a client container should contain a `manifest.md`.
 
 - **Pass:** Client has `manifest.md`.
 - **Warning:** Client folder exists but has no `manifest.md`.
-- **Fail:** `manifest.md` exists but is empty.
 
 **Check 2.4 — No duplicate briefs**
 
-A client folder should have exactly one `brief.md`. Files like `brief 2.md` or `brief-draft.md` alongside the canonical brief are flagged.
+A client folder should have exactly one `brief.md`. Files like `brief 2.md` or `brief-draft.md` alongside the canonical brief are flagged — that is what a cloud-sync conflict looks like, and two briefs mean an agent will read the wrong one half the time.
 
 - **Pass:** Exactly one `brief.md`.
 - **Warning:** Additional brief-like files found alongside `brief.md` (list them).
-- **Fail:** No canonical `brief.md` but brief-like files exist.
 
-**Check 2.5 — Brief frontmatter has required fields**
+**Check 2.5 — Frontmatter presence and required fields**
 
-Every `brief.md` and `company-brief.md` must include: `type`, `status`, `last-updated`, `maintainer`, `purpose`.
+Every OS document (README, brief, manifest) must open with frontmatter carrying `type`, `status`, `last-updated`, `maintainer`, `purpose`.
 
 - **Pass:** All five fields present and non-empty.
-- **Warning:** Some fields present but missing one or more of the required five.
-- **Fail:** No frontmatter at all, or frontmatter is malformed.
+- **Warning:** Frontmatter exists but is missing one or more of the required five.
+- **Fail:** No frontmatter at all, or it could not be parsed.
+- **Exempt:** The direct children of a container named in the overlay's `repo-child-containers`. Their `README.md` is a codebase README owned by that repository, not an OS-managed document.
 
 ### Category 3: Frontmatter validation
 
-These checks confirm that frontmatter across all READMEs, briefs, and manifests follows the ACOS taxonomy.
-
 **Check 3.1 — Type values are recognized**
 
-Every `type:` value in frontmatter across the instance must be one of the recognized types. The taxonomy is defined in [`framework/README.md`](../../README.md#frontmatter) — that list is the source of truth, and this skill defers to it rather than restating it. Instances may add their own via the overlay's `custom-types`.
+Every `type:` value must be one of the recognized types. The taxonomy is defined in [`framework/README.md`](../../README.md#frontmatter) — that list is the source of truth, and this skill defers to it rather than restating it. Instances may add their own via the overlay's `custom-types`.
 
 - **Pass:** All type values are recognized.
-- **Warning:** Type value is not in the known taxonomy but could be a valid instance-specific addition (list it).
-- **Fail:** Type value is clearly a typo or mistake (e.g., `folder-readme-contianer`).
+- **Warning:** The type is not in the taxonomy and the overlay didn't declare it.
+- **Info:** The type is one the framework uses in its own artifacts but has not yet written into the manual's taxonomy. Accepted, and reported so the drift stays visible.
 
 **Check 3.2 — Status values are valid**
 
-`status` in frontmatter must be one of the values in the framework [status vocabulary](../../README.md#status-vocabulary) — that list is the source of truth and this skill defers to it rather than restating it. Instances may add their own via the overlay's `custom-statuses`.
+`status` must be one of the values in the framework [status vocabulary](../../README.md#status-vocabulary) — that list is the source of truth and this skill defers to it. Instances may add their own via the overlay's `custom-statuses`.
 
 - **Pass:** All status values are recognized.
-- **Warning:** Unusual but plausible status value (list it).
-- **Fail:** Clearly invalid status value.
+- **Warning:** Unrecognized status value.
 
 **Check 3.3 — Dates are ISO 8601**
 
-`last-updated` values in frontmatter must follow `YYYY-MM-DD` format.
+`last-updated` values must be `YYYY-MM-DD`.
 
-- **Pass:** All dates are valid ISO 8601.
-- **Fail:** Any date uses a non-standard format.
+- **Pass:** Valid ISO 8601.
+- **Fail:** Any other format. This one *is* a failure: the field exists to be machine-read, and a date a tool cannot parse is a field that does not work.
 
-**Check 3.4 — Staleness detection**
+**Check 3.4 — Staleness**
 
-Flag READMEs or briefs with `status: active` whose `last-updated` date is older than 90 days.
+A document with `status: active` whose `last-updated` is older than the staleness limit (90 days by default; overlay key `staleness-days`, `0` to turn it off).
 
-- **Pass:** All active documents updated within 90 days.
-- **Warning:** Active document last updated more than 90 days ago (may need refresh).
-- **Note:** This is informational, not a hard fail.
+- **Pass:** All active documents are within the limit.
+- **Warning:** An active document has not been touched in longer than the limit. Either refresh it or give it an honest status — `stale`, `paused`, `dormant`, and `wrapped` all exist, and none of them is flagged here.
+- **Never a fail.** Only a human knows whether an old document is wrong or simply finished.
 
 ### Category 4: Folder naming
 
@@ -174,108 +186,62 @@ The only naming finding the framework makes. A name containing a space, `#`, `?`
 
 The framework ships **no** default naming convention. An instance that wants one enforced sets `naming-style` in its overlay (`kebab-case` or `capitalized`).
 
-- **Not run at all** when the overlay carries no `naming-style` key. This is the default, and a clean instance that never declares one is fully conformant.
+- **Not run at all** when the overlay carries no `naming-style` key. This is the default, and a clean instance that never declares one is fully conformant — the report says so explicitly under "Not run".
 - **Pass:** Names match the instance's declared style.
 - **Warning:** A name doesn't match the style the instance declared for itself.
 
 ### Category 5: Agent-ignore compliance
 
-**Check 5.1 — Underscore-prefixed folders are not referenced**
+**Check 5.1 — Underscore-prefixed folders are not linked into**
 
-No in-scope file (README, brief, manifest, overlay) should contain a link to or explicit reference of a file inside an `_`-prefixed folder, unless the reference is in the `agent-ignore.md` file itself.
+No OS document should link to something inside an `_`-prefixed **folder**. Agents are told to skip those folders at any depth, so a link into one is a pointer the reader has been instructed not to follow: either the link is wrong or the underscore is.
 
-- **Pass:** No in-scope files reference `_`-prefixed content.
-- **Warning:** In-scope file references `_archive/` or `_progress/` content (may be intentional but should be reviewed).
+- **Pass:** No OS document links into an `_`-prefixed folder.
+- **Warning:** A link resolves through an `_`-prefixed folder (file and line reported).
+- **Folders, not files.** [`agent-ignore.md`](../../agent-ignore.md) scopes the rule to folders (`_*/`, `**/_*/`), and the framework depends on that: [`client-brand-capture`](../client-brand-capture/SKILL.md) deliberately writes `Brand/_principal-review.md` and the client brief template deliberately links to it. An underscore-prefixed *file* is not agent-ignored and is not flagged. Flagging the framework's own prescribed output is how a validator teaches people to ignore it.
 
-**Check 5.2 — Agent-ignore file exists at framework level**
+### Category 6: Overlays
 
-The ACOS framework directory should contain an `agent-ignore.md`.
+**Check 6.1 — Overlays have matching skills**
 
-- **Pass:** `agent-ignore.md` exists in the framework.
-- **Fail:** `agent-ignore.md` is missing from the framework.
-
-### Category 6: Lateral cascade references
-
-**Check 6.1 — Brand README exists when Brand folder is declared**
-
-If the instance root's folder map declares a `Brand/` folder, that folder should have a `README.md` with `type: folder-readme-asset`.
-
-- **Pass:** `Brand/README.md` exists with correct type.
-- **Warning:** `Brand/` folder exists but has no README or wrong type.
-- **Fail:** `Brand/` folder declared in folder map but folder doesn't exist.
-
-**Check 6.2 — Overlays have matching skills**
-
-Every overlay in `<instance-root>/overlays/` should correspond to a skill in the framework's `skills/` directory.
+Every overlay in `<instance-root>/overlays/` should correspond to a skill in the framework's `skills/` directory. An overlay with no skill is dead configuration: nothing will ever read it, and the day someone edits it expecting an effect is the day the instance lies to its owner.
 
 - **Pass:** Every overlay has a matching framework skill.
 - **Warning:** Overlay exists with no matching framework skill (orphaned overlay).
+- **Not run** when the framework directory can't be found from where the script is running (pass `--framework`).
 
-**Check 6.3 — Overlay frontmatter is valid**
+**Check 6.2 — Overlay frontmatter is valid**
 
-Every overlay file should have frontmatter with at least `type: skill-overlay`, `skill`, `instance`, and `last-updated`.
+Every overlay should carry frontmatter with `type: skill-overlay`, `skill`, `instance`, and `last-updated`.
 
-- **Pass:** All overlays have valid frontmatter.
-- **Warning:** Overlay missing one or more required frontmatter fields.
-- **Fail:** Overlay has no frontmatter.
-
-### Category 7: Markdown style
-
-These are style linting checks — lower priority but useful for consistency.
-
-**Check 7.1 — No horizontal-rule dividers between sections**
-
-Markdown files should not use `---` between sections (only in frontmatter delimiters).
-
-- **Pass:** No section-divider horizontal rules found.
-- **Warning:** Horizontal rules found between sections in one or more files (list them).
-
-**Check 7.2 — Straight quotes only**
-
-Markdown files should use straight quotes (`'` and `"`), not curly quotes.
-
-- **Pass:** No curly quotes found.
-- **Warning:** Curly quotes found in one or more files (list them).
-
-**Check 7.3 — Sentence-case headings**
-
-Section headings should use sentence case, not title case.
-
-- **Pass:** All headings appear to use sentence case.
-- **Warning:** Headings found that appear to use title case (list them — this is a judgment call, not an automated fail).
+- **Pass:** Valid frontmatter.
+- **Warning:** Missing one or more required fields, or a `type` other than `skill-overlay`.
+- **Fail:** No readable frontmatter at all.
 
 ### Category 8: Cross-reference integrity
 
 **Check 8.1 — Internal links resolve**
 
-Markdown links that point to other files within the instance tree (relative links) should resolve to existing files.
+Every relative markdown link in an OS document must resolve to something that exists on disk. Anchors, `mailto:`, and absolute URLs are ignored; `%20` and other percent-escapes are decoded before resolving, so a link into a folder with a space in its name is judged on what it actually points at.
 
-- **Pass:** All internal links resolve.
-- **Warning:** Internal link targets a file that doesn't exist (list the broken links).
+- **Pass:** All internal links resolve. The message says how many were checked.
+- **Warning:** A link target doesn't exist (file and line reported), or a template placeholder like `<client-name>` survived into a live document.
+- **Never a fail**, because a link usually breaks when the *target* moves, and the person running the checker is often not the person who should fix it.
 
-**Check 8.2 — Brief-to-README cross-references**
+This is the highest-value check in the set and the one the framework went longest without. A stale internal link is precisely the rot ACOS exists to prevent: the tree looks navigable, an agent follows a pointer, and the pointer goes nowhere. Two dead links sat in the reference instance's own root README for months because nothing looked.
 
-When a `brief.md` and `README.md` coexist in a client folder, the brief should reference the README and vice versa.
+The checker only follows links in documents the walk actually opened — so nothing outside the OS, and nothing behind an asset library, is ever reported.
 
-- **Pass:** Both reference each other.
-- **Warning:** One references the other but not reciprocally.
-- **Note:** Not required, just good practice.
+## What this checker deliberately does not check
 
-### Category 9: Template coverage
+An honest list of things it would be easy to add and wrong to:
 
-**Check 9.1 — Every folder pattern has a template**
-
-For each README pattern in use (root, container, item, asset) and each brief pattern (company, client), the framework's `templates/` directory should have a corresponding template file.
-
-- **Pass:** All in-use patterns have templates.
-- **Warning:** A pattern is in use but has no template (may indicate a gap in the framework).
-
-**Check 9.2 — Folders using templates correctly**
-
-When a folder's README declares a `type`, check that its structure matches the corresponding template.
-
-- **Pass:** All typed folders match their template structure.
-- **Warning:** Folder deviates from its declared template (list deviations).
+- **Markdown style** — curly quotes, `---` dividers, title-case headings. The framework [decided that it governs structure, not style](../../../docs/extending-acos.md#acos-governs-structure-not-style), and policing prose style is the same category error as policing letter case: apply the test — *if the convention were violated, what would actually break?* — and the honest answer is "nothing, it would just look inconsistent." A validator that spends its warnings on aesthetics trains everyone to ignore its warnings, including the ones that matter. The framework's markdown-style house rule remains as guidance for agents *writing* files; it is not the validator's business. (Earlier versions of this spec described checks 7.1-7.3 for exactly this. They were never implemented and have been deleted rather than built.)
+- **Reciprocal cross-references** (a brief and a README pointing at each other) — good practice, not a rule. Nothing breaks when they don't.
+- **Template shape conformance** (does this README have the same sections as its template?) — templates are starting points, not schemas. A folder that outgrew its template is healthy, not broken.
+- **Template coverage** (does every pattern in use have a template?) — a property of the *framework*, not of an instance, so it belongs in the framework's own test suite, and that is where it now lives.
+- **Content-level analysis** — contradictory briefs, an identifier in a manifest that never appears in the brief, circular reference chains. All require reading meaning rather than structure. If they become worth doing, they are a skill's job, not a script's.
+- **The framework's own health** — a missing `agent-ignore.md`, a broken link inside ACOS itself. This script checks an *instance*. The framework checks itself with [`scripts/check-links.py`](../../../scripts/check-links.py) and its unit tests, in CI, on every push.
 
 ## Running the checks
 
@@ -288,49 +254,46 @@ When a folder's README declares a `type`, check that its structure matches the c
    - `folder-readme-container` → descend into its children; each child with a README is an OS item, and each child without one is simply not in the OS (check 1.4, a warning, not a failure).
    - `folder-readme-asset` → **stop**. Its children are material, not structure. Do not descend, at any depth.
 5. Skip all `_`-prefixed folders, at any depth (per the agent-ignore convention).
-6. Collect all `brief.md`, `manifest.md`, and `README.md` files encountered.
+6. Collect every `README.md`, `brief.md`, `manifest.md`, `dashboard.md`, and overlay encountered. Checks 5.1 and 8.1 run over that collection at the end, so they see exactly what the walk saw.
 
 ### Check execution
 
-- Run all checks in each category, collecting results.
-- A check that cannot be evaluated (e.g., no folder map to walk) produces an **info** result, not a fail.
-- A check that encounters an error (e.g., permission denied reading a file) produces a **warning** and continues.
+- Run every check, collecting results. A check that finds nothing has still *run*, and the report says so.
+- A check with nothing in this instance to run against (no client container, no declared naming style, no overlays) is reported under **Not run**, with the reason. It is not a pass and not a failure.
+- A check that encounters an error (permission denied, unreadable file) produces a **warning** and continues.
 
 ### Report format
-
-Produce a structured report with this shape:
 
 ```
 # ACOS Integrity Report — <instance name>
 
 **Date:** YYYY-MM-DD
 **Instance root:** <path>
-**Checks run:** <number>
-**Pass:** <number>  **Warning:** <number>  **Fail:** <number>  **Info:** <number>
+**Checks attempted:** 22 of 23 (0.1, 0.3, 0.4, 1.1, ...)
+**Findings:** 13 pass · 4 warning · 0 fail · 2 info
+**Inspected:** 30 folders, 38 OS documents
 
----
+**Not run:**
+- 4.2 Instance naming style — this instance declared no naming-style (the framework ships no default)
 
-## Category 1: README cascade completeness
-✅ 1.1 Instance root README — pass
-✅ 1.2 In-scope folders have READMEs — pass
-⚠️ 1.3 Container type — warning: Clients/README.md has type "folder-readme-root" (expected "folder-readme-container")
-❌ 1.4 Item READMEs — fail: <client-folder>/README.md is missing
+✅ 0.1 Folder map — the membership roster — pass: 7 folders opted into the OS: ...
+⚠️ 1.3 Declared type matches position — warning: Clients/README.md type is 'folder-readme-root', expected 'folder-readme-container'
+⚠️ 8.1 Internal links resolve — warning: README.md:101 -> ../Products/gone/README.md (does not exist)
+❌ 1.2 Roster folder has a README — fail: 'Vault' is listed in the folder map but has no README.md
 
-## Category 2: Brief and manifest presence
-...
-
-## Summary of items needing attention
-1. [⚠️] Clients/README.md type mismatch
-2. [❌] <client-folder> missing README.md
-3. ...
+## Items needing attention
+1. [❌] ...
+2. [⚠️] ...
 ```
+
+**Checks attempted is not the same number as findings**, and reporting the latter as the former is a bug this skill has already shipped once. A clean instance emits four or five findings and runs all 23 checks; a broken walk emits four or five findings and runs *nothing*. The counter has to be able to tell those apart, so it counts checks attempted, names them, names the ones that didn't run and why, and says how many folders and documents were actually inspected. A run that walked zero folders prints a banner saying it is not a pass, and exits non-zero regardless of `--strict`.
 
 ### Severity guide
 
 - **✅ Pass** — Convention met. No action needed.
 - **⚠️ Warning** — Convention may not be met, or a gray area. Review and decide.
 - **❌ Fail** — Convention violated. Fix recommended.
-- **ℹ️ Info** — Check could not be evaluated. Informational only.
+- **ℹ️ Info** — Not a finding. Something worth knowing (the walk stopped here; this type isn't in the manual yet).
 
 ## Output
 
@@ -364,6 +327,7 @@ custom-types: []
 custom-statuses: []
 naming-exempt: []
 naming-style: none
+staleness-days: 90
 ```
 ````
 
@@ -374,11 +338,12 @@ naming-style: none
 | `asset-folders` | Folders that *are* asset libraries: the walk stops at them and their children are never OS items (check 1.5). Usually unnecessary — a folder whose own README says `type: folder-readme-asset` is already treated as one. This key is for saying it once here instead. | none |
 | `repo-child-containers` | Containers whose direct children are self-contained repositories. Their `README.md` is a codebase README owned by that repo, so checks 2.5 and 3.1 are exempt for them. | none |
 | `exclude-folders` | Folders to skip during the walk, in addition to `_`-prefixed and hidden folders. Rarely needed: a folder that shouldn't be in the OS should simply not be on the roster. | none |
-| `suppress-checks` | Check IDs to skip entirely (e.g. `4.1`). | none |
+| `suppress-checks` | Check IDs to skip entirely (e.g. `4.1`). Suppressed checks are named in the report, so suppression is visible rather than silent. | none |
 | `custom-types` | Instance-specific `type:` values treated as valid in addition to the framework taxonomy (check 3.1). | none |
 | `custom-statuses` | Instance-specific `status:` values treated as valid (check 3.2). | none |
 | `naming-exempt` | Folder names exempt from the naming checks (4.1, 4.2) — the place to record accepted legacy names. | none |
 | `naming-style` | The instance's **own** naming policy, enforced as a warning (check 4.2): `kebab-case`, `capitalized`, or `none`. **The framework ships no default and has no opinion on case** — with no key, check 4.2 does not run. | `none` |
+| `staleness-days` | How long an `active` document may go untouched before check 3.4 mentions it. `0` turns the check off. | `90` |
 
 Report destination is prose, not config: the script writes to stdout, and the agent routes the report per the overlay's routing section.
 
@@ -387,14 +352,15 @@ The skill is self-sufficient without an overlay. With no overlay, the script fal
 ## Running the script
 
 ```
-python3 <path-to-acos>/scripts/acos-integrity-check.py [--root PATH] [--overlay PATH] [--strict]
+python3 <path-to-acos>/scripts/acos-integrity-check.py [--root PATH] [--overlay PATH] [--framework PATH] [--strict]
 ```
 
 - `--root` — the instance root (the folder containing `company-brief.md`). Defaults to walking up from the working directory.
 - `--overlay` — an explicit overlay path. Defaults to `<instance-root>/overlays/acos-integrity.md`.
-- `--strict` — exit non-zero if any check fails. Useful in CI; off by default so scheduled runs report rather than break.
+- `--framework` — the ACOS `framework/` directory, used to pair overlays with skills (check 6.1). Defaults to the `framework/` next to the script.
+- `--strict` — exit non-zero if any check fails. Useful in CI; off by default so scheduled runs report rather than break. A run that walked **nothing** exits non-zero either way: that is a broken checker, not a clean instance.
 
-The script is stdlib-only and has no dependencies. Its tests live in `tests/test_acos_integrity_check.py` and run in CI on every push and PR.
+The script is stdlib-only and has no dependencies. Its tests live in `tests/test_acos_integrity_check.py` and run in CI on every push and PR — including a test that this document and the script implement the same set of checks.
 
 ## Links
 
@@ -402,57 +368,3 @@ The script is stdlib-only and has no dependencies. Its tests live in `tests/test
 - Agent-ignore convention: [`../../agent-ignore.md`](../../agent-ignore.md)
 - Templates directory: [`../../templates/`](../../templates/)
 - Instance root: the folder containing `company-brief.md` in the instance being checked. Resolved at runtime, never hardcoded.
-
----
-
-## Future checks (placeholders)
-
-These checks are not yet implemented. They are listed here as placeholders for ACOS enhancements that will make them feasible. Do not implement until the corresponding framework feature exists or is explicitly requested.
-
-### Placeholder A — Schema validation for manifests
-
-When the client manifest template gains a formal schema (e.g., JSON Schema for the identifier tables), the integrity check should validate each `manifest.md` against it. Currently manifests are freeform markdown, so structural validation is limited to "has the expected sections."
-
-### Placeholder B — Overlay-schema validation
-
-When overlays gain a formal schema (e.g., required fields per skill type), validate each overlay against its corresponding skill's expected overlay schema. Currently overlays are freeform markdown.
-
-### Placeholder C — Template freshness
-
-Compare the last-updated date on each template in `framework/templates/` against the templates actually in use in the instance. If a template has been updated more recently than the files derived from it, flag that the instance's files may be out of date.
-
-### Placeholder D — Circular reference detection
-
-Walk all cross-references (markdown links between files) and detect cycles — e.g., file A links to B, B links to C, C links back to A. This requires a graph walk and is deferred until the cross-reference check (8.1) is stable.
-
-### Placeholder E — Duplicate brief detection (content-level)
-
-Beyond the structural check for duplicate brief files (2.4), detect when two briefs have overlapping or contradictory content — e.g., two client briefs that both claim the same contact person. This requires content analysis, not just filename comparison.
-
-### Placeholder F — Orphaned client folders
-
-Detect client folders inside `Clients/` that have no corresponding entry in the `Clients/README.md` container index, and vice versa — entries in the container README that point to non-existent folders.
-
-### Placeholder G — Brand pre-flight readiness
-
-When a Brand folder exists, verify that it contains the minimum artifacts required for brand pre-flight (color palette, typography definitions, logo directory, voice guidelines). The exact minimum set will be defined as the client-brand-capture skill matures.
-
-### Placeholder H — Skill-overlay parameter coverage
-
-For each overlay that exists, verify that it provides values for all the parameters the corresponding framework skill expects from overlays. This requires parsing the skill's SKILL.md for expected overlay keys, which is a future enhancement.
-
-### Placeholder I — Dependency graph between briefs and manifests
-
-Verify that every contact, project keyword, or identifier in a client manifest is also referenced in the corresponding client brief (or vice versa). Detect identifiers that exist in one but not the other.
-
-### Placeholder J — File encoding and whitespace hygiene
-
-Check for common markdown hygiene issues: trailing whitespace, mixed line endings (CRLF vs LF), non-UTF-8 encoding, BOM markers. Low priority but contributes to long-term consistency.
-
-### Placeholder K — Companion plugin availability
-
-When the `companion-plugins.md` file at the framework level declares expected plugins (e.g., `brand-voice`), verify that any plugin-specific code paths in skills can be reached — i.e., the skill's plugin detection logic is documented and the companion-plugins file is consistent with what skills reference.
-
-### Placeholder L — Scheduled trigger health
-
-When ACOS instances configure scheduled integrity checks (e.g., via cron or a task runner), verify that the trigger configuration is valid, the schedule is reasonable, and the last run completed successfully. This depends on a scheduling convention that doesn't exist yet.

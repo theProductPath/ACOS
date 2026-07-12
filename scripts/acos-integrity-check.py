@@ -29,10 +29,56 @@ import re
 import sys
 from datetime import datetime
 from pathlib import Path
+from urllib.parse import unquote
 
 # --- Configuration & Taxonomy ---
 
 REQUIRED_FRONTMATTER = ["type", "status", "last-updated", "maintainer", "purpose"]
+
+# Every check this script implements, in report order. This list is the contract
+# with framework/skills/acos-integrity/SKILL.md: the SKILL documents exactly
+# these checks and no others. If you add a check, add it here and document it
+# there in the same change (tests/test_acos_integrity_check.py enforces the
+# pairing). If you remove one, remove it from both.
+#
+# The registry also makes the report honest: a clean instance emits almost no
+# findings, so the report says how many checks were *attempted*, which is the
+# only way "everything passed" can be told apart from "the walk did nothing".
+CHECK_REGISTRY = [
+    ("0.1", "Folder map — the membership roster"),
+    ("0.3", "Instance overlay"),
+    ("0.4", "Instance walk"),
+    ("1.1", "Instance root README"),
+    ("1.2", "Roster folder has a README"),
+    ("1.3", "Declared type matches position"),
+    ("1.4", "OS membership"),
+    ("1.5", "Asset library ends the walk"),
+    ("2.1", "Company brief exists"),
+    ("2.2", "Client brief presence"),
+    ("2.3", "Client manifest presence"),
+    ("2.4", "Duplicate brief detection"),
+    ("2.5", "Frontmatter — presence and required fields"),
+    ("3.1", "Type taxonomy"),
+    ("3.2", "Status vocabulary"),
+    ("3.3", "ISO 8601 dates"),
+    ("3.4", "Staleness"),
+    ("4.1", "Folder naming — breaking characters"),
+    ("4.2", "Instance naming style"),
+    ("5.1", "No references into agent-ignored folders"),
+    ("6.1", "Overlay has a matching framework skill"),
+    ("6.2", "Overlay frontmatter"),
+    ("8.1", "Internal links resolve"),
+]
+
+CHECK_IDS = {cid for cid, _ in CHECK_REGISTRY}
+
+# 3.4 — an `active` document nobody has touched in this long is worth a look.
+# Overlay key `staleness-days`; 0 turns the check off.
+DEFAULT_STALENESS_DAYS = 90
+
+# 3.4 only applies to documents that claim to be current. A `wrapped` client or
+# an `archived` doc is *supposed* to sit still.
+STALENESS_STATUSES = {"active"}
 
 # The canonical `type` taxonomy, as documented in framework/README.md
 # ("Frontmatter" section). The manual is the source of truth; if you add a type
@@ -131,6 +177,63 @@ NO_NAMING_STYLE = "none"
 FRONTMATTER_RE = re.compile(r"\A---[ \t]*\r?\n(.*?)\r?\n---[ \t]*(?:\r?\n|\Z)", re.DOTALL)
 
 CONFIG_BLOCK_RE = re.compile(r"```acos-config[ \t]*\r?\n(.*?)```", re.DOTALL)
+
+# --- Markdown links (checks 5.1 and 8.1) ---
+#
+# Shared with scripts/check-links.py, which imports these three helpers rather
+# than keeping a second copy: the two validators ask the same question ("does
+# this relative link resolve?") of two different trees, and one of them drifting
+# from the other is the exact failure both exist to catch.
+
+# Two shapes of link target. The angle-bracket form `[x](<a b.md>)` wraps the
+# WHOLE target, so it is only recognized when the `>` is followed by the closing
+# paren — otherwise `[x](<client-name>/brief.md)` would be read as a link to
+# `client-name` and the unresolved placeholder would vanish instead of being
+# reported. That placeholder is the one an adopter is most likely to leave behind.
+LINK_RE = re.compile(r"\[[^\]]*\]\(\s*(<[^>]*>\s*\)|[^)\s]+)")
+FENCE_RE = re.compile(r"^\s*(```|~~~)")
+
+
+def iter_links(text):
+    """Yield (lineno, target) for every markdown link, skipping fenced code blocks."""
+    in_fence = False
+    for lineno, line in enumerate(text.splitlines(), start=1):
+        if FENCE_RE.match(line):
+            in_fence = not in_fence
+            continue
+        if in_fence:
+            continue
+        for raw in LINK_RE.findall(line):
+            if raw.endswith(")"):  # the angle-bracket form: <target>
+                raw = raw[:-1].strip().strip("<>")
+            yield lineno, raw
+
+
+def is_external_link(target):
+    """True for anything that doesn't name a file on this disk."""
+    return (
+        not target
+        or target.startswith("#")
+        or "://" in target
+        or target.startswith("mailto:")
+        or target.startswith("tel:")
+    )
+
+
+def link_target_path(target):
+    """The filesystem path a link points at, or None if it points at nothing local.
+
+    Strips the `#anchor` and `?query` tails and percent-decodes the rest, so a
+    link written `Research/AI%20Gateways/README.md` resolves to the folder that
+    is actually on disk.
+    """
+    if is_external_link(target):
+        return None
+    path_part = target.split("#", 1)[0].split("?", 1)[0].strip()
+    if not path_part:
+        return None
+    return unquote(path_part)
+
 
 # --- Utility Functions ---
 
@@ -324,6 +427,13 @@ class InstanceConfig:
         # their own codebase README: exempt from frontmatter (2.5) and type (3.1).
         self.repo_child_containers = config.get("repo-child-containers", [])
 
+        # 3.4 — how long an `active` document may sit untouched before the
+        # checker mentions it. `0` turns the check off entirely.
+        try:
+            self.staleness_days = int(config.get("staleness-days", DEFAULT_STALENESS_DAYS))
+        except (TypeError, ValueError):
+            self.staleness_days = DEFAULT_STALENESS_DAYS
+
         self.exclude_folders = config.get("exclude-folders", [])
         self.suppress_checks = config.get("suppress-checks", [])
         self.naming_exempt = config.get("naming-exempt", [])
@@ -358,47 +468,119 @@ class InstanceConfig:
 # --- Check Implementation ---
 
 
+FRAMEWORK_DIR = Path(__file__).resolve().parent.parent / "framework"
+
+
 class ACOSIntegrityChecker:
-    def __init__(self, root_path, config=None):
+    def __init__(self, root_path, config=None, framework_path=None):
         # Don't resolve: stay in logical path space (Google Drive symlinks).
         self.root_path = Path(root_path).expanduser()
         self.config = config or InstanceConfig(self.root_path)
+        self.framework_path = Path(framework_path) if framework_path else FRAMEWORK_DIR
         self.report = []
         self.stats = {"pass": 0, "warning": 0, "fail": 0, "info": 0}
         self.in_scope_folders = []
         self.folders_walked = 0
+        # Every OS document the walk actually opened. Checks 5.1 and 8.1 run
+        # over this set at the end, so they see exactly what the walk saw —
+        # nothing outside the OS, nothing behind an asset library.
+        self.os_files = []
+        # Checks *attempted*, which is not the same thing as findings emitted.
+        # A conformant instance emits almost no findings; without this, its
+        # report is indistinguishable from one where the walk did nothing.
+        self.attempted = set()
+        self.not_run = {}
 
     def log(self, check_id, title, status, message=""):
         if check_id in self.config.suppress_checks:
             return
+        self.attempt(check_id)
         self.stats[status] += 1
         icon = {"pass": "✅", "warning": "⚠️", "fail": "❌", "info": "ℹ️"}[status]
         self.report.append((check_id, f"{icon} {check_id} {title} — {status}{': ' + message if message else ''}"))
+
+    def attempt(self, check_id):
+        """Record that a check ran, whether or not it had anything to say.
+
+        Call this from any check that can legitimately produce no finding. A
+        silent check that was never marked attempted is reported as *not run*,
+        which is the honest answer and the one that catches a broken walk.
+        """
+        if check_id in self.config.suppress_checks or check_id not in CHECK_IDS:
+            return False
+        self.attempted.add(check_id)
+        self.not_run.pop(check_id, None)
+        return True
+
+    def not_applicable(self, check_id, reason):
+        """Record why a check had nothing to run against in this instance."""
+        if check_id in self.attempted or check_id in self.config.suppress_checks:
+            return
+        self.not_run[check_id] = reason
 
     def run_checks(self):
         self.check_overlay()
         self.check_root()
 
         if not self.in_scope_folders:
-            self.log("0.0", "Instance Walk", "fail", "No in-scope folders found to walk.")
+            self.log("0.4", "Instance walk", "fail",
+                     "Nothing was walked: the root README's '## Folder map' yielded no folders, so "
+                     "no check below inspected anything. This is not a pass — it is a checker that "
+                     "found nothing to check. Confirm the folder map is a table whose first column "
+                     "holds the folder name in backticks")
+            self.finalize()
             return
 
         for folder_name in self.in_scope_folders:
             if folder_name in self.config.exclude_folders:
-                self.log("0.2", "Excluded folder", "info", f"Skipping '{folder_name}' per overlay exclude-folders")
+                self.log("0.4", "Instance walk", "info",
+                         f"Skipping '{folder_name}' per the overlay's exclude-folders")
                 continue
             folder_path = self.root_path.parent / folder_name
             if folder_path.exists():
                 self.check_folder_recursive(folder_path, is_container=True)
             else:
-                self.log("1.2", "In-scope folder exists", "fail",
-                         f"Folder '{folder_name}' declared in map but not found at {folder_path}")
+                self.log("1.2", "Roster folder has a README", "fail",
+                         f"Folder '{folder_name}' declared in the folder map but not found at {folder_path}")
+
+        self.check_overlays()
+        self.check_links()
 
         # A clean instance would otherwise report almost nothing, since the
         # per-folder checks only speak up when something is wrong. Say what was
         # actually inspected so "no findings" reads as "checked" and not "skipped".
-        self.log("0.4", "Instance walk", "pass",
-                 f"Walked {self.folders_walked} folders under {len(self.in_scope_folders)} in-scope roots")
+        if self.folders_walked:
+            self.log("0.4", "Instance walk", "pass",
+                     f"Walked {self.folders_walked} folders under {len(self.in_scope_folders)} in-scope "
+                     f"roots and read {len(self.os_files)} OS documents")
+        else:
+            self.log("0.4", "Instance walk", "fail",
+                     f"The folder map named {len(self.in_scope_folders)} folders and the walk inspected "
+                     "0 of them. Every check below therefore ran against nothing. This is not a pass")
+        self.finalize()
+
+    def finalize(self):
+        """Record why each unattempted check had nothing to run against."""
+        reasons = {
+            "1.5": "no asset library on the roster",
+            "2.2": "no client container in this instance (overlay key: client-containers)",
+            "2.3": "no client container in this instance (overlay key: client-containers)",
+            "2.4": "no client container in this instance (overlay key: client-containers)",
+            "3.4": ("the overlay set staleness-days: 0" if self.config.staleness_days <= 0
+                    else "no dated OS document was read"),
+            "4.2": "this instance declared no naming-style (the framework ships no default)",
+            "6.1": "this instance has no overlays/ directory",
+            "6.2": "this instance has no overlays/ directory",
+        }
+        blind = self.folders_walked == 0
+        for cid, _ in CHECK_REGISTRY:
+            if cid in self.attempted or cid in self.config.suppress_checks:
+                continue
+            if blind:
+                # Don't dress a broken walk up as an instance with nothing to check.
+                self.not_run.setdefault(cid, "the walk inspected nothing — see 0.4")
+                continue
+            self.not_run.setdefault(cid, reasons.get(cid, "nothing in this instance to run it against"))
 
     def check_overlay(self):
         overlay = self.config.overlay_path
@@ -421,6 +603,12 @@ class ACOSIntegrityChecker:
             self.validate_fm(cb_path, load_frontmatter(cb_path), "brief-company")
         else:
             self.log("2.1", "Company brief exists", "fail", "company-brief.md missing")
+
+        # The instance root's other singletons are OS documents too: their links
+        # are checked (8.1) even though they are files, not folders.
+        dashboard = self.root_path / "dashboard.md"
+        if dashboard.exists():
+            self.os_files.append(dashboard)
 
         # 1.1 Root README
         readme_path = self.root_path / "README.md"
@@ -488,6 +676,12 @@ class ACOSIntegrityChecker:
         if self.config.is_naming_exempt(path.name):
             return
 
+        # 4.1 runs against every folder walked; it just usually has nothing to
+        # say, which is the point of tracking attempts separately from findings.
+        self.attempt("4.1")
+        if self.config.naming_style != NO_NAMING_STYLE:
+            self.attempt("4.2")
+
         reason = naming_violation(path.name)
         if reason:
             self.log("4.1", "Folder naming", "warning", f"'{self.rel(path)}' {reason}")
@@ -521,7 +715,7 @@ class ACOSIntegrityChecker:
                 # A folder on the roster opted into the OS but has no front door.
                 # That is a real failure: the map promised an OS folder and there
                 # is nothing there to declare what it is or what its children are.
-                self.log("1.2", "In-scope folder README", "fail",
+                self.log("1.2", "Roster folder has a README", "fail",
                          f"'{self.rel(path)}' is listed in the root README's folder map "
                          "but has no README.md, so nothing declares what it is")
             else:
@@ -535,6 +729,14 @@ class ACOSIntegrityChecker:
                          "type its parent 'folder-readme-asset'; to hide it, prefix it with '_'")
             return
 
+        if is_container:
+            # 1.2 passes silently on a roster folder that has its front door.
+            self.attempt("1.2")
+        else:
+            # 1.4 ran and found the child opted in. Nothing to say, but it ran.
+            self.attempt("1.4")
+
+        # The instance root is on its own roster; check_root already validated it.
         if path == self.root_path:
             return
 
@@ -549,9 +751,14 @@ class ACOSIntegrityChecker:
         self.validate_fm(readme_path, load_frontmatter(readme_path),
                          self.expected_type_for(path, is_container))
 
-        # An asset library's children are material, not OS structure. Stop here:
-        # do not walk in, do not expect READMEs, at any depth.
+        # 1.5 — an asset library's children are material, not OS structure. Stop
+        # here: do not walk in, do not expect READMEs, at any depth. Reported as
+        # info so a reader can see where the walk deliberately ended, rather than
+        # wondering why a folder full of logos produced no findings.
         if self.is_asset_library(path):
+            self.log("1.5", "Asset library ends the walk", "info",
+                     f"'{self.rel(path)}' is an asset library; its children are material, "
+                     "not OS items, and were not walked")
             return
 
         # Client-specific checks (2.2-2.4) on direct children of a client container.
@@ -565,6 +772,7 @@ class ACOSIntegrityChecker:
 
     def check_client_folder(self, path):
         # 2.2 Client Brief
+        self.attempt("2.2")
         brief_path = path / "brief.md"
         if brief_path.exists():
             self.validate_fm(brief_path, load_frontmatter(brief_path), "brief-client")
@@ -572,6 +780,7 @@ class ACOSIntegrityChecker:
             self.log("2.2", "Client brief presence", "warning", f"No brief.md in {path.name}")
 
         # 2.3 Client Manifest
+        self.attempt("2.3")
         manifest_path = path / "manifest.md"
         if manifest_path.exists():
             self.validate_fm(manifest_path, load_frontmatter(manifest_path), "client-manifest")
@@ -579,6 +788,7 @@ class ACOSIntegrityChecker:
             self.log("2.3", "Client manifest presence", "warning", f"No manifest.md in {path.name}")
 
         # 2.4 Duplicate briefs
+        self.attempt("2.4")
         other_briefs = sorted(path.glob("brief*.md"))
         if len(other_briefs) > 1:
             canonical = path / "brief.md"
@@ -594,6 +804,11 @@ class ACOSIntegrityChecker:
 
     def validate_fm(self, path, fm, expected_type):
         rel_path = self.rel(path)
+        # Every document the OS owns. Its links are checked at the end (5.1, 8.1).
+        if Path(path).suffix == ".md":
+            self.os_files.append(Path(path))
+
+        self.attempt("2.5")
         if not fm:
             self.log("2.5", "Frontmatter presence", "fail", f"No frontmatter in {rel_path}")
             return
@@ -606,7 +821,9 @@ class ACOSIntegrityChecker:
         if missing:
             self.log("2.5", "Required FM fields", "warning", f"{rel_path} missing: {', '.join(missing)}")
 
-        # 3.1 Type check — taxonomy first, then the expectation for this position.
+        # 3.1 Type taxonomy — is this a `type` the framework (or the overlay) knows?
+        self.attempt("3.1")
+        self.attempt("1.3")
         doc_type = fm.get("type")
         if doc_type and doc_type not in self.config.known_types():
             self.log("3.1", "Type taxonomy", "warning",
@@ -615,18 +832,165 @@ class ACOSIntegrityChecker:
             self.log("3.1", "Type taxonomy", "info",
                      f"{rel_path} uses '{doc_type}', which is in use but undocumented in framework/README.md")
         elif doc_type != expected_type:
-            self.log("3.1", "Type validation", "warning",
-                     f"{rel_path} type is '{doc_type}', expected '{expected_type}'")
+            # 1.3 — the type is legal, but it isn't the one this position implies.
+            # This is the check that catches a container README typed as an item:
+            # the type is what tells an agent whether to descend, so a wrong one
+            # sends the cascade the wrong way.
+            self.log("1.3", "Declared type matches position", "warning",
+                     f"{rel_path} type is '{doc_type}', expected '{expected_type}' for a folder in "
+                     "this position")
 
         # 3.2 Status check
+        self.attempt("3.2")
         status = fm.get("status")
         if status and status not in self.config.known_statuses():
             self.log("3.2", "Status validation", "warning", f"{rel_path} uses unknown status '{status}'")
 
         # 3.3 Date check
+        self.attempt("3.3")
         updated = fm.get("last-updated")
         if updated and not validate_date(str(updated)):
             self.log("3.3", "ISO date validation", "fail", f"{rel_path} has invalid date format: '{updated}'")
+            return
+
+        # 3.4 Staleness — a document that claims to be `active` and hasn't been
+        # touched in months is either fine or lying, and only a human knows which.
+        # Informational by design: never a failure, and off entirely at 0 days.
+        limit = self.config.staleness_days
+        if limit > 0 and status in STALENESS_STATUSES and updated and validate_date(str(updated)):
+            self.attempt("3.4")
+            age = (datetime.now() - datetime.strptime(str(updated), "%Y-%m-%d")).days
+            if age > limit:
+                self.log("3.4", "Staleness", "warning",
+                         f"{rel_path} is 'active' but was last updated {updated} ({age} days ago, "
+                         f"limit {limit}). Either refresh it or set an honest status")
+
+    def check_overlays(self):
+        """6.1 and 6.2 — the instance's overlays are its configuration surface.
+
+        An overlay with no matching framework skill is dead configuration: nothing
+        will ever read it, and the day someone edits it expecting an effect is the
+        day the instance lies to its owner.
+        """
+        overlays_dir = self.root_path / "overlays"
+        if not overlays_dir.is_dir():
+            return
+
+        skills_dir = self.framework_path / "skills"
+        overlays = sorted(p for p in overlays_dir.glob("*.md") if not is_agent_ignored(p.name))
+        if not overlays:
+            return
+
+        for overlay in overlays:
+            rel_path = self.rel(overlay)
+            self.os_files.append(overlay)
+
+            # 6.1 — pairing. Skipped (not failed) if we can't see the framework:
+            # the script may have been copied somewhere without it.
+            if skills_dir.is_dir():
+                self.attempt("6.1")
+                skill_name = overlay.stem
+                if not (skills_dir / skill_name / "SKILL.md").exists():
+                    self.log("6.1", "Overlay has a matching framework skill", "warning",
+                             f"{rel_path} configures a skill named '{skill_name}', but there is no "
+                             f"{skill_name}/SKILL.md in the framework. Nothing will read this overlay")
+            else:
+                self.not_applicable("6.1", f"framework skills not found at {skills_dir}")
+
+            # 6.2 — an overlay's own frontmatter.
+            self.attempt("6.2")
+            fm = load_frontmatter(overlay)
+            if not fm or "_error" in fm:
+                self.log("6.2", "Overlay frontmatter", "fail", f"No readable frontmatter in {rel_path}")
+                continue
+            missing = [f for f in ("type", "skill", "instance", "last-updated") if not fm.get(f)]
+            if missing:
+                self.log("6.2", "Overlay frontmatter", "warning",
+                         f"{rel_path} missing: {', '.join(missing)}")
+            elif fm.get("type") != "skill-overlay":
+                self.log("6.2", "Overlay frontmatter", "warning",
+                         f"{rel_path} type is '{fm.get('type')}', expected 'skill-overlay'")
+
+    @staticmethod
+    def _points_into_ignored_folder(path_part):
+        """True if a link target passes through an `_`-prefixed *folder*.
+
+        The final component is only treated as a folder when the link says so
+        (a trailing slash), because `agent-ignore.md` scopes the rule to folders:
+        `_*/`, `**/_*/`. An underscore-prefixed file is not ignored, and the
+        framework prescribes one (`Brand/_principal-review.md`).
+        """
+        components = list(Path(path_part).parts)
+        if not path_part.endswith("/"):
+            components = components[:-1]
+        return any(part.startswith("_") for part in components)
+
+    def check_links(self):
+        """5.1 and 8.1 — every relative link in an OS document resolves.
+
+        8.1 is the check the framework most needed and least had. A stale internal
+        link is precisely the rot ACOS exists to prevent: the tree looks navigable,
+        an agent follows a pointer, and the pointer goes nowhere. Two dead links
+        survived in the reference instance's own root README for months because
+        nothing looked.
+
+        Warning, never failure: a link can break because the *target* moved, and
+        the person running the checker may not be the person who should fix it.
+        """
+        if not self.os_files:
+            return
+
+        self.attempt("8.1")
+        self.attempt("5.1")
+        checked = 0
+
+        for md in self.os_files:
+            rel_file = self.rel(md)
+            try:
+                text = md.read_text(encoding="utf-8")
+            except Exception as exc:
+                self.log("8.1", "Internal links resolve", "warning",
+                         f"Could not read {rel_file}: {exc}")
+                continue
+
+            for lineno, target in iter_links(text):
+                path_part = link_target_path(target)
+                if path_part is None:
+                    continue
+
+                # A placeholder that survived scaffolding is a dead link with a
+                # friendlier face. Say what it is.
+                if "<" in path_part and ">" in path_part:
+                    self.log("8.1", "Internal links resolve", "warning",
+                             f"{rel_file}:{lineno} -> {target} (unresolved template placeholder)")
+                    continue
+
+                checked += 1
+                resolved = (md.parent / path_part)
+
+                # 5.1 — nothing in the OS should point into an agent-ignored
+                # folder. The reader is told to skip it; the link tells them not to.
+                #
+                # FOLDERS only. agent-ignore.md is explicit that the rule is
+                # `_*/` — a *folder* prefix — and the framework relies on that:
+                # client-brand-capture deliberately writes `Brand/_principal-review.md`
+                # and the client brief template deliberately links to it. Flagging
+                # underscore-prefixed *files* would flag the framework's own
+                # prescribed output, which is how a validator teaches people to
+                # ignore it.
+                if self._points_into_ignored_folder(path_part):
+                    self.log("5.1", "No references into agent-ignored folders", "warning",
+                             f"{rel_file}:{lineno} -> {target} points inside an '_'-prefixed folder, "
+                             "which agents are told to skip at any depth. Either the link or the "
+                             "underscore is wrong")
+
+                if not resolved.exists():
+                    self.log("8.1", "Internal links resolve", "warning",
+                             f"{rel_file}:{lineno} -> {target} (does not exist)")
+
+        if checked:
+            self.log("8.1", "Internal links resolve", "pass",
+                     f"Resolved {checked} relative links across {len(self.os_files)} OS documents")
 
     def print_report(self, stream=None):
         # Resolve stdout at call time so callers can redirect it.
@@ -635,14 +999,44 @@ class ACOSIntegrityChecker:
         def w(line=""):
             print(line, file=stream)
 
+        titles = dict(CHECK_REGISTRY)
+        suppressed = [cid for cid, _ in CHECK_REGISTRY if cid in self.config.suppress_checks]
+        attempted = [cid for cid, _ in CHECK_REGISTRY if cid in self.attempted]
+        skipped = [cid for cid, _ in CHECK_REGISTRY
+                   if cid not in self.attempted and cid not in self.config.suppress_checks]
+
         w(f"# ACOS Integrity Report — {self.config.instance_name}")
         w()
         w(f"**Date:** {datetime.now().strftime('%Y-%m-%d')}")
         w(f"**Instance root:** {self.root_path}")
-        w(f"**Checks run:** {sum(self.stats.values())}")
-        w(f"**Pass:** {self.stats['pass']}  **Warning:** {self.stats['warning']}  "
-          f"**Fail:** {self.stats['fail']}  **Info:** {self.stats['info']}")
+        w(f"**Checks attempted:** {len(attempted)} of {len(CHECK_REGISTRY)} "
+          f"({', '.join(attempted) if attempted else 'none'})")
+        w(f"**Findings:** {self.stats['pass']} pass · {self.stats['warning']} warning · "
+          f"{self.stats['fail']} fail · {self.stats['info']} info")
+        w(f"**Inspected:** {self.folders_walked} folders, {len(self.os_files)} OS documents")
         w()
+
+        # The failure mode this guards: reformat the folder map and the walk
+        # silently visits nothing, every check finds nothing to complain about,
+        # and the report reads like a clean bill of health. It must not.
+        if self.folders_walked == 0:
+            w("> **NOTHING WAS WALKED — THIS IS NOT A PASS.**")
+            w("> The walk inspected 0 folders, so no check below had anything to run against. "
+              "A report with no findings and no walk means the checker was blind, not that the "
+              "instance is clean. Fix the `## Folder map` table in the instance root README "
+              "(exact heading, real markdown table, folder name in backticks in the first column) "
+              "and run again.")
+            w()
+
+        if skipped:
+            w("**Not run:**")
+            for cid in skipped:
+                w(f"- {cid} {titles[cid]} — {self.not_run.get(cid, 'nothing to run it against')}")
+            w()
+        if suppressed:
+            w(f"**Suppressed by the overlay:** {', '.join(suppressed)}")
+            w()
+
         for _, line in sorted(self.report, key=lambda r: r[0]):
             w(line)
 
@@ -672,6 +1066,9 @@ def main(argv=None):
                                        "Default: discovered by walking up from the current directory.")
     parser.add_argument("--overlay", help="Path to the acos-integrity overlay. "
                                           "Default: <instance-root>/overlays/acos-integrity.md")
+    parser.add_argument("--framework", help="Path to the ACOS framework/ directory, used to pair "
+                                            "overlays with skills (check 6.1). "
+                                            "Default: the framework/ next to this script.")
     parser.add_argument("--strict", action="store_true", help="Exit non-zero if any check fails.")
     args = parser.parse_args(argv)
 
@@ -689,10 +1086,15 @@ def main(argv=None):
             return 1
 
     config = InstanceConfig.load(root, overlay_path=args.overlay)
-    checker = ACOSIntegrityChecker(root, config=config)
+    checker = ACOSIntegrityChecker(root, config=config, framework_path=args.framework)
     checker.run_checks()
     checker.print_report()
 
+    # A walk that inspected nothing is a broken checker, not a clean instance, and
+    # it exits non-zero whether or not --strict was asked for. Reporting rather
+    # than breaking is a courtesy the findings get; it is not one a blind run gets.
+    if checker.folders_walked == 0:
+        return 1
     if args.strict and checker.stats["fail"]:
         return 1
     return 0

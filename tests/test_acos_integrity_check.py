@@ -14,6 +14,7 @@ import shutil
 import sys
 import tempfile
 import unittest
+from datetime import datetime, timedelta
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -303,6 +304,125 @@ class TestAgentIgnore(unittest.TestCase):
         self.assertFalse(aic.is_agent_ignored("Brand"))
 
 
+SKILL_PATH = REPO_ROOT / "framework" / "skills" / "acos-integrity" / "SKILL.md"
+
+
+class TestSkillAndScriptSpecifyTheSameChecks(unittest.TestCase):
+    """The SKILL must document exactly the checks the script implements.
+
+    The bug this guards is the one that shipped: the SKILL specified ~27 checks
+    across nine categories and the script implemented ~16 of them. A spec that
+    describes a tool that doesn't exist is the same "documentation that lies"
+    failure ACOS was built to prevent — so the two are pinned to each other here,
+    and adding a check to one without the other fails the build.
+    """
+
+    def skill_checks(self):
+        text = SKILL_PATH.read_text(encoding="utf-8")
+        return set(re.findall(r"^\*\*Check (\d+\.\d+)", text, re.MULTILINE))
+
+    def test_the_skill_documents_every_check_the_script_implements(self):
+        undocumented = aic.CHECK_IDS - self.skill_checks()
+        self.assertEqual(undocumented, set(),
+                         f"checks in the script with no entry in SKILL.md: {sorted(undocumented)}")
+
+    def test_the_skill_specifies_no_check_the_script_does_not_implement(self):
+        aspirational = self.skill_checks() - aic.CHECK_IDS
+        self.assertEqual(aspirational, set(),
+                         f"checks specified in SKILL.md but not implemented: {sorted(aspirational)}")
+
+    def test_the_deleted_style_checks_stay_deleted(self):
+        # Category 7 was markdown style (curly quotes, dividers, title case).
+        # ACOS governs structure, not style; policing prose is the same category
+        # error as policing letter case. Deleted from the spec, never built.
+        text = SKILL_PATH.read_text(encoding="utf-8")
+        self.assertNotIn("### Category 7", text)
+        self.assertFalse([cid for cid in aic.CHECK_IDS if cid.startswith("7.")])
+
+    def test_every_registry_entry_has_a_title(self):
+        for cid, title in aic.CHECK_REGISTRY:
+            with self.subTest(check=cid):
+                self.assertTrue(title.strip())
+
+
+class TestTemplateCoverage(unittest.TestCase):
+    """Was SKILL check 9.1. It is a property of the framework, not of an instance,
+    so it belongs here — in the framework's own test suite — rather than in a
+    validator that walks somebody else's tree."""
+
+    TEMPLATE_FOR = {
+        "folder-readme-root": "folder-readme-root.md",
+        "folder-readme-container": "folder-readme-container.md",
+        "folder-readme-item": "folder-readme-item.md",
+        "folder-readme-asset": "folder-readme-asset.md",
+        "brief-company": "brief-company.md",
+        "brief-client": "brief-client.md",
+        "brief-stakeholder": "stakeholder-brief.md",
+        "client-manifest": "manifest-client.md",
+        "dashboard-company": "dashboard-company.md",
+    }
+
+    def test_every_pattern_an_instance_can_use_has_a_template(self):
+        templates = REPO_ROOT / "framework" / "templates"
+        for doc_type, filename in self.TEMPLATE_FOR.items():
+            with self.subTest(type=doc_type):
+                self.assertTrue((templates / filename).exists(),
+                                f"type '{doc_type}' has no template at framework/templates/{filename}")
+
+    def test_the_map_covers_every_scaffoldable_framework_type(self):
+        # agent-ignore and progress-checkpoint are framework-internal, not
+        # scaffolded into an instance from a template.
+        unmapped = aic.FRAMEWORK_TYPES - set(self.TEMPLATE_FOR) - {"agent-ignore", "progress-checkpoint"}
+        self.assertEqual(unmapped, set(), f"framework types with no template mapping: {unmapped}")
+
+
+class TestLinkParsing(unittest.TestCase):
+    """Shared by the integrity checker (8.1) and scripts/check-links.py."""
+
+    def test_finds_links_with_line_numbers(self):
+        found = list(aic.iter_links("intro\n[a](one.md) and [b](two.md)\n"))
+        self.assertEqual(found, [(2, "one.md"), (2, "two.md")])
+
+    def test_skips_fenced_code_blocks(self):
+        text = "[real](a.md)\n```\n[fake](b.md)\n```\n[also-real](c.md)\n"
+        targets = [t for _, t in aic.iter_links(text)]
+        self.assertEqual(targets, ["a.md", "c.md"])
+
+    def test_angle_bracketed_targets_are_unwrapped(self):
+        self.assertEqual([t for _, t in aic.iter_links("[x](<a b.md>)\n")], ["a b.md"])
+
+    def test_a_placeholder_target_keeps_its_brackets(self):
+        # `<client-name>` is a placeholder, not the angle-bracket link form. If
+        # the parser unwraps it, the unresolved placeholder disappears from the
+        # report instead of being flagged — and that is the single most likely
+        # thing an adopter leaves behind after copying a template.
+        self.assertEqual([t for _, t in aic.iter_links("[b](<client-name>/brief.md)\n")],
+                         ["<client-name>/brief.md"])
+
+    def test_external_targets_are_recognized(self):
+        for target in ["https://example.com", "mailto:a@b.com", "#anchor", ""]:
+            with self.subTest(target=target):
+                self.assertTrue(aic.is_external_link(target))
+                self.assertIsNone(aic.link_target_path(target))
+
+    def test_percent_escapes_are_decoded(self):
+        # 'Research/AI Gateways' is a real folder with a real space in it. A link
+        # to it is written %20, and the checker has to resolve what's on disk.
+        self.assertEqual(aic.link_target_path("Research/AI%20Gateways/README.md"),
+                         "Research/AI Gateways/README.md")
+
+    def test_anchors_and_queries_are_stripped(self):
+        self.assertEqual(aic.link_target_path("../README.md#house-rules"), "../README.md")
+
+    def test_underscore_files_are_not_underscore_folders(self):
+        # agent-ignore is a FOLDER rule (`_*/`). The framework itself prescribes
+        # Brand/_principal-review.md and links to it from the client brief.
+        self.assertFalse(aic.ACOSIntegrityChecker._points_into_ignored_folder("Brand/_principal-review.md"))
+        self.assertTrue(aic.ACOSIntegrityChecker._points_into_ignored_folder("Brand/_archive/old.md"))
+        self.assertTrue(aic.ACOSIntegrityChecker._points_into_ignored_folder("../_progress/notes.md"))
+        self.assertTrue(aic.ACOSIntegrityChecker._points_into_ignored_folder("_archive/"))
+
+
 def write(path, text):
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(text, encoding="utf-8")
@@ -371,6 +491,12 @@ class TestWalkOnFixtureInstance(unittest.TestCase):
         checker = aic.ACOSIntegrityChecker(self.root, config=config)
         checker.run_checks()
         return checker, [line for _, line in checker.report]
+
+    @staticmethod
+    def render(checker):
+        buf = io.StringIO()
+        checker.print_report(stream=buf)
+        return buf.getvalue()
 
     def test_the_clean_baseline_fixture_has_no_failures(self):
         checker, _ = self.run_checker(self.CLEAN)
@@ -610,6 +736,255 @@ class TestWalkOnFixtureInstance(unittest.TestCase):
             # widget/README.md has no frontmatter and no exemption configured.
             self.assertEqual(aic.main(["--root", str(self.root), "--strict"]), 1)
             self.assertEqual(aic.main(["--root", str(self.tree / "Clients")]), 1)  # not an instance root
+
+    # --- The counter: checks attempted, not findings emitted ---
+
+    def test_the_report_counts_checks_attempted_not_findings(self):
+        # The bug: "Checks run: 5" on a clean instance, because the counter
+        # counted findings. A conformant instance emits few findings and runs
+        # every check; a broken walk emits few findings and runs none. The report
+        # has to distinguish them.
+        checker, _ = self.run_checker(self.CLEAN)
+        report = self.render(checker)
+        self.assertIn("**Checks attempted:**", report)
+        self.assertNotIn("**Checks run:**", report)
+        self.assertGreaterEqual(len(checker.attempted), 15)
+        self.assertGreater(len(checker.attempted), sum(checker.stats.values()) - len(checker.attempted))
+        self.assertIn(f"of {len(aic.CHECK_REGISTRY)}", report)
+
+    def test_a_check_that_ran_silently_is_counted_as_attempted(self):
+        # 4.1 finds nothing in a clean tree. It still ran, and must not be
+        # reported as "not run" — that would be the same lie in the other direction.
+        (self.tree / "Clients" / "Bad Client").rename(self.tree / "Clients" / "Good-Client")
+        checker, _ = self.run_checker(self.CLEAN)
+        self.assertIn("4.1", checker.attempted)
+        self.assertNotIn("4.1", checker.not_run)
+
+    def test_checks_with_nothing_to_run_against_are_named_with_a_reason(self):
+        checker, _ = self.run_checker(self.CLEAN)
+        report = self.render(checker)
+        self.assertIn("**Not run:**", report)
+        # This instance declares no naming-style, so 4.2 never runs — and the
+        # report says why rather than leaving a silent gap.
+        self.assertIn("4.2", checker.not_run)
+        self.assertIn("naming-style", checker.not_run["4.2"])
+
+    def test_suppressed_checks_are_named_in_the_report(self):
+        checker, _ = self.run_checker({**self.CLEAN, "suppress-checks": ["4.1"]})
+        report = self.render(checker)
+        self.assertIn("Suppressed by the overlay", report)
+        self.assertNotIn("4.1", checker.attempted)
+
+    def test_a_walk_that_inspects_nothing_is_never_a_pass(self):
+        # THE failure mode: reformat the folder map so it stops parsing, and the
+        # old checker walked nothing, found nothing, and reported a cheerful pass.
+        readme_path = self.root / "README.md"
+        readme_path.write_text(
+            readme("folder-readme-root", "Acme OS") + "\n## Folders\n\nNo map here.\n",
+            encoding="utf-8",
+        )
+        checker, lines = self.run_checker(self.CLEAN)
+        report = self.render(checker)
+        self.assertEqual(checker.folders_walked, 0)
+        self.assertGreater(checker.stats["fail"], 0)
+        self.assertIn("NOTHING WAS WALKED — THIS IS NOT A PASS", report)
+        self.assertTrue([line for line in lines if line.startswith("❌ 0.4")])
+
+    def test_a_blind_run_exits_non_zero_even_without_strict(self):
+        readme_path = self.root / "README.md"
+        readme_path.write_text(readme("folder-readme-root", "Acme OS") + "\n# no map\n", encoding="utf-8")
+        with contextlib.redirect_stdout(io.StringIO()):
+            self.assertEqual(aic.main(["--root", str(self.root)]), 1)
+
+    # --- 1.3: declared type vs position ---
+
+    def test_a_container_typed_as_an_item_is_a_1_3_warning(self):
+        write(self.tree / "Clients" / "README.md", readme("folder-readme-item", "Clients"))
+        _, lines = self.run_checker(self.CLEAN)
+        hits = [line for line in lines if line.startswith("⚠️ 1.3") and "Clients/README.md" in line]
+        self.assertEqual(len(hits), 1, hits)
+        self.assertIn("expected 'folder-readme-container'", hits[0])
+
+    def test_an_unknown_type_is_3_1_not_1_3(self):
+        write(self.tree / "Clients" / "README.md", readme("folder-readme-contianer", "Clients"))
+        _, lines = self.run_checker(self.CLEAN)
+        self.assertTrue([line for line in lines if line.startswith("⚠️ 3.1") and "Clients/README.md" in line])
+        self.assertFalse([line for line in lines if line.startswith("⚠️ 1.3") and "Clients/README.md" in line])
+
+    # --- 3.4: staleness ---
+
+    def test_a_stale_active_document_is_a_warning(self):
+        old = (datetime.now() - timedelta(days=200)).strftime("%Y-%m-%d")
+        write(self.tree / "Clients" / "Acme-Industries" / "brief.md",
+              f"---\ntype: brief-client\nstatus: active\nlast-updated: {old}\n"
+              "maintainer: Test\npurpose: Acme.\n---\n\n# Acme\n")
+        checker, lines = self.run_checker(self.CLEAN)
+        hits = [line for line in lines if "3.4" in line]
+        self.assertEqual(len(hits), 1, hits)
+        self.assertTrue(hits[0].startswith("⚠️"))
+        self.assertIn("200 days ago", hits[0])
+        self.assertEqual(checker.stats["fail"], 0)  # never a failure
+
+    def test_an_honest_status_is_not_stale(self):
+        # `wrapped`, `archived`, `paused` — a finished thing is supposed to sit still.
+        old = (datetime.now() - timedelta(days=400)).strftime("%Y-%m-%d")
+        write(self.tree / "Clients" / "Acme-Industries" / "brief.md",
+              f"---\ntype: brief-client\nstatus: wrapped\nlast-updated: {old}\n"
+              "maintainer: Test\npurpose: Acme.\n---\n\n# Acme\n")
+        _, lines = self.run_checker(self.CLEAN)
+        self.assertFalse([line for line in lines if "3.4" in line])
+
+    def test_staleness_days_zero_turns_the_check_off(self):
+        old = (datetime.now() - timedelta(days=999)).strftime("%Y-%m-%d")
+        write(self.tree / "Clients" / "Acme-Industries" / "brief.md",
+              f"---\ntype: brief-client\nstatus: active\nlast-updated: {old}\n"
+              "maintainer: Test\npurpose: Acme.\n---\n\n# Acme\n")
+        checker, lines = self.run_checker({**self.CLEAN, "staleness-days": "0"})
+        self.assertFalse([line for line in lines if "3.4" in line])
+        self.assertIn("3.4", checker.not_run)
+
+    def test_the_staleness_window_is_configurable(self):
+        old = (datetime.now() - timedelta(days=100)).strftime("%Y-%m-%d")
+        write(self.tree / "Clients" / "Acme-Industries" / "brief.md",
+              f"---\ntype: brief-client\nstatus: active\nlast-updated: {old}\n"
+              "maintainer: Test\npurpose: Acme.\n---\n\n# Acme\n")
+        _, lenient = self.run_checker({**self.CLEAN, "staleness-days": "365"})
+        self.assertFalse([line for line in lenient if "3.4" in line])
+        _, strict = self.run_checker({**self.CLEAN, "staleness-days": "30"})
+        self.assertTrue([line for line in strict if "3.4" in line])
+
+    # --- 6.1 / 6.2: overlays ---
+
+    def overlay(self, name, body="", type_="skill-overlay", skill=None):
+        write(self.root / "overlays" / f"{name}.md",
+              f"---\ntype: {type_}\nskill: {skill or name}\ninstance: acme-os\n"
+              f"last-updated: 2026-07-12\nmaintainer: Test\npurpose: Overlay.\n---\n\n# {name}\n{body}")
+
+    def test_an_overlay_with_a_matching_framework_skill_is_silent(self):
+        self.overlay("acos-integrity")
+        checker, lines = self.run_checker(self.CLEAN)
+        self.assertFalse([line for line in lines if line.startswith("⚠️ 6.")])
+        self.assertIn("6.1", checker.attempted)
+        self.assertIn("6.2", checker.attempted)
+
+    def test_an_orphaned_overlay_is_flagged(self):
+        # Dead configuration: nothing will ever read it, and the day someone edits
+        # it expecting an effect is the day the instance lies to its owner.
+        self.overlay("notion-sync")
+        _, lines = self.run_checker(self.CLEAN)
+        hits = [line for line in lines if line.startswith("⚠️ 6.1")]
+        self.assertEqual(len(hits), 1, hits)
+        self.assertIn("notion-sync", hits[0])
+
+    def test_an_overlay_without_frontmatter_fails_6_2(self):
+        write(self.root / "overlays" / "acos-integrity.md", "# overlay\n\nno frontmatter\n")
+        checker, lines = self.run_checker(self.CLEAN)
+        self.assertTrue([line for line in lines if line.startswith("❌ 6.2")])
+        self.assertGreater(checker.stats["fail"], 0)
+
+    def test_an_overlay_missing_required_fields_warns(self):
+        write(self.root / "overlays" / "acos-integrity.md",
+              "---\ntype: skill-overlay\nskill: acos-integrity\n---\n\n# overlay\n")
+        _, lines = self.run_checker(self.CLEAN)
+        hits = [line for line in lines if line.startswith("⚠️ 6.2")]
+        self.assertEqual(len(hits), 1, hits)
+        self.assertIn("instance", hits[0])
+
+    def test_overlay_checks_do_not_run_without_an_overlays_directory(self):
+        checker, _ = self.run_checker(self.CLEAN)
+        self.assertIn("6.1", checker.not_run)
+        self.assertIn("6.2", checker.not_run)
+
+    # --- 8.1: internal links resolve (the one that matters most) ---
+
+    def test_a_dead_internal_link_is_reported_with_file_and_line(self):
+        # The rot ACOS exists to prevent: the tree looks navigable, an agent
+        # follows a pointer, the pointer goes nowhere. Two of these survived in
+        # the reference instance's own root README because nothing looked.
+        write(self.tree / "Clients" / "README.md",
+              readme("folder-readme-container", "Clients")
+              + "\n- [Acme](Acme-Industries/README.md)\n- [Ghost](Ghost-Corp/README.md)\n")
+        checker, lines = self.run_checker(self.CLEAN)
+        hits = [line for line in lines if line.startswith("⚠️ 8.1")]
+        self.assertEqual(len(hits), 1, hits)
+        self.assertIn("Ghost-Corp/README.md", hits[0])
+        self.assertRegex(hits[0], r"README\.md:\d+ ->")  # file and line
+        self.assertIn("does not exist", hits[0])
+        self.assertEqual(checker.stats["fail"], 0)  # a broken link is never a fail
+
+    def test_links_that_resolve_produce_no_finding_and_a_pass_line(self):
+        write(self.tree / "Clients" / "README.md",
+              readme("folder-readme-container", "Clients") + "\n- [Acme](Acme-Industries/README.md)\n")
+        _, lines = self.run_checker(self.CLEAN)
+        self.assertFalse([line for line in lines if line.startswith("⚠️ 8.1")])
+        self.assertTrue([line for line in lines if line.startswith("✅ 8.1")])
+
+    def test_external_links_and_anchors_are_not_checked(self):
+        write(self.tree / "Clients" / "README.md",
+              readme("folder-readme-container", "Clients")
+              + "\n[web](https://example.com/nope)\n[mail](mailto:a@b.com)\n[anchor](#somewhere)\n")
+        _, lines = self.run_checker(self.CLEAN)
+        self.assertFalse([line for line in lines if line.startswith("⚠️ 8.1")])
+
+    def test_links_inside_code_fences_are_not_checked(self):
+        write(self.tree / "Clients" / "README.md",
+              readme("folder-readme-container", "Clients")
+              + "\n```\n[example](Not-Real/README.md)\n```\n")
+        _, lines = self.run_checker(self.CLEAN)
+        self.assertFalse([line for line in lines if line.startswith("⚠️ 8.1")])
+
+    def test_a_percent_escaped_link_to_a_real_folder_resolves(self):
+        (self.tree / "Clients" / "Bad Client" / "docs").mkdir()
+        write(self.tree / "Clients" / "Bad Client" / "docs" / "notes.md", "# notes\n")
+        write(self.tree / "Clients" / "README.md",
+              readme("folder-readme-container", "Clients")
+              + "\n[notes](Bad%20Client/docs/notes.md)\n")
+        _, lines = self.run_checker(self.CLEAN)
+        self.assertFalse([line for line in lines if line.startswith("⚠️ 8.1")])
+
+    def test_an_unresolved_template_placeholder_is_reported(self):
+        write(self.tree / "Clients" / "Acme-Industries" / "README.md",
+              readme("folder-readme-item", "Acme") + "\n[brief](<client-name>/brief.md)\n")
+        _, lines = self.run_checker(self.CLEAN)
+        hits = [line for line in lines if line.startswith("⚠️ 8.1")]
+        self.assertEqual(len(hits), 1, hits)
+        self.assertIn("placeholder", hits[0])
+
+    def test_links_are_not_followed_into_an_asset_library(self):
+        # The walk stops at Brand/, so nothing inside it is read — including its
+        # children's links. An asset library's material is nobody's business.
+        write(self.tree / "Brand" / "colors" / "README.md",
+              readme("folder-readme-item", "Colors") + "\n[gone](../../Nowhere/README.md)\n")
+        _, lines = self.run_checker(self.CLEAN)
+        self.assertFalse([line for line in lines if "Nowhere" in line])
+
+    def test_links_are_not_followed_into_agent_ignored_folders(self):
+        write(self.tree / "Clients" / "_archive" / "old" / "README.md",
+              readme("folder-readme-item", "Old") + "\n[gone](../../Nowhere/README.md)\n")
+        _, lines = self.run_checker(self.CLEAN)
+        self.assertFalse([line for line in lines if "Nowhere" in line])
+
+    # --- 5.1: no references into agent-ignored folders ---
+
+    def test_a_link_into_an_underscore_folder_is_flagged(self):
+        write(self.tree / "Clients" / "Acme-Industries" / "README.md",
+              readme("folder-readme-item", "Acme") + "\n[old](_archive/2025-notes.md)\n")
+        _, lines = self.run_checker(self.CLEAN)
+        hits = [line for line in lines if line.startswith("⚠️ 5.1")]
+        self.assertEqual(len(hits), 1, hits)
+        self.assertIn("_archive", hits[0])
+
+    def test_an_underscore_prefixed_file_is_not_flagged(self):
+        # agent-ignore is a FOLDER rule. client-brand-capture deliberately writes
+        # Brand/_principal-review.md and brief-client.md deliberately links to it.
+        # Flagging the framework's own prescribed output is how a validator
+        # teaches everyone to ignore it.
+        write(self.tree / "Clients" / "Acme-Industries" / "Brand" / "_principal-review.md", "# review\n")
+        write(self.tree / "Clients" / "Acme-Industries" / "brief.md",
+              readme("brief-client", "Acme") + "\n[pending](Brand/_principal-review.md)\n")
+        _, lines = self.run_checker(self.CLEAN)
+        self.assertFalse([line for line in lines if line.startswith("⚠️ 5.1")])
+        self.assertFalse([line for line in lines if line.startswith("⚠️ 8.1")])
 
 
 if __name__ == "__main__":

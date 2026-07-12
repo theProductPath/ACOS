@@ -27,6 +27,7 @@ why _progress/ (gitignored, maintainer-only) is out of scope here — but note
 that nothing which ships may link *into* it.
 """
 
+import importlib.util
 import re
 import subprocess
 import sys
@@ -34,8 +35,17 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 
-LINK_RE = re.compile(r"\[[^\]]*\]\(\s*(<[^>]*>|[^)\s]+)")
-FENCE_RE = re.compile(r"^\s*(```|~~~)")
+# Link parsing is shared with the integrity checker (its checks 5.1 and 8.1 ask
+# the same question of an instance tree that this script asks of the repo). One
+# implementation, so the two can't drift.
+_spec = importlib.util.spec_from_file_location(
+    "acos_integrity_check", Path(__file__).resolve().parent / "acos-integrity-check.py"
+)
+_aic = importlib.util.module_from_spec(_spec)
+_spec.loader.exec_module(_aic)
+
+links_in = _aic.iter_links
+is_external = _aic.is_external_link
 
 TEMPLATE_DIRS = ("framework/templates/", "output-templates/")
 
@@ -55,29 +65,6 @@ def tracked_markdown() -> list[Path]:
 
 def is_template(rel: str) -> bool:
     return any(marker in rel for marker in TEMPLATE_DIRS)
-
-
-def links_in(text: str):
-    """Yield (lineno, target), skipping fenced code blocks."""
-    in_fence = False
-    for lineno, line in enumerate(text.splitlines(), start=1):
-        if FENCE_RE.match(line):
-            in_fence = not in_fence
-            continue
-        if in_fence:
-            continue
-        for raw in LINK_RE.findall(line):
-            yield lineno, raw.strip("<>") if raw.startswith("<") else raw
-
-
-def is_external(target: str) -> bool:
-    return (
-        not target
-        or target.startswith("#")
-        or "://" in target
-        or target.startswith("mailto:")
-        or target.startswith("tel:")
-    )
 
 
 def main() -> int:

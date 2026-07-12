@@ -26,3 +26,7 @@ jobs:
 
       - name: Run tests
         run: python3 -m unittest discover -s tests -v
+
+      - name: Check relative links
+        # Every relative link in a file that ships in a clone must resolve.
+        run: python3 scripts/check-links.py
