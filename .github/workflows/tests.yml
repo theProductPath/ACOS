@@ -1,0 +1,28 @@
+name: tests
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+
+jobs:
+  unittest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Assert no third-party dependencies
+        # ACOS is stdlib-only by design. If a requirements file ever appears,
+        # fail loudly rather than silently growing a dependency.
+        run: |
+          if ls requirements*.txt pyproject.toml setup.py Pipfile 2>/dev/null | grep -q .; then
+            echo "ACOS must stay stdlib-only: found a dependency manifest."
+            exit 1
+          fi
+
+      - name: Run tests
+        run: python3 -m unittest discover -s tests -v

@@ -118,7 +118,7 @@ These checks confirm that frontmatter across all READMEs, briefs, and manifests 
 
 **Check 3.1 — Type values are recognized**
 
-Every `type:` value in frontmatter across the instance must be one of the recognized types: `folder-readme-root`, `folder-readme-container`, `folder-readme-item`, `folder-readme-asset`, `brief-company`, `brief-client`, `client-manifest`, `agent-ignore`, `progress-checkpoint`, `skill-overlay`, or a type declared in the instance's own glossary.
+Every `type:` value in frontmatter across the instance must be one of the recognized types. The taxonomy is defined in [`framework/README.md`](../../README.md#frontmatter) — that list is the source of truth, and this skill defers to it rather than restating it. Instances may add their own via the overlay's `custom-types`.
 
 - **Pass:** All type values are recognized.
 - **Warning:** Type value is not in the known taxonomy but could be a valid instance-specific addition (list it).
