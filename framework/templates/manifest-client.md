@@ -1,7 +1,8 @@
 ---
 type: client-manifest
 subject: <Client name>
-folder: <kebab-case-folder-name>
+folder: <Client-folder-name>
+status: active  # active | dormant | archived
 last-updated: YYYY-MM-DD
 maintainer: <Name>
 purpose: Lookup index for matching transcripts and communications to this client. Used by the client-brief-processor skill (and any other skill that needs to route input to a specific client) to identify which client a piece of input belongs to.

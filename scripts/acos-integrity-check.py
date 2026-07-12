@@ -369,6 +369,7 @@ class ACOSIntegrityChecker:
         self.report = []
         self.stats = {"pass": 0, "warning": 0, "fail": 0, "info": 0}
         self.in_scope_folders = []
+        self.folders_walked = 0
 
     def log(self, check_id, title, status, message=""):
         if check_id in self.config.suppress_checks:
@@ -395,6 +396,12 @@ class ACOSIntegrityChecker:
             else:
                 self.log("1.2", "In-scope folder exists", "fail",
                          f"Folder '{folder_name}' declared in map but not found at {folder_path}")
+
+        # A clean instance would otherwise report almost nothing, since the
+        # per-folder checks only speak up when something is wrong. Say what was
+        # actually inspected so "no findings" reads as "checked" and not "skipped".
+        self.log("0.4", "Instance walk", "pass",
+                 f"Walked {self.folders_walked} folders under {len(self.in_scope_folders)} in-scope roots")
 
     def check_overlay(self):
         overlay = self.config.overlay_path
@@ -437,9 +444,30 @@ class ACOSIntegrityChecker:
         else:
             self.log("0.1", "Folder map extraction", "fail", "Could not find '## Folder map' section in root README")
 
+    @staticmethod
+    def declared_type(path):
+        """The `type` a folder's own README claims, or None."""
+        readme = Path(path) / "README.md"
+        if not readme.exists():
+            return None
+        fm = load_frontmatter(readme) or {}
+        return fm.get("type")
+
     def expected_type_for(self, path, is_container):
+        # The overlay's asset-folders key is an explicit declaration and wins.
         if path.name in self.config.asset_folders or path.parent.name in self.config.asset_folders:
             return "folder-readme-asset"
+
+        # Without an overlay, a folder that declares itself an asset library IS
+        # one — that's what frontmatter is for. Requiring the overlay to say so
+        # meant an instance built exactly as the adoption guide describes got
+        # spurious "expected folder-readme-container" warnings on its Brand
+        # folder. The README is allowed to speak for itself.
+        if is_container and self.declared_type(path) == "folder-readme-asset":
+            return "folder-readme-asset"
+        if not is_container and self.declared_type(path.parent) == "folder-readme-asset":
+            return "folder-readme-asset"
+
         return "folder-readme-container" if is_container else "folder-readme-item"
 
     def check_folder_recursive(self, path, is_container=False):
@@ -449,6 +477,8 @@ class ACOSIntegrityChecker:
             return
         if path.name in self.config.exclude_folders:
             return
+
+        self.folders_walked += 1
 
         # 4.1 Folder naming — the three-bucket house rule. A folder walked as a
         # container is in the container bucket; its direct children are items.

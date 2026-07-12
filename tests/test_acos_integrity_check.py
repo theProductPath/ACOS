@@ -452,6 +452,19 @@ class TestWalkOnFixtureInstance(unittest.TestCase):
         self.assertEqual(len(hits), 1, hits)
         self.assertIn("expected 'folder-readme-asset'", hits[0])
 
+    def test_a_self_declared_asset_library_needs_no_overlay(self):
+        # The bug this guards: an instance built exactly as adopting-acos.md
+        # describes has no acos-integrity overlay (the guide never mentions one),
+        # and its Brand/README.md — correctly typed folder-readme-asset per the
+        # asset template — was flagged as "expected folder-readme-container".
+        _, lines = self.run_checker()
+        self.assertFalse([line for line in lines if "3.1" in line and "Brand/README.md" in line])
+
+    def test_the_walk_is_reported_even_when_nothing_is_wrong(self):
+        checker, lines = self.run_checker()
+        self.assertTrue([line for line in lines if line.startswith("✅ 0.4")])
+        self.assertGreater(checker.folders_walked, 0)
+
     def test_repo_child_readme_is_frontmatter_exempt_when_configured(self):
         _, lines = self.run_checker({"repo-child-containers": ["Repos"]})
         self.assertTrue([line for line in lines if line.startswith("✅ 2.5") and "widget" in line])
