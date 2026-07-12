@@ -53,7 +53,12 @@ Create the root `README.md` by copying [`../framework/templates/folder-readme-ro
 
 Every README opens with a small YAML frontmatter block (`type`, `status`, `last-updated`, `maintainer`, `purpose`). Fill those in honestly as you go — they're what lets a future tool report which files have gone stale without reading the prose. `status` comes from the framework's [status vocabulary](../framework/README.md#status-vocabulary); each template's `status:` line carries the values legal for that document type in a trailing comment. Leave the comment or delete it — tools ignore it either way.
 
-**The `## Folder map` table is machine-read, and it is the only thing that tells a tool which folders exist.** Keep the heading spelled exactly `## Folder map`, keep it a table, and keep each folder's name in backticks in the first column (`` | `Clients/` | … | ``). The integrity checker discovers your whole tree from this table and walks nothing that isn't in it; reformat it into bullets and every downstream tool goes blind. Include a row for the instance root itself.
+**The `## Folder map` table is the membership allowlist, and it is load-bearing.** A folder is part of your operating system **if and only if** it has a row in that table — see [Membership](../framework/README.md#membership--what-is-part-of-the-operating-system) in the manual. Keep the heading spelled exactly `## Folder map`, keep it a table, and keep each folder's name in backticks in the first column (`` | `Clients/` | … | ``). The integrity checker discovers your whole tree from this table and walks nothing that isn't in it; reformat it into bullets and every downstream tool goes blind. Include a row for the instance root itself.
+
+Two consequences worth internalizing now, because they make adoption much cheaper than it looks:
+
+- **You are not adopting ACOS for your whole company.** You're adopting it for the folders you list. Everything else in the tree — the scanned receipts, the photo dumps, the folder someone made last Tuesday — is simply not in the OS. Not excluded, not ignored, not a finding. Just not in it. List one folder and the OS governs one folder.
+- **Never write a list of folders to ignore.** An exclusion list rots the moment someone adds or deletes a folder, and then it lies to every agent that reads it. The allowlist can't rot: the only way in is a human writing a row.
 
 ## Step 2 — Fill in the company brief
 
@@ -65,14 +70,16 @@ The brief is stable content. It answers "who is this company and what does it so
 
 Now walk your sibling folders and give each one a README, choosing the pattern that fits what the folder is. ACOS uses four shapes, each with a template in [`../framework/templates/`](../framework/templates/):
 
-- Use the **container** pattern for folders that hold many similar children — `Clients/`, `Products/`, `Projects/`. The README is an index of children plus the conventions every child follows.
+- Use the **container** pattern for folders that hold many similar children — `Clients/`, `Products/`, `Projects/`. The README is an index of children plus the conventions every child follows. Declaring `type: folder-readme-container` is how you tell agents **its children are OS items** and the cascade continues into them.
 - Use the **item** pattern for a specific child inside a container — one client, one product. The README is curated context for that one thing.
-- Use the **asset** pattern for a folder that is itself a source of truth — a brand kit, design tokens, a shared script library. The README is the substance, not an index.
+- Use the **asset** pattern for a folder that is itself a source of truth — a brand kit, design tokens, a shared script library, a cabinet of scanned filings. The README is the substance, not an index. Declaring `type: folder-readme-asset` tells agents **its children are material, not structure**: they never need READMEs, at any depth, and nothing walks into them looking for OS shape. This is the right type for any folder whose contents are *stuff* rather than *things the OS manages* — a `Brand/` full of logo files, an `Admin/` full of tax PDFs.
 - The **root** pattern you already used in step 1.
 
 Your containers will not be the ones in the examples, and that's expected. The four README patterns are shapes, not a prescribed folder set: a clinic's containers are `Patients/` and `Suppliers/` and `Staff/`; a manufacturer's might be `Lines/` and `Vendors/`. `Clients/` is the only container name that carries extra machinery (briefs, manifests, and the client-facing skills), and only because that's the pattern that got built first. If your business's core entities aren't clients, you still get the README cascade and the integrity checker; you just won't use those skills.
 
-You do not have to instrument everything at once. Start with the one or two folders where agents will do the most work and add the rest as you go — but be aware of the boundary the integrity checker draws: it walks every folder listed in your folder map and every direct child of those folders, and it reports a **missing README as a failure**. So an un-instrumented folder inside a declared container isn't free — it's a finding. Either give it a README or leave its parent out of the folder map until you're ready. Anything deeper than one level below a container is not walked at all, and is yours to organize however you like.
+**Getting the container-vs-asset call right is the highest-leverage decision in this step**, because it determines what the OS expects one level down. Ask: *are this folder's children things the operating system manages, or are they material it merely stores?* A folder per client is the former. A folder per year of receipts is the latter. Mistype an asset library as a container and you'll get a finding for every folder of paperwork that doesn't have a README — which is the checker faithfully reporting what you told it, not a bug.
+
+You do not have to instrument everything at once. Start with the one or two folders where agents will do the most work and add the rest as you go — nothing you leave out costs you anything. A folder inside a container with no README is not a failure; it has simply not opted into the OS, and the checker says so as information, not as an error. Give it a README when you're ready to bring it in, and not before.
 
 ## Step 4 — Add briefs and manifests where the work is substantive
 
@@ -90,7 +97,9 @@ When a skill needs to know something specific to your company — an account nam
 
 There is no overlay template; an overlay is just a markdown file with frontmatter (`type: skill-overlay`, `skill`, `instance`, `last-updated`) and whatever configuration the skill's own SKILL.md says it reads. Each skill documents its own overlay keys — read the skill before writing its overlay.
 
-The one overlay most instances end up wanting is [`acos-integrity.md`](../framework/skills/acos-integrity/SKILL.md#instance-overlay-configuration), which tells the integrity checker the handful of things it cannot infer: which container holds your clients, which folders are asset libraries, which containers hold self-contained code repos, and which legacy folder names you've decided to live with. Its config goes in a fenced ` ```acos-config ` block. The checker runs without it — it just has to guess — so write the overlay once the shape of your tree is settled.
+The one overlay most instances end up wanting is [`acos-integrity.md`](../framework/skills/acos-integrity/SKILL.md#instance-overlay-configuration), which tells the integrity checker the handful of things it cannot infer: which container holds your clients, which containers hold self-contained code repos, and which legacy folder names you've decided to live with. Its config goes in a fenced ` ```acos-config ` block. The checker runs without it — it just has to guess — so write the overlay once the shape of your tree is settled.
+
+The overlay is also where an instance may declare a **naming policy**, if it wants one: `naming-style: kebab-case` or `naming-style: capitalized`. The framework ships no default and does not care about case, so this key is purely a company's choice about its own house style. Leave it out and nothing is enforced, which is the expected state for most instances.
 
 ## Step 6 — Stand up the dashboard
 
@@ -111,14 +120,15 @@ Work through this and then run the integrity checker. A freshly-scaffolded insta
 - ACOS itself reachable from the tree (sibling clone, vendored copy, or remote), and `<path-to-acos>` resolved consistently in every file.
 - Instance root chosen, with a `README.md` from the root template listing in-scope siblings.
 - `company-brief.md` populated, with at least one principal and a designated primary stakeholder.
-- A `## Folder map` table in the root README, in the exact format above, with a row for every in-scope sibling and for the root itself.
-- Container READMEs on every folder in the map, and an item README on every direct child of one — a child without a README is a checker failure, not a blank.
+- A `## Folder map` table in the root README, in the exact format above, with a row for every folder you want in the OS and for the root itself. Nothing else on disk needs a mention — and no list of folders to *exclude*, ever.
+- A README on every folder in the map, typed honestly: `folder-readme-container` where the children are OS items, `folder-readme-asset` where the children are material.
+- An item README on every child of a container you actually want in the OS. A child without one isn't a failure — it just isn't in the system.
 - `brief.md` and `manifest.md` on every client folder.
 - ACOS skills made available to your agent tooling, with overlays for anything company-specific.
-- An `overlays/acos-integrity.md` declaring your asset folders and client container, so the checker isn't guessing.
+- An `overlays/acos-integrity.md` declaring your client container (and your asset folders, if you'd rather say it there than in the frontmatter).
 - `dashboard.md` in place and on a refresh cadence.
 - `scripts/acos-integrity-check.py --strict` run against the tree, and clean.
-- House rules honored: [folder naming](../framework/README.md#folder-naming--three-buckets) (Capitalized containers, proper-name items, kebab-case for everything else, and never a space or an underscore), straight quotes, sentence-case headings, ISO dates, and underscore-prefixed folders (`_archive/`, `_progress/`) left out of scope.
+- House rules honored: straight quotes, sentence-case headings, ISO dates, underscore-prefixed folders (`_archive/`, `_progress/`) left out of scope, and no [breaking characters](../framework/README.md#folder-naming--structure-not-style) in folder names. Note what is *not* on this list: **letter case**. ACOS has no opinion on it. Capitalize your folders or don't.
 
 ## Where to go next
 

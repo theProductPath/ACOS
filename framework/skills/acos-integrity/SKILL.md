@@ -27,9 +27,21 @@ Before doing anything else, look for an instance overlay:
 
 The skill runs a series of discrete checks, each producing pass/warning/fail results. Checks are organized by category.
 
+### Category 0: Membership
+
+Everything in this skill applies **only to folders that are part of the operating system**, and membership is opt-in. Read [Membership](../../README.md#membership--what-is-part-of-the-operating-system) in the framework manual before running any check; it is the model the rest of this skill assumes.
+
+**Check 0.1 — The folder map is the roster**
+
+The `## Folder map` table in the instance root README is the membership allowlist. A sibling folder is in the OS **if and only if** it has a row there. Parse the table; walk what it lists and nothing else.
+
+- **Pass:** The table is present and parses; report which folders opted in.
+- **Fail:** No `## Folder map` section, or it doesn't parse as a table. Without it, nothing is in scope.
+- **Never a finding:** A folder on disk that is *not* in the table. It is not part of the OS. Do not report it, do not count it, do not suggest adding it. Say nothing.
+
 ### Category 1: README cascade completeness
 
-These checks confirm the README cascade pattern is fully populated.
+These checks confirm the README cascade is populated **for the folders that are in the OS**.
 
 **Check 1.1 — Instance root README exists**
 
@@ -38,36 +50,35 @@ The instance root (the folder containing `company-brief.md`) must have a `README
 - **Pass:** `README.md` exists and is non-empty.
 - **Fail:** `README.md` is missing or empty.
 
-**Check 1.2 — In-scope folders have READMEs**
+**Check 1.2 — Folders on the roster have READMEs**
 
-Every folder listed in the instance root README's folder map must contain a `README.md`.
+Every folder listed in the root README's folder map must exist and must contain a `README.md`. A folder on the roster opted into the OS, so it owes the OS a front door: without a README nothing declares what it is or what its children are.
 
-- **Pass:** All in-scope folders have a `README.md`.
-- **Fail:** Any in-scope folder is missing its `README.md`.
+- **Pass:** Every folder in the map exists and has a `README.md`.
+- **Fail:** A folder in the map doesn't exist on disk, or exists with no `README.md`.
 
 **Check 1.3 — Container folders have container-type READMEs**
 
-Folders that hold sibling sub-folders (like `Clients/`, `Products/`, `Projects/`) should have a `README.md` with `type: folder-readme-container` in frontmatter.
+A folder whose README says `type: folder-readme-container` is declaring that **its children are OS items**. That declaration is what makes check 1.4 apply to them.
 
 - **Pass:** Container README has `type: folder-readme-container`.
-- **Warning:** Container README has a different type (may need correction).
-- **Fail:** Container folder has no README.
+- **Warning:** Container README has a different type than its position suggests.
 
-**Check 1.4 — Item folders have item-type READMEs**
+**Check 1.4 — A container's child without a README is not an OS item**
 
-Each sub-folder inside a container (e.g., `Clients/Heartland-Paving-Partners/`) should have a `README.md` with `type: folder-readme-item`.
+A folder inside a container with no `README.md` has **not opted into the OS**. This is *information, not an error* — a folder is in the system only if it says so, and plenty of folders correctly say nothing.
 
-- **Pass:** Item README has `type: folder-readme-item`.
-- **Warning:** Item README has a different type.
-- **Fail:** Item folder has no README.
+- **Pass:** The child has a `README.md`; it is an OS item and the cascade continues into it.
+- **Warning (informational):** No `README.md`. Report it as what it is — *this folder is not visible to the OS and agents will not read into it* — and name the three ways to change that, all of them valid: give it a README (to include it), type its parent `folder-readme-asset` (to declare it material rather than structure), or underscore-prefix it (to hide it). Doing nothing is also valid.
+- **Never a fail.** A missing README is an absence of opt-in, not a violation. Reporting it as a failure inverts the model and trains people to ignore the checker.
 
-**Check 1.5 — Asset folders have asset-type READMEs**
+**Check 1.5 — Asset libraries end the walk**
 
-Folders declared as asset libraries (like `Brand/`) should have a `README.md` with `type: folder-readme-asset`.
+A folder whose README says `type: folder-readme-asset` — or that the overlay names in `asset-folders` — is an **asset library**. Its children are *material*: files, images, scanned documents, sub-folders of assets. They are not OS items.
 
-- **Pass:** Asset README has `type: folder-readme-asset`.
-- **Warning:** Asset README has a different type.
-- **Fail:** Asset folder has no README.
+- **Pass:** Asset README has `type: folder-readme-asset`. Validate that README, then **stop**.
+- **Do not walk into an asset library's children, at any depth.** They never need READMEs and never carry frontmatter. Produce **no findings** for anything inside one.
+- **Fail:** The folder is on the roster and has no README at all (that's 1.2).
 
 ### Category 2: Brief and manifest presence
 
@@ -149,19 +160,23 @@ Flag READMEs or briefs with `status: active` whose `last-updated` date is older 
 
 ### Category 4: Folder naming
 
-**Check 4.1 — Folder names match their bucket**
+**ACOS does not govern letter case.** See [Folder naming — structure, not style](../../README.md#folder-naming--structure-not-style), which is the source of truth. A capitalized folder name produces **no finding**. Neither does a lowercase one, a mixed-case one, or an underscore inside a name. Do not flag style. Do not suggest renames on aesthetic grounds.
 
-Folder names are checked against the three-bucket rule in [`framework/README.md`](../../README.md#folder-naming--three-buckets), which is the source of truth:
+**Check 4.1 — Folder names don't contain characters that break things**
 
-- **Container folders** (the siblings of the instance root, listed in the root folder map) are **Capitalized** — an initial capital, no spaces, no underscores, dashes between words.
-- **Item folders** (direct children of a container) carry the **real-world proper name** of the thing they stand for — any case, no spaces, no underscores.
-- **Everything else** is **kebab-case**. Below the item level ACOS doesn't govern the tree, so the check stops there.
-- The instance root folder itself is exempt (it's named for the instance), as is any name listed in the overlay's `naming-exempt`.
+The only naming finding the framework makes. A name containing a space, `#`, `?`, `%`, `\`, `:`, `|`, `*`, `<`, `>`, or `"` breaks real machinery — shell paths, markdown links, URLs — and that's worth saying out loud.
 
-Spaces and underscores are illegal in every bucket. Legacy folders that carry them are expected; they're flagged rather than renamed, and an instance records the ones it's keeping in `naming-exempt`.
+- **Pass:** No breaking characters.
+- **Warning:** A breaking character is present. Say **concretely what it breaks** (a space needs `%20` in a URL, angle brackets in a markdown link, and quoting in a shell; a `#` truncates a URL at the fragment; a `*` is a glob wildcard). Never a failure — a legacy folder with a space in it works fine until something links to it, and renaming may break references that already point at it.
+- The instance root folder is exempt (it's named for the instance), as is any name in the overlay's `naming-exempt`.
 
-- **Pass:** Folder name matches the convention for its bucket.
-- **Warning:** Folder name violates its bucket's convention (report the bucket and the reason).
+**Check 4.2 — The instance's own naming style, if it declared one**
+
+The framework ships **no** default naming convention. An instance that wants one enforced sets `naming-style` in its overlay (`kebab-case` or `capitalized`).
+
+- **Not run at all** when the overlay carries no `naming-style` key. This is the default, and a clean instance that never declares one is fully conformant.
+- **Pass:** Names match the instance's declared style.
+- **Warning:** A name doesn't match the style the instance declared for itself.
 
 ### Category 5: Agent-ignore compliance
 
@@ -267,10 +282,13 @@ When a folder's README declares a `type`, check that its structure matches the c
 ### Walk order
 
 1. Start at the instance root (the folder containing `company-brief.md`).
-2. Read the instance root `README.md` to get the folder map.
-3. Walk each in-scope folder in the folder map, reading its README and descending into its children.
-4. Skip all `_`-prefixed folders (per agent-ignore convention).
-5. Collect all `brief.md`, `manifest.md`, and `README.md` files encountered.
+2. Read the instance root `README.md` and parse the `## Folder map` table. **That table is the roster** — it is the complete list of what is in the OS.
+3. Walk each folder on the roster, reading its README. Anything on disk that isn't on the roster is not part of the OS: don't walk it, don't report it, don't mention it.
+4. At each folder, let its README's `type` tell you what to do next:
+   - `folder-readme-container` → descend into its children; each child with a README is an OS item, and each child without one is simply not in the OS (check 1.4, a warning, not a failure).
+   - `folder-readme-asset` → **stop**. Its children are material, not structure. Do not descend, at any depth.
+5. Skip all `_`-prefixed folders, at any depth (per the agent-ignore convention).
+6. Collect all `brief.md`, `manifest.md`, and `README.md` files encountered.
 
 ### Check execution
 
@@ -345,20 +363,22 @@ suppress-checks: []
 custom-types: []
 custom-statuses: []
 naming-exempt: []
+naming-style: none
 ```
 ````
 
 | Key | Meaning | Default with no overlay |
 |---|---|---|
-| `instance-name` | Display name; also exempt from the kebab-case folder check (the instance root is named for the instance, not for its contents). | The instance root folder's name. |
+| `instance-name` | Display name; also exempt from the folder-name check (the instance root is named for the instance, not for its contents). | The instance root folder's name. |
 | `client-containers` | Folders whose direct children are client engagements. Checks 2.2-2.4 apply to each child. | `Clients` |
-| `asset-folders` | Folders that *are* asset libraries. Their README, and their children's READMEs, are expected to be `folder-readme-asset` (check 1.5). | none |
-| `repo-child-containers` | Containers whose direct children are self-contained repositories. Their `README.md` is a codebase README owned by that repo, so checks 2.5 and 3.1 are exempt for them; the README-presence check (1.4) still applies. | none |
-| `exclude-folders` | Folders to skip during the walk, in addition to `_`-prefixed and hidden folders. | none |
+| `asset-folders` | Folders that *are* asset libraries: the walk stops at them and their children are never OS items (check 1.5). Usually unnecessary — a folder whose own README says `type: folder-readme-asset` is already treated as one. This key is for saying it once here instead. | none |
+| `repo-child-containers` | Containers whose direct children are self-contained repositories. Their `README.md` is a codebase README owned by that repo, so checks 2.5 and 3.1 are exempt for them. | none |
+| `exclude-folders` | Folders to skip during the walk, in addition to `_`-prefixed and hidden folders. Rarely needed: a folder that shouldn't be in the OS should simply not be on the roster. | none |
 | `suppress-checks` | Check IDs to skip entirely (e.g. `4.1`). | none |
 | `custom-types` | Instance-specific `type:` values treated as valid in addition to the framework taxonomy (check 3.1). | none |
 | `custom-statuses` | Instance-specific `status:` values treated as valid (check 3.2). | none |
-| `naming-exempt` | Folder names exempt from the kebab-case check (check 4.1) — the place to record accepted legacy names. | none |
+| `naming-exempt` | Folder names exempt from the naming checks (4.1, 4.2) — the place to record accepted legacy names. | none |
+| `naming-style` | The instance's **own** naming policy, enforced as a warning (check 4.2): `kebab-case`, `capitalized`, or `none`. **The framework ships no default and has no opinion on case** — with no key, check 4.2 does not run. | `none` |
 
 Report destination is prose, not config: the script writes to stdout, and the agent routes the report per the overlay's routing section.
 

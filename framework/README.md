@@ -57,9 +57,31 @@ theProductPath/            <- the company tree
   Brand/                   <- sibling folder, asset README (source of truth, not an index)
 ```
 
+## Membership — what is part of the operating system
+
+Before anything else: an agent working in an ACOS instance has to know **which folders are actually part of the operating system**. A company's folder tree contains a great deal that the OS does not govern — scanned invoices, exported photos, a folder someone made last Tuesday. Being nearby is not membership.
+
+**Membership is opt-in.** A folder is part of the OS only if it says so. Nothing is in the OS because of where it sits on disk. This is an allowlist, and it is the single most load-bearing idea in the framework, because every other rule — the cascade, the frontmatter, the naming check, the traversal order — applies only to what's in.
+
+Four rules, and there are no others:
+
+1. **The `## Folder map` table in the instance root README is the roster.** A sibling folder is part of the OS **if and only if** it has a row in that table. This table is machine-parsed and it is load-bearing: keep the heading spelled exactly `## Folder map`, keep it a table, keep the folder name in backticks in the first column. A folder that is not listed is not in the OS — **silently**, with no finding and no complaint. It is not "excluded" or "ignored"; it is simply not part of the system, the way a filing cabinet in the next room is not part of your desk.
+
+2. **A container's README declares what its children are.** The `type` in a folder's frontmatter is not decoration; it tells an agent what it will find one level down.
+   - `type: folder-readme-container` — the children are OS **items** (a client, a product, a project). They are expected to have READMEs of their own, and the cascade continues into them.
+   - `type: folder-readme-asset` — this folder is an **asset library**. Its children are *material*: files, images, documents, sub-folders of assets. They are **never** OS items, they **never** need READMEs at any depth, and an agent should **not walk into them looking for OS structure**. The README is the answer, not an index of children.
+
+3. **Absence of a README means "not an OS item." It does not mean error.** A folder inside a container with no README has simply not opted in: it is not visible to the OS and agents will not read into it. That is frequently the correct state, so it is reported as information, not as a failure. If you want it in, give it a README. If it holds material rather than structure, type its parent `folder-readme-asset`. If you want it gone from view entirely, underscore-prefix it. All three are valid; doing nothing is also valid.
+
+4. **An underscore prefix means agent-ignore, at any depth.** Unchanged, and unconditional. See [agent-ignore](#agent-ignore--skip-underscore-prefixed-folders).
+
+The reason it is an allowlist and not a denylist: **a denylist rots silently.** Nothing forces you to update a list of exclusions when a folder is added, and nothing forces you to prune it when a folder is deleted — so it drifts, and then it lies, and an agent reading it is worse off than one reading nothing. An allowlist cannot rot, because the only way a folder gets into the OS is that a human wrote a row for it. If an instance's root README carries a section enumerating folders to ignore, delete it: that is the old model, and it is a bug.
+
+The corollary for adopters is a relief rather than a burden: **you do not have to instrument your whole company to adopt ACOS.** Put one folder in the map and the OS governs one folder. Everything else carries on exactly as it did.
+
 ## README cascade
 
-Every in-scope folder in an ACOS instance should contain a `README.md` describing its purpose, conventions, and current state. AI tools orient themselves by **reading READMEs in cascade** — top-down from instance root to the folder where the work is actually happening.
+Every folder **in the OS** (see [Membership](#membership--what-is-part-of-the-operating-system)) should contain a `README.md` describing its purpose, conventions, and current state. AI tools orient themselves by **reading READMEs in cascade** — top-down from instance root to the folder where the work is actually happening.
 
 ### Read order
 
@@ -80,7 +102,7 @@ ACOS uses four README shapes, depending on what the folder *is*. Each has a temp
 | **Root** | The instance root — singleton per instance. The README is the entry point that tells AI tools what the instance is and where context lives. | [`templates/folder-readme-root.md`](templates/folder-readme-root.md) |
 | **Container** | Folders that hold many sibling sub-folders (`Clients/`, `Products/`, `Projects/`, `Research/`). The README is an index of children plus conventions for how each child is structured. | [`templates/folder-readme-container.md`](templates/folder-readme-container.md) |
 | **Item** | A specific child inside a container — a single client, product, project, or research thread. The README is curated context for that one thing. | [`templates/folder-readme-item.md`](templates/folder-readme-item.md) |
-| **Asset** | A folder that *is* a source-of-truth library (brand assets, design tokens, shared scripts). The README is the substance itself, not an index of children. | [`templates/folder-readme-asset.md`](templates/folder-readme-asset.md) |
+| **Asset** | A folder that *is* a source-of-truth library (brand assets, design tokens, scanned documents, shared scripts). The README is the substance itself, not an index of children — and its children are **material, not OS items**: they never need READMEs, at any depth, and agents do not walk into them looking for structure. | [`templates/folder-readme-asset.md`](templates/folder-readme-asset.md) |
 
 When creating a new README, copy the matching template into place and fill it in. Don't invent a new shape unless none of the four fit — and if that happens, propose a fifth pattern back here rather than going freelance.
 
@@ -88,7 +110,7 @@ When creating a new README, copy the matching template into place and fill it in
 
 Folder READMEs **add to** but cannot **loosen** the framework rules in this file. Specifically:
 
-- Global rules are binding: the [agent-ignore](#agent-ignore) convention, the `templates/` reuse pattern, and folder naming conventions are framework-level.
+- Global rules are binding: the [membership](#membership--what-is-part-of-the-operating-system) model, the [agent-ignore](#agent-ignore--skip-underscore-prefixed-folders) convention, and the `templates/` reuse pattern are framework-level.
 - Folder READMEs may add scope-specific rules on top (e.g., "Client deliverables save as PDF only") — those local rules apply within that folder's tree.
 - If a folder README appears to contradict this framework README, treat the framework as authoritative and surface the contradiction.
 
@@ -185,6 +207,10 @@ See [`../docs/extending-acos.md`](../docs/extending-acos.md) for the full conven
 
 Conventions that apply across every ACOS instance. AI tools should follow these by default unless a folder's own README overrides them. These rules exist so that **multiple agents working in different folders behave consistently** — any tool reading this section should treat the rules below as binding.
 
+### Membership is opt-in
+
+A folder is part of the operating system only if it opts in — by a row in the instance root's `## Folder map`, or by carrying a README inside a container. Not listed and not READMEd means not in the OS: silently, with no finding. Never write a list of folders to ignore; the allowlist is the only mechanism. The full rule is in [Membership](#membership--what-is-part-of-the-operating-system) above, and it is binding.
+
 ### Agent-ignore — skip underscore-prefixed folders
 
 Folders whose name begins with an underscore are **out of scope for AI work** by default. The signal is the prefix itself; the canonical rule, the reasoning, and the patterns live in [`agent-ignore.md`](agent-ignore.md), which is a lateral-cascade reference and should be honored before any folder traversal begins.
@@ -223,28 +249,25 @@ The instance dashboard ([`<instance-root>/dashboard.md`](#dashboards--the-single
 - *Why:* The dashboard is high-visibility internal collateral the principal looks at daily. It's exactly the artifact where brand consistency builds reflexive recognition over time, and exactly the artifact whose drift would be noticed first.
 - *How to apply:* The markdown `dashboard.md` is exempt — it carries no styling. Any skill, agent, or human producing a rendered view of the dashboard reads the instance's Brand asset README first and applies tokens accordingly. If the instance declares a render destination but has no Brand asset library, surface the gap rather than improvising styling.
 
-### Folder naming — three buckets
+### Folder naming — structure, not style
 
-Folder names fall into three buckets, and the right convention depends on which bucket the folder is in. There is no single house style, and pretending there is one was a framework bug: ACOS v0.1 mandated kebab-case everywhere while simultaneously prescribing `Clients/`, `Products/`, `Brand/` and telling adopters to name a client folder after the client. A naming rule the framework's own prescribed names violate is worse than no rule — it trains everyone to ignore the validator.
+**ACOS does not dictate letter case.** Name your folders `Clients/`, `clients/`, or `CLIENTS/`. Capitalize them, kebab them, mix the two. The framework has no opinion, ships no default, and the validator produces **no finding** either way.
 
-| Bucket | What it is | Convention | Examples |
-|---|---|---|---|
-| **Instance root** | The single folder holding `company-brief.md`. | Named for the instance. Any style the company likes. | `tPPOS/`, `acme-os/`, `companyOS/` |
-| **Container folders** | The top-level organizing folders — the siblings of the instance root listed in the root README's folder map. | **Capitalized.** Starts with a capital letter, no spaces, no underscores. Multi-word containers use dashes: `Design-System/`. | `Clients/`, `Products/`, `Projects/`, `Brand/`, `Research/`, `Admin/`, `Suppliers/` |
-| **Item folders** | A specific child inside a container — one client, one product, one project, one supplier. | **The real-world proper name**, spelled the way the world spells it, with spaces replaced by dashes. Case follows the name, not a style rule. No spaces, no underscores. | `Heartland-Paving-Partners/`, `ACOS/`, `AIRS/`, `Sprout.ai/`, `madefor-solutions/`, `1H26-AI-Growth/` |
-| **Everything else** | Files, sub-folders below the item level, skills, templates, overlays, decisions, stakeholder briefs. | **`kebab-case`** — lowercase words joined by single dashes. This is the default; when in doubt, kebab. | `company-brief.md`, `client-brief-processor/`, `overlays/acos-integrity.md`, `decisions/0014-repos-out-of-drive.md` |
+This is a deliberate reversal, and it took two tries to get here. ACOS v0.1 mandated kebab-case everywhere while simultaneously prescribing `Clients/`, `Products/`, and `Brand/` in its own templates — a rule the framework's own prescribed names violated. The first fix split names into three buckets (Capitalized containers, proper-name items, kebab everything else), which was more accurate but no more legitimate: it was still the framework legislating taste. So v0.2 removed the case rule altogether. The lesson generalizes. **Case is style. ACOS governs structure** — what is in the operating system, how it declares itself, how an agent traverses it — and a validator that spends its warnings on aesthetics teaches everyone to ignore its warnings, including the ones that matter.
 
-The reasoning, in one line each:
+So the framework flags exactly one thing about a folder name, and only because it genuinely breaks machinery:
 
-- **Containers are Capitalized** because they are the company's own filing cabinet, not code. They read as proper categories in a Finder window and in a Drive sidebar, which is where humans meet them.
-- **Items take their proper name** because mangling `Heartland Paving Partners` into `heartland-paving-partners` destroys the one thing the folder name is for: matching a real-world entity an agent has to recognize in a transcript, an email, or an invoice. Don't mangle a proper noun to satisfy a style rule.
-- **Everything else is kebab** because it is machine-facing: paths in scripts, links in markdown, skill names in tool configs. Case-insensitive filesystems, URLs, and shells all punish anything else.
+| Flagged | Not flagged |
+|---|---|
+| **Characters that break paths, links, or URLs** — reported as a **warning**, never a failure, with a concrete statement of what breaks. A **space** needs `%20` in a URL, angle brackets in a markdown link, and quoting in every shell. A `#` truncates a URL at the fragment. A `?` starts a query string. A `%` starts an escape. A `\`, `:`, `|`, `*`, `<`, `>`, or `"` collides with a path separator, a glob, or a shell operator. | **Case, in any form.** `Clients`, `clients`, `clientS` — all fine. |
+| | **Underscores inside a name.** `SME_Brain_Dump/` is harmless. (A *leading* underscore is a different rule entirely — it's the [agent-ignore](#agent-ignore--skip-underscore-prefixed-folders) signal.) |
+| | **Dots, digits, dashes, length, or anything else** that doesn't break a tool. |
 
-Two things are forbidden in **every** bucket, and this is the part the original rule got right: **no spaces and no underscores in folder names.** They break shell paths, markdown links, and URLs. Some legacy folders may predate this rule and still contain them — don't rename them on sight, they're load-bearing in scripts and references — but never create a new one, and record any you're keeping in the `naming-exempt` key of the [`acos-integrity`](skills/acos-integrity/SKILL.md) overlay so the finding stays visible rather than silently accepted.
+A legacy folder with a space in it is a warning, not a crisis. Rename it if it's cheap; keep it if renaming would break references that already point at it. The warning exists so the cost is visible, not so you feel obliged to pay it.
 
-This rule is mechanically enforced at the container and item levels by [`scripts/acos-integrity-check.py`](../scripts/acos-integrity-check.py) (check 4.1). Below the item level, ACOS does not govern the tree — that's the owner's working space — so kebab-case there is a recommendation the validator does not police.
+**An instance MAY declare its own naming policy.** If a company wants case enforced across its tree, it sets `naming-style` in its [`acos-integrity`](skills/acos-integrity/SKILL.md#instance-overlay-configuration) overlay (`kebab-case` or `capitalized`), and the validator will enforce it as a warning (check 4.2). The framework supports the mechanism and ships no default: with no `naming-style` key, the check does not run at all. This is the right place for it — a naming convention is a company's house style, and one company's house style is not a framework rule.
 
-To decide which bucket a new folder is in, ask: *does it appear as a row in the instance root's folder map?* If yes, it's a container. *Is it a direct child of one of those, standing for one real-world thing?* If yes, it's an item. Otherwise it's kebab.
+Enforcement lives in [`scripts/acos-integrity-check.py`](../scripts/acos-integrity-check.py) (check 4.1 for breaking characters, 4.2 for an instance's declared style, if it declared one).
 
 ### Status vocabulary
 
@@ -313,7 +336,9 @@ When a new convention, pattern, or operating rule emerges from real work, captur
 
 ## Versioning and maintenance
 
-- **Version:** 0.1 (initial extraction from tPPOS)
+- **Version:** 0.2 (membership model — the folder map is an opt-in allowlist, asset libraries end the walk, a missing README is information rather than error; and the case mandate removed, because ACOS governs structure, not style)
+- **Previous versions:**
+  - 0.1 — Initial extraction from tPPOS.
 - **Last updated:** 2026-07-12
 - **Maintainer:** Steven Jones (sjones@theproductpath.com)
 - **Status:** Active. Published at v0.1 and in production use in the tPPOS reference instance — the rules in this file are binding, not provisional. The framework is still young: expect additive change as patterns get promoted out of instances, and read [`../docs/extending-acos.md`](../docs/extending-acos.md) before making any.

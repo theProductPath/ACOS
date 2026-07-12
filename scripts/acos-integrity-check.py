@@ -84,35 +84,49 @@ KNOWN_STATUSES = {
     "deprecated",
 }
 
-# --- The three naming buckets (framework/README.md, "Folder naming") ---
+# --- Folder naming (framework/README.md, "Folder naming — structure, not style") ---
 #
-# Bucket 3 / default — kebab-case: lowercase alphanumeric words joined by single
-# dashes. Good: "acme-industries", "q3-strategy-review", "brand".
-# Bad: "Acme Industries", "MyFolder", "my_folder", "MYFOLDER", "my--folder".
+# ACOS governs structure, not style. It does NOT dictate letter case: a folder
+# named `Clients`, `clients`, or `clientS` is equally valid as far as the
+# framework is concerned, and none of them produce a finding. Underscores inside
+# a name are harmless too (a *leading* underscore is the agent-ignore signal,
+# which is a different rule handled by is_agent_ignored()).
+#
+# What the framework does flag is a character that genuinely breaks something —
+# paths, markdown links, or URLs. Those are warnings, never failures, and the
+# message says concretely what breaks.
+BREAKING_CHARS = [
+    (" ", "a space", "breaks unquoted shell paths, needs %20 in URLs, and breaks markdown "
+                     "links unless the whole target is angle-bracketed"),
+    ("\t", "a tab", "breaks shell paths and is invisible in every tool that has to render it"),
+    ("#", "a '#'", "truncates a URL at the fragment marker, so links into this folder silently "
+                   "resolve to the wrong place"),
+    ("?", "a '?'", "starts the query string in a URL, so links into this folder are cut short"),
+    ("%", "a '%'", "starts a percent-escape in a URL, so the path is decoded into something else"),
+    ("\\", "a backslash", "is a path separator on Windows and an escape character in most shells"),
+    (":", "a ':'", "is a path separator in some tools and breaks Windows paths outright"),
+    ("|", "a '|'", "is a pipe in every shell and a cell separator in markdown tables"),
+    ("*", "a '*'", "is a glob wildcard, so any script that touches this path can match the wrong "
+                   "folder"),
+    ('"', "a double quote", "breaks shell quoting"),
+    ("<", "a '<'", "is a shell redirect and an HTML tag opener"),
+    (">", "a '>'", "is a shell redirect and an HTML tag closer"),
+]
+
+# --- Optional instance naming policy (overlay: naming-style) ---
+#
+# The framework ships NO default naming style. An instance that wants one
+# enforced declares it in its acos-integrity overlay; without that key, the
+# style check does not run at all.
 KEBAB_RE = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
+CAPITALIZED_RE = re.compile(r"^[A-Z][A-Za-z0-9]*(?:-[A-Za-z0-9]+)*$")
 
-# Bucket 1 — container folders: the top-level organizing folders (the siblings of
-# the instance root, listed in the root README's folder map). Capitalized, no
-# spaces, no underscores, dashes between words.
-# Good: "Clients", "Products", "Brand", "Design-System". Bad: "clients",
-# "File Cabinet", "my_stuff".
-CONTAINER_RE = re.compile(r"^[A-Z][A-Za-z0-9]*(?:-[A-Za-z0-9]+)*$")
-
-# Bucket 2 — item folders: a specific child of a container, named for the
-# real-world thing it stands for. Any case (it's a proper noun, not a style
-# choice), dots allowed (real company names have them), no spaces, no
-# underscores, no leading/trailing/doubled dashes.
-# Good: "Heartland-Paving-Partners", "ACOS", "Sprout.ai", "madefor-solutions",
-# "1H26-AI-Growth". Bad: "AI Gateways", "SME_Brain_Dump", "-leading".
-ITEM_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9.]*(?:-[A-Za-z0-9][A-Za-z0-9.]*)*$")
-
-CONTAINER, ITEM, DEFAULT = "container", "item", "default"
-
-BUCKET_EXPECTATION = {
-    CONTAINER: "container folders are Capitalized",
-    ITEM: "item folders take the real-world proper name, dashes for spaces",
-    DEFAULT: "expected kebab-case",
+NAMING_STYLES = {
+    "kebab-case": (KEBAB_RE, "kebab-case (lowercase words joined by single dashes)"),
+    "capitalized": (CAPITALIZED_RE, "Capitalized (initial capital, dashes between words)"),
 }
+
+NO_NAMING_STYLE = "none"
 
 FRONTMATTER_RE = re.compile(r"\A---[ \t]*\r?\n(.*?)\r?\n---[ \t]*(?:\r?\n|\Z)", re.DOTALL)
 
@@ -165,74 +179,48 @@ def parse_frontmatter_text(text):
 
 
 def is_kebab_case(name):
-    """True only for lowercase kebab-case names — the default naming bucket."""
+    """True only for lowercase kebab-case names.
+
+    Retained because an instance may opt into `naming-style: kebab-case` in its
+    overlay. The framework itself mandates no case convention.
+    """
     if not isinstance(name, str) or not name:
         return False
     return bool(KEBAB_RE.match(name))
 
 
-def is_container_name(name):
-    """True for Capitalized container-folder names (Clients, Products, Design-System)."""
-    if not isinstance(name, str) or not name:
-        return False
-    return bool(CONTAINER_RE.match(name))
+def naming_violation(name):
+    """Describe the character in `name` that genuinely breaks something, or None.
 
-
-def is_item_name(name):
-    """True for proper-name item folders (ACOS, Heartland-Paving-Partners, Sprout.ai)."""
-    if not isinstance(name, str) or not name:
-        return False
-    return bool(ITEM_RE.match(name))
-
-
-def _universal_violation(name):
-    """The two things forbidden in every bucket."""
-    if " " in name or "\t" in name:
-        return "contains spaces"
-    if "_" in name:
-        return "contains underscores"
-    return None
-
-
-def naming_violation(name, bucket=DEFAULT):
-    """Describe why `name` breaks its naming bucket's rule, or None if it doesn't.
-
-    Buckets (framework/README.md, "Folder naming — three buckets"):
-      container — the top-level organizing folders. Capitalized.
-      item      — a specific child of a container. Real-world proper name.
-      default   — everything else. kebab-case.
+    ACOS governs structure, not style. Case is taste: `Clients`, `clients`, and
+    `CLIENTS` are all fine and none of them is a finding. Underscores inside a
+    name are harmless. The only thing reported here is a character that breaks
+    real machinery — shell paths, markdown links, URLs — and the reason says what.
     """
     if not isinstance(name, str) or not name:
         return "is not a usable folder name"
 
-    universal = _universal_violation(name)
-    if universal:
-        return universal
+    for char, label, breaks in BREAKING_CHARS:
+        if char in name:
+            return f"contains {label}, which {breaks}"
+    return None
 
-    if bucket == CONTAINER:
-        if is_container_name(name):
-            return None
-        if name[0].islower():
-            return "is a container folder but is not Capitalized"
-        return "is not a valid container name"
 
-    if bucket == ITEM:
-        if is_item_name(name):
-            return None
-        return "is not a usable item name (leading/trailing/doubled dash, or an illegal character)"
+def style_violation(name, style):
+    """Check `name` against an instance-declared naming policy, or None.
 
-    if is_kebab_case(name):
+    The framework ships no default: `style` is whatever the instance put in its
+    overlay's `naming-style` key. Absent (or "none"), this never fires.
+    """
+    if not style or style == NO_NAMING_STYLE:
         return None
-    if any(c.isupper() for c in name):
-        return "contains uppercase characters"
-    if "." in name:
-        return "contains dots"
-    return "is not kebab-case"
-
-
-def kebab_violation(name):
-    """Back-compat shim: the default bucket's rule."""
-    return naming_violation(name, DEFAULT)
+    rule = NAMING_STYLES.get(style)
+    if not rule:
+        return None
+    pattern, description = rule
+    if isinstance(name, str) and pattern.match(name):
+        return None
+    return f"does not match this instance's declared naming-style: {description}"
 
 
 def validate_date(date_str):
@@ -312,15 +300,24 @@ class InstanceConfig:
         self.root_path = Path(root_path)
 
         # The instance root folder is named for the instance, not for its
-        # contents; it is exempt from the kebab-case folder rule.
+        # contents; it is exempt from the folder-name check.
         self.instance_name = config.get("instance-name", self.root_path.name)
+
+        # An instance MAY declare a naming policy. The framework ships none: with
+        # no `naming-style` key, the style check does not run. See
+        # framework/README.md, "Folder naming — structure, not style".
+        self.naming_style = config.get("naming-style", NO_NAMING_STYLE)
 
         # Convention default: an in-scope folder literally named "clients" holds
         # one folder per client. Overridable for instances that name it otherwise.
         self.client_containers = config.get("client-containers", ["Clients"])
 
         # Folders that ARE asset libraries (framework/README.md "Asset" README
-        # pattern). Their README and their children's READMEs are asset-typed.
+        # pattern). Their children are material, not OS items: never walked,
+        # never expected to carry READMEs. A folder whose own README declares
+        # `type: folder-readme-asset` gets the same treatment without needing an
+        # overlay entry — this key is for instances that would rather say it once
+        # here than trust the frontmatter.
         self.asset_folders = config.get("asset-folders", [])
 
         # Containers whose direct children are self-contained repos carrying
@@ -434,15 +431,22 @@ class ACOSIntegrityChecker:
         self.log("1.1", "Instance root README", "pass")
         self.validate_fm(readme_path, load_frontmatter(readme_path), "folder-readme-root")
 
+        # The `## Folder map` table IS the membership allowlist. A sibling folder
+        # is part of the OS if and only if it has a row here. Anything else on
+        # disk is not in the OS — silently, with no finding. This table is
+        # load-bearing and machine-parsed; see framework/README.md, "Membership".
         content = readme_path.read_text(encoding="utf-8")
         if "## Folder map" in content:
             section = content.split("## Folder map")[1].split("\n##")[0]
             folders = re.findall(r"^\|\s*`([^/`]+)/?`", section, re.MULTILINE)
             self.in_scope_folders = [f for f in folders if not is_agent_ignored(f)]
-            self.log("0.1", "Folder map extraction", "pass",
-                     f"Found {len(self.in_scope_folders)} in-scope folders: {', '.join(self.in_scope_folders)}")
+            self.log("0.1", "Folder map — the membership roster", "pass",
+                     f"{len(self.in_scope_folders)} folders opted into the OS: "
+                     f"{', '.join(self.in_scope_folders)}")
         else:
-            self.log("0.1", "Folder map extraction", "fail", "Could not find '## Folder map' section in root README")
+            self.log("0.1", "Folder map — the membership roster", "fail",
+                     "Could not find the '## Folder map' section in the root README. It is the "
+                     "allowlist that defines what is in the OS; without it nothing is in scope")
 
     @staticmethod
     def declared_type(path):
@@ -453,61 +457,102 @@ class ACOSIntegrityChecker:
         fm = load_frontmatter(readme) or {}
         return fm.get("type")
 
+    def is_asset_library(self, path):
+        """True if this folder is an asset library — a source-of-truth material store.
+
+        Two ways a folder says so, and either is enough:
+          1. Its own README declares `type: folder-readme-asset`. The README is
+             allowed to speak for itself; that is what frontmatter is for.
+          2. The instance overlay names it in `asset-folders`.
+
+        An asset library's children are *material* — files, images, documents,
+        sub-folders of assets. They are never OS items, they never need READMEs,
+        and the checker does not walk into them looking for OS structure.
+        """
+        if path.name in self.config.asset_folders:
+            return True
+        return self.declared_type(path) == "folder-readme-asset"
+
     def expected_type_for(self, path, is_container):
-        # The overlay's asset-folders key is an explicit declaration and wins.
-        if path.name in self.config.asset_folders or path.parent.name in self.config.asset_folders:
+        if self.is_asset_library(path):
             return "folder-readme-asset"
-
-        # Without an overlay, a folder that declares itself an asset library IS
-        # one — that's what frontmatter is for. Requiring the overlay to say so
-        # meant an instance built exactly as the adoption guide describes got
-        # spurious "expected folder-readme-container" warnings on its Brand
-        # folder. The README is allowed to speak for itself.
-        if is_container and self.declared_type(path) == "folder-readme-asset":
-            return "folder-readme-asset"
-        if not is_container and self.declared_type(path.parent) == "folder-readme-asset":
-            return "folder-readme-asset"
-
         return "folder-readme-container" if is_container else "folder-readme-item"
 
+    def check_naming(self, path):
+        """4.1 — the only folder-name findings ACOS makes.
+
+        Structure, not style: no case rule. A breaking character is a warning
+        (it really does break links, paths, and URLs); an instance-declared
+        naming-style, if any, is also a warning. Neither is ever a failure.
+        """
+        if self.config.is_naming_exempt(path.name):
+            return
+
+        reason = naming_violation(path.name)
+        if reason:
+            self.log("4.1", "Folder naming", "warning", f"'{self.rel(path)}' {reason}")
+
+        style = style_violation(path.name, self.config.naming_style)
+        if style:
+            self.log("4.2", "Instance naming style", "warning", f"'{self.rel(path)}' {style}")
+
     def check_folder_recursive(self, path, is_container=False):
+        """Walk one folder of the OS.
+
+        `is_container=True` means this folder is on the roster — it is listed in
+        the instance root README's `## Folder map`, which is the membership
+        allowlist. `is_container=False` means it is a *candidate* child of a
+        container, which is in the OS only if it has a README.
+        """
         # Agent-ignore (framework/agent-ignore.md): underscore-prefixed folders
-        # are out of scope, and so are hidden tool folders.
+        # are out of scope at any depth, and so are hidden tool folders.
         if is_agent_ignored(path.name):
             return
         if path.name in self.config.exclude_folders:
             return
 
         self.folders_walked += 1
-
-        # 4.1 Folder naming — the three-bucket house rule. A folder walked as a
-        # container is in the container bucket; its direct children are items.
-        # Anything deeper is the owner's working space and ACOS doesn't police it.
-        if not self.config.is_naming_exempt(path.name):
-            bucket = CONTAINER if is_container else ITEM
-            reason = naming_violation(path.name, bucket)
-            if reason:
-                self.log("4.1", "Folder naming", "warning",
-                         f"'{self.rel(path)}' {reason} ({BUCKET_EXPECTATION[bucket]})")
+        self.check_naming(path)
 
         readme_path = path / "README.md"
-        if readme_path.exists():
-            if path == self.root_path:
-                return
 
-            # Repo children: a self-contained repository's README.md is a codebase
-            # README owned by that repo, not an OS-managed doc. Which containers
-            # hold repos is instance knowledge, declared in the overlay.
-            if path.parent.name in self.config.repo_child_containers and not is_container:
-                self.log("2.5", "Repo README (frontmatter exempt)", "pass",
-                         f"{self.rel(path)}/README.md is a codebase repo README")
-                return
+        if not readme_path.exists():
+            if is_container:
+                # A folder on the roster opted into the OS but has no front door.
+                # That is a real failure: the map promised an OS folder and there
+                # is nothing there to declare what it is or what its children are.
+                self.log("1.2", "In-scope folder README", "fail",
+                         f"'{self.rel(path)}' is listed in the root README's folder map "
+                         "but has no README.md, so nothing declares what it is")
+            else:
+                # A child of a container with no README is simply NOT AN OS ITEM.
+                # That is information, not an error: a folder is part of the OS
+                # only if it opts in. Say so, and say how to change it.
+                self.log("1.4", "OS membership", "warning",
+                         f"'{self.rel(path)}' has no README.md, so it is not visible to the OS "
+                         "and agents will not read into it. That may be exactly right. To bring "
+                         "it in, give it a README; to declare it material rather than structure, "
+                         "type its parent 'folder-readme-asset'; to hide it, prefix it with '_'")
+            return
 
-            self.validate_fm(readme_path, load_frontmatter(readme_path),
-                             self.expected_type_for(path, is_container))
-        else:
-            # 1.2 / 1.4 — containers and their item children must have a README.
-            self.log("1.4", "README presence", "fail", f"Missing README.md in {self.rel(path)}")
+        if path == self.root_path:
+            return
+
+        # Repo children: a self-contained repository's README.md is a codebase
+        # README owned by that repo, not an OS-managed doc. Which containers
+        # hold repos is instance knowledge, declared in the overlay.
+        if path.parent.name in self.config.repo_child_containers and not is_container:
+            self.log("2.5", "Repo README (frontmatter exempt)", "pass",
+                     f"{self.rel(path)}/README.md is a codebase repo README")
+            return
+
+        self.validate_fm(readme_path, load_frontmatter(readme_path),
+                         self.expected_type_for(path, is_container))
+
+        # An asset library's children are material, not OS structure. Stop here:
+        # do not walk in, do not expect READMEs, at any depth.
+        if self.is_asset_library(path):
+            return
 
         # Client-specific checks (2.2-2.4) on direct children of a client container.
         if path.parent.name in self.config.client_containers and not is_container:

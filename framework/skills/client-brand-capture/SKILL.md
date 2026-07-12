@@ -195,7 +195,7 @@ See [`../../companion-plugins.md`](../../companion-plugins.md) for the general f
 
 ## House rules this skill respects
 
-- Kebab-case folder naming (`Brand/`, `colors/`, `typography/`, `logos/` are all kebab- or single-word).
+- `Brand/` is an **asset library** (`type: folder-readme-asset`): its children (`colors/`, `typography/`, `logos/`) hold material, not OS items, so they carry no READMEs and nothing walks into them looking for structure.
 - TODO sentinels for any value the skill could not verify, routed to the resolved principal.
 - ISO dates (`YYYY-MM-DD`) in `_sources.md` and frontmatter.
 - Frontmatter on every generated `.md` file (folder-readme-asset for `Brand/README.md`, content-file types for the others).

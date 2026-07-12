@@ -112,6 +112,16 @@ House rules live in `framework/README.md` under [House rules](../framework/READM
 - Phrase it as a binding statement, not a suggestion.
 - Include the *why* if it's non-obvious. Future agents will need to judge edge cases.
 
+### ACOS governs structure, not style
+
+The sharpest version of the bar above, and the one that has already been failed twice. **ACOS governs structure** — what is part of the operating system, how a folder declares what it is, how an agent traverses the tree, what a document must carry so a tool can reason about it. **It does not govern taste.**
+
+Letter case is the worked example. ACOS v0.1 mandated kebab-case for every folder while its own templates prescribed `Clients/` and `Brand/` — a rule the framework's own names broke. The first fix narrowed it into three buckets (Capitalized containers, proper-name items, kebab everything else), which was more accurate and still wrong: it was still the framework legislating aesthetics. v0.2 removed the case rule entirely. What survived is the part that was never about taste — a **space** in a folder name breaks URLs, markdown links, and shell paths, so it earns a warning that says exactly what it breaks.
+
+Apply the test before you add any rule: **if the convention were violated, what would actually break?** If the honest answer is "nothing, it would just look inconsistent," it is not a framework rule. It may still be a fine convention — for *one company*, in *its* instance, declared in *its* overlay (the `naming-style` key exists for exactly this). The framework supports the mechanism and ships no default.
+
+A validator that spends its warnings on aesthetics trains everyone to ignore its warnings, including the ones that matter. That is the failure mode the framework is protecting against, and it is worse than having no validator at all.
+
 ## Working in this folder safely
 
 A few defensive habits that prevent future regret:
