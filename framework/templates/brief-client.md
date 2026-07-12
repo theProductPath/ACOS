@@ -27,7 +27,7 @@ purpose: Canonical record for this client — who they are, the relationship his
 
 > **TODO:** One row per contact who has materially shown up in our work with this client. Mark champions and blockers honestly — that's the part that doesn't survive in email threads. Update "Last contact" as conversations happen. When someone leaves the client org, change their Relationship to "alumni" and append "(former)" to their Role — keep the row rather than deleting, because the relationship can still pay off when they resurface elsewhere.
 >
-> **Brief column:** when a contact is designated a **primary stakeholder**, scaffold a per-person brief at [`Stakeholders/<kebab-name>.md`](Stakeholders/) and link it here. Stakeholder briefs hold the rolling 1:1 history and person-level notes that would otherwise bloat this file. See the [`stakeholder-brief` template](../../Products/ACOS/framework/templates/stakeholder-brief.md). Contacts who don't warrant a brief use `—` in this column. Only promote someone to a stakeholder brief when they're a decision-maker, a recurring 1:1 partner, or someone whose personal context materially shapes how we operate the engagement.
+> **Brief column:** when a contact is designated a **primary stakeholder**, scaffold a per-person brief at [`Stakeholders/<kebab-name>.md`](Stakeholders/) and link it here. Stakeholder briefs hold the rolling 1:1 history and person-level notes that would otherwise bloat this file. See the [`stakeholder-brief` template](../../<path-to-acos>/framework/templates/stakeholder-brief.md). Contacts who don't warrant a brief use `—` in this column. Only promote someone to a stakeholder brief when they're a decision-maker, a recurring 1:1 partner, or someone whose personal context materially shapes how we operate the engagement.
 
 ## Engagement history
 
@@ -72,7 +72,7 @@ Tone, channel preferences, things to avoid.
 
 The headline of the client's visual and verbal brand, so any agent producing artifacts for them has enough to act on without descending into `Brand/` for every task. Full kit lives in [`Brand/`](Brand/).
 
-> **TODO:** Populated automatically by the [`client-brand-capture`](../../Products/ACOS/framework/skills/client-brand-capture/) skill on first run. If the section is missing, run the skill to scaffold it; if values are stale, re-run.
+> **TODO:** Populated automatically by the [`client-brand-capture`](../../<path-to-acos>/framework/skills/client-brand-capture/) skill on first run. If the section is missing, run the skill to scaffold it; if values are stale, re-run.
 
 **Visual identity.** *(Primary brand color and one-word descriptor. Body typography. Overall feel in one sentence.)*
 

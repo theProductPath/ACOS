@@ -203,7 +203,6 @@ See [`../../companion-plugins.md`](../../companion-plugins.md) for the general f
 
 ## Links
 
-- Parent skill index: [`../README.md`](../README.md) (TODO if not yet created)
 - Framework house rules: [`../../README.md`](../../README.md)
 - Companion plugins convention: [`../../companion-plugins.md`](../../companion-plugins.md)
 - Output templates: [`output-templates/`](output-templates/)

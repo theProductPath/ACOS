@@ -2,8 +2,8 @@
 type: folder-readme-item
 folder: ACOS
 parent: Products
-status: drafting
-last-updated: 2026-07-03
+status: active
+last-updated: 2026-07-12
 maintainer: Steven Jones
 purpose: ACOS product overview — what it is, who it's for, and how the framework relates to its first reference instance (tPPOS).
 ---
@@ -42,9 +42,11 @@ What ACOS does *not* provide:
 
 ## Status
 
-Drafting, v0.1. Currently being extracted from tPPOS into its own coherent surface. The skill library has grown past the first skill: `client-brief-processor`, `client-brand-capture`, `dashboard-refresh`, `dashboard-tune`, `acos-integrity`, and `readme-refresh` are live in `framework/skills/`, with more to follow as patterns harden inside tPPOS and prove general enough to promote.
+**Active, v0.1.** The framework is published and in production use in its reference instance. The rules in `framework/README.md` are binding, not provisional — but the surface is young, and it will keep growing as patterns prove general enough to promote out of an instance.
 
-This product follows the standard `Products/` rule: it's a self-contained codebase with its own internal structure, separate from the tPPOS layer that wraps the rest of theProductPath. Expect ACOS to eventually become its own repo once the surface stabilizes.
+Six skills are live in `framework/skills/`: `client-brief-processor`, `client-brand-capture`, `dashboard-refresh`, `dashboard-tune`, `acos-integrity`, and `readme-refresh`.
+
+ACOS is developed in its own git repository, separate from any instance. A read-only copy is published into theProductPath's Drive tree so that Drive-scoped agents can read the framework; that copy is a mirror, and the repo is canonical.
 
 ## How to navigate
 
@@ -55,10 +57,11 @@ This product follows the standard `Products/` rule: it's a self-contained codeba
 - `docs/extending-acos.md` — conventions for agents and contributors extending the framework. Read this before adding a new skill, template, or rule.
 - `docs/adopting-acos.md` — guide for a new company adopting ACOS: scaffolding an instance, filling in the templates, wiring in skills, and pointing agents at the tree.
 - `instances/README.md` — known instances of ACOS. tPPOS is currently the only one and is the reference implementation.
+- `scripts/` — read-only validators. `acos-integrity-check.py` checks an instance against the conventions; `check-links.py` checks this repo's own links. ACOS ships no runtime tooling — see [`docs/extending-acos.md`](docs/extending-acos.md#code-in-acos--validators-yes-runtime-no) for where that line is drawn.
 
 ## Relationship to tPPOS
 
-tPPOS is the tPP instance of ACOS. The relationship works in both directions:
+tPPOS is theProductPath's own instance of ACOS. It's a private company tree — it is not distributed with the framework, and nothing in this repo requires you to read it. The relationship works in both directions:
 
 - **ACOS → tPPOS:** improvements to the framework propagate to tPPOS by reference. tPPOS adopts ACOS templates, ACOS skills, ACOS conventions without re-implementing them.
 - **tPPOS → ACOS:** patterns that emerge in tPPOS and prove generally useful get *promoted* to ACOS, with a thin overlay in tPPOS capturing whatever residual tPP-specificity remains.
@@ -67,12 +70,12 @@ The decision rule for where a new change lands is in [`docs/extending-acos.md`](
 
 ## Links
 
-- Parent: [Products](../README.md)
-- Marketing site: https://acos.theproductpath.com — published from the `gh-pages` branch of this repo. It is not part of a framework clone; see `setup-acos-repo.sh` and `acos-site/` (on `gh-pages`) for how it's wired.
 - Framework manual: [`framework/README.md`](framework/README.md)
-- Reference instance (tPP): [`../../tPPOS/README.md`](../../tPPOS/README.md)
+- Adoption guide: [`docs/adopting-acos.md`](docs/adopting-acos.md)
 - Extension conventions: [`docs/extending-acos.md`](docs/extending-acos.md)
-- tPPOS company brief (positioning context for why tPP built this): [`../../tPPOS/company-brief.md`](../../tPPOS/company-brief.md)
+- Known instances: [`instances/README.md`](instances/README.md)
+- Source: https://github.com/theProductPath/ACOS
+- Marketing site: https://acos.theproductpath.com — built from the `gh-pages` branch of this repo, which is a separate content root. It is not part of a framework clone, and nothing on `main` depends on it.
 
 ## License
 

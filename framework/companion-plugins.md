@@ -1,8 +1,8 @@
 ---
 type: framework-doc
 folder: ACOS-framework
-status: drafting
-last-updated: 2026-05-12
+status: active
+last-updated: 2026-07-12
 maintainer: Steven Jones
 purpose: Defines the companion-plugin convention — how ACOS skills declare optional partner plugins that enhance their output without becoming dependencies.
 ---

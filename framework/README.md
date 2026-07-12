@@ -1,8 +1,8 @@
 ---
 type: folder-readme-root
 folder: ACOS-framework
-status: drafting
-last-updated: 2026-05-11
+status: active
+last-updated: 2026-07-12
 maintainer: Steven Jones
 purpose: The ACOS framework operating manual — system-wide rules, README cascade conventions, frontmatter taxonomy, house rules, and pointers for any company instance that adopts the framework.
 ---
@@ -40,7 +40,22 @@ An ACOS instance is a folder tree with an **instance root** containing:
 
 Sibling folders of the instance root hold the slices of the business — clients, projects, products, brand, research, or whatever the company chooses. Each sibling folder follows the [README cascade](#readme-cascade) rules.
 
-The first reference instance of ACOS is **tPPOS**, theProductPath's instance. See [`../../../tPPOS/README.md`](../../../tPPOS/README.md) for an example of a fully populated instance.
+The first reference instance of ACOS is **tPPOS**, theProductPath's own instance. It is a private company tree and is not distributed with the framework, so this manual never sends you to it: every pattern below is fully specified here and scaffolded in [`templates/`](templates/). Where an example is genuinely load-bearing, it's inlined. Known instances are registered in [`../instances/README.md`](../instances/README.md).
+
+A populated instance root, for orientation:
+
+```
+theProductPath/            <- the company tree
+  tPPOS/                   <- the instance root
+    README.md              <- folder-readme-root: the front door every agent reads first
+    company-brief.md       <- brief-company: stable identity, principals, voice
+    dashboard.md           <- dashboard-company: volatile current state
+    overlays/              <- per-skill instance configuration
+      client-brief-processor.md
+  Clients/                 <- sibling folder, container README + one item folder per client
+  Products/                <- sibling folder, container README
+  Brand/                   <- sibling folder, asset README (source of truth, not an index)
+```
 
 ## README cascade
 
@@ -89,6 +104,7 @@ The `type` taxonomy currently in use:
 - `folder-readme-asset` — for sibling-level asset libraries that are sources of truth in their own right.
 - `brief-company` — singleton company identity brief.
 - `brief-client` — per-client CRM-flavored brief.
+- `brief-stakeholder` — per-person brief for a primary stakeholder at a client. Lives at `Clients/<client>/Stakeholders/<kebab-name>.md`.
 - `client-manifest` — per-client lookup index for matching transcripts and communications to the correct client. Lives in each client folder as `manifest.md`.
 - `dashboard-company` — singleton company state record. Lives at the instance root as `dashboard.md`. Companion to `brief-company`: the brief is stable (who the company is), the dashboard is volatile (what it's doing right now).
 - `agent-ignore` — singleton skip-rule reference (see [`agent-ignore.md`](agent-ignore.md)).
@@ -112,12 +128,15 @@ Lateral references are powerful precisely because they're rare. Don't add a new 
 
 Some folders also contain a `brief.md` — substantive content about the *thing the folder represents*. Briefs complement READMEs: the README is the operational front door (what's here, where to look), and the brief is the substantive record (history, contacts, content, positioning).
 
-Two brief patterns exist today, both with templates in [`templates/`](templates/):
+Three brief patterns exist today, all with templates in [`templates/`](templates/):
 
 | Brief pattern | Used for | Template | Instance location |
 |---|---|---|---|
 | **Company brief** | Singleton — identity content about the company itself | [`templates/brief-company.md`](templates/brief-company.md) | `<instance-root>/company-brief.md` |
 | **Client brief** | Per-client — relationship content (CRM-style contacts, engagement history, opportunities, interaction log) | [`templates/brief-client.md`](templates/brief-client.md) | `Clients/<client>/brief.md` (one per client) |
+| **Stakeholder brief** | Per-person — the rolling 1:1 history and personal context for a *primary stakeholder*, kept out of the client brief so it doesn't bloat the organizational record | [`templates/stakeholder-brief.md`](templates/stakeholder-brief.md) | `Clients/<client>/Stakeholders/<kebab-name>.md` |
+
+Only promote a contact to a stakeholder brief when they're a decision-maker, a recurring 1:1 partner, or someone whose personal context materially shapes the engagement. The client brief stays the source of truth for the *organization*; a stakeholder brief is scoped to one *person*.
 
 Client folders also contain a **manifest** — a lookup index used by skills like [`client-brief-processor`](skills/client-brief-processor/SKILL.md) to route transcripts and communications to the correct client:
 
@@ -260,6 +279,6 @@ When a new convention, pattern, or operating rule emerges from real work, captur
 ## Versioning and maintenance
 
 - **Version:** 0.1 (initial extraction from tPPOS)
-- **Last updated:** 2026-05-11
+- **Last updated:** 2026-07-12
 - **Maintainer:** Steven Jones (sjones@theproductpath.com)
-- **Status:** Drafting. Expect this file to firm up as additional skills and patterns get promoted out of tPPOS into the framework.
+- **Status:** Active. Published at v0.1 and in production use in the tPPOS reference instance — the rules in this file are binding, not provisional. The framework is still young: expect additive change as patterns get promoted out of instances, and read [`../docs/extending-acos.md`](../docs/extending-acos.md) before making any.

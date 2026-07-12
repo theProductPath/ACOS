@@ -324,20 +324,58 @@ The skill is idempotent. Running it again produces a fresh report. Previous repo
 
 ## Instance overlay configuration
 
-An overlay at `<instance-root>/overlays/acos-integrity.md` may specify:
+An overlay at `<instance-root>/overlays/acos-integrity.md` carries everything instance-specific. The framework skill and the script it ships with hold **no** knowledge of any particular instance's folder names — which folder holds clients, which folders are asset libraries, which containers hold self-contained repos all come from here.
 
-- **Exclude folders** — specific folders to skip during the walk (in addition to `_`-prefixed folders). Useful for legacy areas not yet migrated to ACOS conventions.
-- **Suppress checks** — specific check IDs to skip (e.g., `7.1` if the instance has a known style exception for horizontal rules).
-- **Staleness threshold** — override the default 90-day staleness window for check 3.4.
-- **Report destination** — a file path or channel to write the report to.
-- **Custom type additions** — instance-specific `type:` values that should be treated as valid in addition to the framework taxonomy.
+The overlay is prose for the agent, plus one fenced `acos-config` block that the script (`scripts/acos-integrity-check.py`) parses. Agents running the skill by hand should read the same block.
+
+````
+```acos-config
+instance-name: <Instance>
+client-containers: [Clients]
+asset-folders: [Brand]
+repo-child-containers: [Products]
+exclude-folders: []
+suppress-checks: []
+custom-types: []
+custom-statuses: []
+naming-exempt: []
+```
+````
+
+| Key | Meaning | Default with no overlay |
+|---|---|---|
+| `instance-name` | Display name; also exempt from the kebab-case folder check (the instance root is named for the instance, not for its contents). | The instance root folder's name. |
+| `client-containers` | Folders whose direct children are client engagements. Checks 2.2-2.4 apply to each child. | `Clients` |
+| `asset-folders` | Folders that *are* asset libraries. Their README, and their children's READMEs, are expected to be `folder-readme-asset` (check 1.5). | none |
+| `repo-child-containers` | Containers whose direct children are self-contained repositories. Their `README.md` is a codebase README owned by that repo, so checks 2.5 and 3.1 are exempt for them; the README-presence check (1.4) still applies. | none |
+| `exclude-folders` | Folders to skip during the walk, in addition to `_`-prefixed and hidden folders. | none |
+| `suppress-checks` | Check IDs to skip entirely (e.g. `4.1`). | none |
+| `custom-types` | Instance-specific `type:` values treated as valid in addition to the framework taxonomy (check 3.1). | none |
+| `custom-statuses` | Instance-specific `status:` values treated as valid (check 3.2). | none |
+| `naming-exempt` | Folder names exempt from the kebab-case check (check 4.1) — the place to record accepted legacy names. | none |
+
+Report destination is prose, not config: the script writes to stdout, and the agent routes the report per the overlay's routing section.
+
+The skill is self-sufficient without an overlay. With no overlay, the script falls back to convention-based discovery: instance root by walking up for `company-brief.md`, in-scope folders from the root README's folder map, `Clients` as the client container.
+
+## Running the script
+
+```
+python3 <path-to-acos>/scripts/acos-integrity-check.py [--root PATH] [--overlay PATH] [--strict]
+```
+
+- `--root` — the instance root (the folder containing `company-brief.md`). Defaults to walking up from the working directory.
+- `--overlay` — an explicit overlay path. Defaults to `<instance-root>/overlays/acos-integrity.md`.
+- `--strict` — exit non-zero if any check fails. Useful in CI; off by default so scheduled runs report rather than break.
+
+The script is stdlib-only and has no dependencies. Its tests live in `tests/test_acos_integrity_check.py` and run in CI on every push and PR.
 
 ## Links
 
 - Framework README: [`../../README.md`](../../README.md)
 - Agent-ignore convention: [`../../agent-ignore.md`](../../agent-ignore.md)
 - Templates directory: [`../../templates/`](../../templates/)
-- Instance root (tPPOS example): [`../../../../tPPOS/README.md`](../../../../tPPOS/README.md)
+- Instance root: the folder containing `company-brief.md` in the instance being checked. Resolved at runtime, never hardcoded.
 
 ---
 

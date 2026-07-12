@@ -1,8 +1,8 @@
 ---
 type: acos-doc
 subject: adopting-acos
-status: drafting
-last-updated: 2026-07-07
+status: active
+last-updated: 2026-07-12
 maintainer: Steven Jones
 purpose: Guide for a new company adopting ACOS — how to scaffold an instance, fill in the templates, wire in skills, and point agents at the tree. Written 2026-07-07 from the settled framework and the tPPOS reference instance.
 ---
@@ -11,7 +11,9 @@ purpose: Guide for a new company adopting ACOS — how to scaffold an instance, 
 
 This guide takes you from an ordinary folder tree to a working ACOS instance — a company that any AI agent can read, orient itself in, and act on without being re-taught every time. It's written for the person setting up a new instance, not for contributors extending the framework itself (that's [`extending-acos.md`](extending-acos.md)).
 
-You don't need to read the whole framework manual first. Skim [`../framework/README.md`](../framework/README.md) for the vocabulary, then work through the steps below. When you want to see any pattern fully populated, [tPPOS](../../../tPPOS/) — theProductPath's own instance — is the reference implementation.
+You don't need to read the whole framework manual first. Skim [`../framework/README.md`](../framework/README.md) for the vocabulary, then work through the steps below.
+
+Two notes on what you will and won't find here. Every pattern this guide asks you to create has a template in [`../framework/templates/`](../framework/templates/) — that's the worked example, and it's the one you copy. The framework's first instance, tPPOS, is theProductPath's own company tree: it's private, it doesn't ship with ACOS, and this guide will never tell you to go read it. If a step is unclear, the gap is in the template or in this doc, and it's worth [raising](https://github.com/theProductPath/ACOS/issues) rather than working around.
 
 ## What ACOS asks of you
 
@@ -96,7 +98,9 @@ From here, the system compounds. Improve a rule once and every agent, on every m
 ## Where to go next
 
 - Read the full [framework manual](../framework/README.md) for the cascade rules, frontmatter taxonomy, and house rules in depth.
-- Study [tPPOS](../../../tPPOS/) as a fully populated instance when a pattern isn't obvious from the template.
+- When a pattern isn't obvious, go back to its template in [`../framework/templates/`](../framework/templates/) — each one carries `> **TODO:**` blocks describing what good content looks like in that section.
+- Check your own instance against the conventions with the [`acos-integrity`](../framework/skills/acos-integrity/SKILL.md) skill, or with `scripts/acos-integrity-check.py` — a read-only validator, run from anywhere inside your instance tree (it walks up to find `company-brief.md`).
+- Register your instance in [`../instances/README.md`](../instances/README.md) if you'd like it tracked alongside the reference implementation.
 - When you start extending the framework rather than just adopting it, switch to [`extending-acos.md`](extending-acos.md).
 
 ## Related
@@ -105,4 +109,4 @@ From here, the system compounds. Improve a rule once and every agent, on every m
 - Templates: [`../framework/templates/`](../framework/templates/)
 - Skills: [`../framework/skills/`](../framework/skills/)
 - Extension conventions (for contributors): [`extending-acos.md`](extending-acos.md)
-- Reference instance: [`../../../tPPOS/`](../../../tPPOS/)
+- Known instances: [`../instances/README.md`](../instances/README.md)

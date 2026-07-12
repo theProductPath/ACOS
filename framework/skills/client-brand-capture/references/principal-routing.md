@@ -52,6 +52,6 @@ Some brand decisions might warrant routing to a domain-specific principal rather
 
 ## Instance examples
 
-Single-principal instance (tPPOS today): one principal, listed once, automatically primary stakeholder.
+Single-principal instance (a solo operating company): one principal, listed once in `company-brief.md`, automatically the primary stakeholder. Nothing to route.
 
-Multi-principal instance (hypothetical agency adopting ACOS): three principals — founder, head of accounts, head of design. Founder marked as primary stakeholder. Skill routes here by default. An overlay specifies head of design for brand verification.
+Multi-principal instance (an agency adopting ACOS): three principals — founder, head of accounts, head of design. The founder is marked as primary stakeholder, so the skill routes there by default. An overlay specifies head of design for brand verification, and that overrides the default for this skill only.

@@ -11,7 +11,7 @@ purpose: Single consolidated checklist of every TODO from the brand-capture run.
 
 # <Client name> — Principal review
 
-**For:** <Principal name> (resolved via `tPPOS/company-brief.md` Principals → <single principal | primary stakeholder | maintainer fallback>)
+**For:** <Principal name> (resolved via `<instance-root>/company-brief.md` Principals → <single principal | primary stakeholder | maintainer fallback>)
 **Run date:** YYYY-MM-DD
 **Extraction tier:** <1 — live browser | 2 — computer-use | 3 — static HTML (preliminary)>
 

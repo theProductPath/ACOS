@@ -2,8 +2,8 @@
 type: folder-readme-container
 folder: instances
 parent: ACOS
-status: drafting
-last-updated: 2026-05-11
+status: active
+last-updated: 2026-07-12
 maintainer: Steven Jones
 purpose: Index of known ACOS instances. Each instance is a company's adoption of the framework; this folder is the registry, not the home for instance content.
 ---
@@ -20,9 +20,11 @@ This folder records which companies have adopted ACOS and points at where each i
 
 | Instance | Company | Location | Status | Notes |
 |---|---|---|---|---|
-| **tPPOS** | theProductPath | [`../../../tPPOS/`](../../../tPPOS/) | Active | Reference implementation — the first and most fully populated instance. Patterns in tPPOS often migrate to ACOS via the promotion path. |
+| **tPPOS** | theProductPath | Private company tree — not distributed | Active | Reference implementation — the first and most fully populated instance. Patterns in tPPOS often migrate to ACOS via the promotion path. |
 
-> **TODO:** Add rows as additional companies adopt ACOS. The minimum entry: instance name, company, location (path or URL), status, one-line note.
+An instance is a company's own folder tree, so its location is usually private and this registry records it, rather than linking to it. Nothing in the framework requires reading an instance: every pattern is specified in [`../framework/README.md`](../framework/README.md) and scaffolded in [`../framework/templates/`](../framework/templates/).
+
+> **TODO:** Add rows as additional companies adopt ACOS. The minimum entry: instance name, company, location (a path or URL only if it's actually reachable by a reader of this repo — otherwise say so plainly), status, one-line note.
 
 ## Why "instances" and not "deployments" or "adopters"
 
