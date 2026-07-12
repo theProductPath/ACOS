@@ -57,7 +57,7 @@ ACOS is developed in its own git repository, separate from any instance. A read-
 - `docs/extending-acos.md` — conventions for agents and contributors extending the framework. Read this before adding a new skill, template, or rule.
 - `docs/adopting-acos.md` — guide for a new company adopting ACOS: scaffolding an instance, filling in the templates, wiring in skills, and pointing agents at the tree.
 - `instances/README.md` — known instances of ACOS. tPPOS is currently the only one and is the reference implementation.
-- `scripts/` — read-only validators. `acos-integrity-check.py` checks an instance against the conventions; `check-links.py` checks this repo's own links. ACOS ships no runtime tooling — see [`docs/extending-acos.md`](docs/extending-acos.md#code-in-acos--validators-yes-runtime-no) for where that line is drawn.
+- `scripts/` — developer tooling you run by choice, never a dependency. `acos-integrity-check.py` checks an instance against the conventions; `check-links.py` checks this repo's own links. ACOS ships no *runtime* tooling — nothing an instance needs in order to operate — see [`docs/extending-acos.md`](docs/extending-acos.md#code-in-acos--tools-yes-runtime-no) for where that line is drawn, and why a scaffolder like `acos init` falls on the permitted side of it.
 
 ## Relationship to tPPOS
 

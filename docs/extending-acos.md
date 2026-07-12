@@ -133,26 +133,32 @@ A few defensive habits that prevent future regret:
 - **Don't paraphrase good prose just to relocate it.** When extracting from an instance to the framework, preserve sentences that are already framework-neutral. Rewriting introduces drift.
 - **Check your links before you commit.** Every relative link in a file that ships in a clone must resolve inside the repo. Run `python3 scripts/check-links.py`.
 
-## Code in ACOS — validators yes, runtime no
+## Code in ACOS — tools yes, runtime no
 
-ACOS is markdown conventions, not a platform. That principle is not negotiable, but it is narrower than "no code at all." The line:
+ACOS is markdown conventions, not a platform. That principle is not negotiable, but it is narrower than "no code at all," and the line is **not** read-vs-write. It is **dependency**:
 
-- **No runtime tooling.** ACOS ships nothing that an instance *depends on to operate* — no servers, no daemons, no agent runners, no build systems, no libraries an instance imports, nothing that has to be installed, configured, or kept running for the conventions to hold. An ACOS instance is a folder tree of markdown. It must work when the only thing reading it is an LLM with a filesystem. If a proposed addition would make an instance stop working when you delete it, it is runtime tooling and it does not belong here. Build it as a *tool that consumes ACOS*, in its own product.
-- **Validators are allowed.** ACOS may ship read-only scripts that check whether an instance (or this repo) conforms to the conventions, and report what they find. `scripts/acos-integrity-check.py` and `scripts/check-links.py` are the current examples. A framework that cannot verify its own conventions is just prose, and prose drifts — the rules in `framework/README.md` are only real to the extent something can tell you when you've broken them.
+- **No runtime tooling.** ACOS ships nothing that an instance *depends on to operate* — no servers, no daemons, no agent runners, no build systems, no libraries an instance imports, nothing that has to be installed, configured, or kept running for the conventions to hold. An ACOS instance is a folder tree of markdown. **It must still work when the only thing reading it is an LLM with a filesystem.** If a proposed addition would make an instance stop working when you delete it, it is runtime tooling and it does not belong here. Build it as a *tool that consumes ACOS*, in its own product.
+- **Developer and operator tooling is allowed.** A script a human or an agent runs *occasionally, by choice*, whose only output is plain files (or a report) that the instance would be fine without, is in scope. Two kinds exist today, and both are welcome:
+  - **Validators** — read-only scripts that check whether an instance (or this repo) conforms to the conventions and report what they find. `scripts/acos-integrity-check.py` and `scripts/check-links.py`. A framework that cannot verify its own conventions is just prose, and prose drifts: the rules in `framework/README.md` are only real to the extent something can tell you when you've broken them.
+  - **Scaffolders** — scripts that *generate* an instance, or part of one, from the templates in `framework/templates/`. **An `acos init` that writes a folder tree of markdown and then exits is explicitly permitted**, and is the single highest-leverage thing the framework could ship: adopting ACOS by hand means copying nine templates and resolving their placeholders by eye, which is most of the adoption cost. The output is ordinary markdown that a human then owns and edits. The instance does not depend on the scaffolder; it was never running in the first place. Delete it and every instance it ever made carries on unchanged.
+
+Writing files is therefore **not** disqualifying. A scaffolder writes; so does a report you redirect to a file. What matters is whether anything *keeps needing* the code after it exits.
 
 The test for which side a new script falls on, in order:
 
-1. **Does an instance depend on it?** If deleting the script would break an instance — or break a skill, a template, or a house rule — it's runtime tooling. Rejected.
-2. **Does it write anything?** A validator reads the tree, resolves the conventions against it, and prints a report. It does not edit files, move files, generate content, or call out to a network. If it mutates the instance, it's a tool, not a validator. Rejected. (Skills are how ACOS mutates an instance, and skills are markdown.)
-3. **Is it optional?** A validator is a convenience for maintainers and adopters who want CI. An instance that never runs one is still a valid ACOS instance. If the answer is no, it's runtime tooling. Rejected.
+1. **Would an instance stop working if you deleted the script?** If an instance — or a skill, a template, or a house rule — needs it to be present, installed, imported, or running, it is runtime tooling. Rejected. This is the whole rule; the next two are just its common shapes.
+2. **Does it have to run for the conventions to hold?** A validator and a scaffolder both run when someone decides to run them, and nothing degrades in between. A build step, a sync daemon, an indexer that something else reads the output of, a library a skill imports — those are *load-bearing while running*. Rejected.
+3. **Is its output plain, human-owned files?** Markdown, folders, a report on stdout. Not a database, not a cache another tool depends on, not a generated artifact that has to be regenerated when the source changes. If the instance's markdown is no longer the source of truth once your script exists, it's a platform. Rejected.
 
-A validator that passes all three is in scope. Keep it dependency-free (standard library only), keep it read-only, and keep it honest about what it can't check — a validator that reports a false pass is worse than no validator.
+A script that passes all three is in scope. Keep it dependency-free (standard library only), keep its output human-owned, and keep it honest about what it can't do — a validator that reports a false pass is worse than no validator, and a scaffolder that silently leaves placeholders behind is worse than copying the templates yourself.
+
+One thing the permission does *not* license: **a scaffolder is not a substitute for the conventions being readable by hand.** If a template can only be filled in correctly by running a script, the template is broken. Scaffolding removes tedium; it must never become the only path in.
 
 ## What's *not* in ACOS (and shouldn't be)
 
 A short list of things people sometimes propose adding that don't belong here:
 
-- **Runtime tooling / runners.** See [Code in ACOS](#code-in-acos--validators-yes-runtime-no) above. If you find yourself proposing a JavaScript or Python *runner* — something that executes an instance rather than checking one — you're building a tool that consumes ACOS, which belongs in its own product.
+- **Runtime tooling / runners.** See [Code in ACOS](#code-in-acos--tools-yes-runtime-no) above. If you find yourself proposing a JavaScript or Python *runner* — something that executes an instance rather than checking or scaffolding one — you're building a tool that consumes ACOS, which belongs in its own product. (A validator or a scaffolder is not a runner: it exits, and nothing is left depending on it.)
 - **A single specific LLM's quirks.** ACOS is LLM-agnostic. Notes like "Claude does X" or "GPT-4 does Y" don't belong in framework docs.
 - **Marketing copy.** This repo is the operating manual, not the pitch. Adoption messaging lives in [`adopting-acos.md`](adopting-acos.md); the marketing site is published from a separate branch and is not part of a framework clone.
 - **An instance's content.** This is the most common mistake. If a draft you're writing has a real company name in it, you've stepped over the line. Move that part to the instance.
