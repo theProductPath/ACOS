@@ -314,6 +314,16 @@ These are rules for an agent *writing* a file, and that is the only thing they a
 - **Dashes for bullet lists** (`-`), not asterisks or plus signs.
 - **ISO 8601 dates** (`2026-04-26`), not "April 26, 2026" or "4/26/2026."
 
+### Relative links resolve from the file that contains them
+
+A markdown link's path is resolved relative to the file it lives in, not the tree root. A target in the **same folder** is written bare — the path is just `README.md`, never the folder-prefixed `Clients/Acme/README.md` from inside `Clients/Acme/`. A sibling or ancestor uses `../`, as in `../README.md`. Never "normalize" a working relative link by prefixing it with the folder's own path: that produces a doubled path (`Clients/Acme/Clients/Acme/README.md`) that resolves nowhere, and it is the most common way an otherwise-navigable tree grows dead links.
+
+Unlike the [markdown style](#markdown-style) rules above, this one **is** policed. The integrity checker resolves every relative link (check 8.1): it *warns* on a target that has gone missing (which may be someone else's to fix), and it *fails* on a self-referential prefix, because that is a malformed link its own author wrote, not a target that moved.
+
+### Generated files are read-only
+
+A file whose top carries a `GENERATED — DO NOT EDIT` header (or equivalent) is published from a source that lives elsewhere — most often a framework mirror vendored into an instance so that Drive- or web-scoped agents, which can't reach the source repo, can still read the rules. Read it freely; never edit it. An edit there is not the way to change anything: the publisher detects it as drift and refuses to republish until it's resolved, and in the meantime the mirror silently diverges from its source. If something in a generated file is wrong — a broken link, a stale rule — fix it in the source and re-publish. This is why a published mirror doesn't need an underscore prefix to be safe from edits: the header is the signal, and honoring it is a house rule.
+
 ### Principals — who agents escalate to
 
 Every ACOS instance has at least one **principal** — a human on whose behalf agents act within the instance. The default approver when a skill needs human sign-off. Principals are declared in the instance's `company-brief.md` under `People` → `Principals` (see [`templates/brief-company.md`](templates/brief-company.md)).

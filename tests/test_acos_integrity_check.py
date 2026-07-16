@@ -506,6 +506,32 @@ class TestWalkOnFixtureInstance(unittest.TestCase):
         checker, _ = self.run_checker()
         self.assertEqual(checker.in_scope_folders, ["acme-os", "Clients", "Brand", "Repos"])
 
+    def test_self_referential_link_prefix_is_a_failure(self):
+        # A same-folder README linked with the folder's own path prefix resolves
+        # to a doubled path that never exists — a malformed link, escalated from
+        # the usual 8.1 warning to a hard failure so --strict gates on it.
+        write(
+            self.tree / "Clients" / "Acme-Industries" / "brief.md",
+            readme("brief-client", "Acme")
+            + "\n> Cascade: read this folder's [README](Clients/Acme-Industries/README.md) first.\n",
+        )
+        checker, lines = self.run_checker(self.CLEAN)
+        hits = [l for l in lines if "8.1" in l and "self-referential" in l]
+        self.assertEqual(len(hits), 1, lines)
+        self.assertTrue(hits[0].startswith("❌"), hits[0])
+        self.assertGreater(checker.stats["fail"], 0)
+
+    def test_correct_same_folder_link_is_not_flagged(self):
+        # The bare form is correct and must produce neither warning nor failure.
+        write(
+            self.tree / "Clients" / "Acme-Industries" / "brief.md",
+            readme("brief-client", "Acme")
+            + "\n> Cascade: read this folder's [README](README.md) first.\n",
+        )
+        checker, lines = self.run_checker(self.CLEAN)
+        self.assertEqual(checker.stats["fail"], 0)
+        self.assertFalse([l for l in lines if "self-referential" in l])
+
     def test_agent_ignore_rule_skips_underscore_folders(self):
         _, lines = self.run_checker()
         joined = "\n".join(lines)

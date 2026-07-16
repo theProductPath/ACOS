@@ -934,8 +934,12 @@ class ACOSIntegrityChecker:
         survived in the reference instance's own root README for months because
         nothing looked.
 
-        Warning, never failure: a link can break because the *target* moved, and
-        the person running the checker may not be the person who should fix it.
+        Warning, never failure — with one exception: a link can break because the
+        *target* moved, and the person running the checker may not be the person
+        who should fix it, so a missing target warns. But a *self-referential
+        prefix* (a same-folder link written from the tree root, e.g.
+        `Clients/Acme/README.md` from inside `Clients/Acme/`) is a malformed link
+        its own author wrote, not a target that moved — that fails.
         """
         if not self.os_files:
             return
@@ -967,6 +971,21 @@ class ACOSIntegrityChecker:
 
                 checked += 1
                 resolved = (md.parent / path_part)
+
+                # A same-folder target written with the folder's OWN path prefix
+                # (`Clients/Acme/README.md` from inside `Clients/Acme/`) resolves
+                # to a doubled path that never exists. That's not a moved target —
+                # it's a malformed link the author wrote — so it FAILS, not warns.
+                folder_rel = self.rel(md.parent)
+                if folder_rel not in (".", "") and (
+                    path_part == folder_rel or path_part.startswith(folder_rel + "/")
+                ):
+                    bare = path_part[len(folder_rel) + 1:] or path_part
+                    self.log("8.1", "Internal links resolve", "fail",
+                             f"{rel_file}:{lineno} -> {target} (self-referential prefix — links "
+                             f"resolve from this file, not the tree root; write it '{bare}', "
+                             f"not '{folder_rel}/{bare}')")
+                    continue
 
                 # 5.1 — nothing in the OS should point into an agent-ignored
                 # folder. The reader is told to skip it; the link tells them not to.
