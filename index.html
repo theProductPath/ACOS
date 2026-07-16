@@ -313,7 +313,7 @@ p{margin:0}
 @keyframes hbspin{0%{transform:rotate(0) scale(1)}60%{transform:rotate(340deg) scale(1.3)}100%{transform:rotate(360deg) scale(1.12)}}
 @keyframes hbring{0%{opacity:0;transform:scale(.55)}40%{opacity:.85}100%{opacity:.45;transform:scale(1)}}
 </style>
-<svg id="acoshb-svg" viewBox="0 0 480 442" width="100%" role="img" aria-label="Animated build: your folders, ACOS markdown added to each, two agents reading up and becoming ready to work">
+<svg id="acoshb-svg" viewBox="0 0 480 442" width="100%" role="img" aria-label="Animated build: your folders, ACOS markdown added to the folders that matter, two agents reading up and becoming ready to work">
 <defs>
 <marker id="acoshb-ahB" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto-start-reverse"><path d="M1.5 1.5 L6.5 4 L1.5 6.5 Z" fill="#38bdf8"/></marker>
 <marker id="acoshb-ahG" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto-start-reverse"><path d="M1.5 1.5 L6.5 4 L1.5 6.5 Z" fill="#22c55e"/></marker>
@@ -393,7 +393,7 @@ p{margin:0}
   var P='acoshb-';
   function g(id){return document.getElementById(P+id);}
   var svg=g('svg'); if(!svg) return;
-  var mdIds=['mdRoot','mdClients','mdProjects','mdBrand','mdAcme','mdGlobex','mdApp','mdSite','mdBriefs','mdBuild'];
+  var mdIds=['mdRoot','mdClients','mdProjects','mdBrand','mdAcme','mdApp','mdSite','mdBriefs'];
   var segIds=['segA1','segA2','segA3','segB1','segB2'];
   var segLen={}; segIds.forEach(function(id){ segLen[id]=g(id).getTotalLength(); });
   var cap=g('cap');
@@ -414,7 +414,7 @@ p{margin:0}
   function cycle(){
     reset();
     T(function(){
-      cap.textContent='2 · ACOS adds markdown to every folder';
+      cap.textContent='2 · ACOS adds markdown to the folders that matter';
       mdIds.forEach(function(id,i){ T(function(){ g(id).classList.add('show'); }, i*105); });
     },1900);
     T(function(){
@@ -453,7 +453,7 @@ p{margin:0}
     <div class="pain-list">
       <div class="pain"><span class="x">✕</span><p><b>Context lives in your head.</b> The rules for how your business runs aren't written anywhere an agent can read them.</p></div>
       <div class="pain"><span class="x">✕</span><p><b>Every tool reinvents the wheel.</b> Multiple agents across multiple folders each build their own understanding, inconsistently.</p></div>
-      <div class="pain"><span class="x">✕</span><p><b>No shared conventions.</b> Where files go, how documents reference each other, what's off-limits — nothing is codified.</p></div>
+      <div class="pain"><span class="x">✕</span><p><b>No shared conventions.</b> Where files go, how documents reference each other, which folders are even in play — nothing is codified.</p></div>
       <div class="pain"><span class="x">✕</span><p><b>It doesn't compound.</b> What you teach one tool today is lost the moment you switch models or open a new session.</p></div>
     </div>
   </div>
@@ -478,7 +478,7 @@ p{margin:0}
         <div class="ed-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="7" height="7" rx="1"/><rect x="13" y="4" width="7" height="7" rx="1"/><rect x="4" y="13" width="7" height="7" rx="1"/><rect x="13" y="13" width="7" height="7" rx="1"/></svg></div>
         <div class="ed-body">
           <h3>Template library</h3>
-          <p>Ready-made scaffolds for the artifacts every company has — company brief, client brief, client manifest, dashboards. Copy in, fill out, done.</p>
+          <p>Ready-made scaffolds for the artifacts every company has — company brief, client &amp; stakeholder briefs, client manifest, dashboards. Copy in, fill out, done.</p>
         </div>
       </div>
       <div class="ed-item" style="--edc:#2dd4bf">
@@ -492,7 +492,7 @@ p{margin:0}
         <div class="ed-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M4 12h16M4 17h10"/></svg></div>
         <div class="ed-body">
           <h3>House rules</h3>
-          <p>Naming, markdown style, frontmatter, what to ignore, who to escalate to — codified once so every agent behaves consistently instead of improvising.</p>
+          <p>Which folders are in scope, markdown style, frontmatter, who to escalate to — codified once so every agent behaves consistently instead of improvising.</p>
         </div>
       </div>
       <div class="ed-item" style="--edc:#a78bfa">
@@ -517,20 +517,20 @@ p{margin:0}
   <div class="wrap">
     <div class="head-center">
       <span class="eyebrow">How it works</span>
-      <h2>Three moves from folder sprawl to an agent-ready company.</h2>
+      <h2>Three moves to a working instance — then it grows itself.</h2>
     </div>
     <div class="flow">
       <div class="flow-step"><div class="flow-num">1</div>
-        <h3>Instrument your tree</h3>
-        <p>Drop ACOS templates into your existing folders — Google Drive, OneDrive, Dropbox, a repo, it doesn't matter. Each folder gets a README that tells agents what it is and how it works. No migration, no new tool to learn.</p>
+        <h3>Instrument a small core</h3>
+        <p>Copy a handful of ACOS templates into the one or two folders where agents will actually work — Google Drive, OneDrive, Dropbox, a repo, it doesn't matter. You list those folders in one map; everything else in your tree stays exactly as it is. No migration, no instrumenting your whole company.</p>
       </div>
       <div class="flow-step"><div class="flow-num">2</div>
-        <h3>Fill in your instance</h3>
-        <p>Populate the company brief with your voice, clients, and products. Your business-specific content lives in <code>your instance</code>; the reusable framework stays clean underneath it. Add overlays where your setup has quirks.</p>
+        <h3>Seed your identity</h3>
+        <p>Fill in one company brief — your voice, your defaults, who agents escalate to. That's the judgment only you can supply; you don't pre-load every client and project. Your business-specific content lives in <code>your instance</code>; the reusable framework stays clean underneath it.</p>
       </div>
       <div class="flow-step"><div class="flow-num">3</div>
         <h3>Point agents at the root</h3>
-        <p>Any LLM or AI platform reads your root README first, cascades into the folder in scope, and follows your house rules. Improve the framework once and every agent, on every model, inherits it.</p>
+        <p>Any LLM or AI platform reads your root README first, cascades into the folder in scope, and follows your house rules. From there the instance grows itself — agents add the briefs, manifests, and records as real work reveals the need. Improve the framework once and every agent, on every model, inherits it.</p>
       </div>
     </div>
   </div>
@@ -622,8 +622,9 @@ p{margin:0}
       <div class="panel" style="--pc:#c75c2a">
         <h3><span class="mk">✓</span> What ACOS provides</h3>
         <ul>
+          <li><span class="mk">✓</span><p>An <b>opt-in membership model</b> — you list the folders ACOS governs; the rest of your tree stays exactly as it is.</p></li>
           <li><span class="mk">✓</span><p>A set of four folder <b>README patterns</b> — root, container, item, asset.</p></li>
-          <li><span class="mk">✓</span><p>A <b>template library</b> for company brief, client brief, and client manifest.</p></li>
+          <li><span class="mk">✓</span><p>A <b>template library</b> for company and client briefs, stakeholder briefs, client manifests, and dashboards.</p></li>
           <li><span class="mk">✓</span><p>A <b>skill library</b> of reusable agent capabilities that run on any instance.</p></li>
           <li><span class="mk">✓</span><p>An <b>overlay convention</b> so each business configures skills without forking them.</p></li>
           <li><span class="mk">✓</span><p><b>House rules</b> for naming, markdown, frontmatter, and escalation.</p></li>
