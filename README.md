@@ -14,7 +14,7 @@ purpose: ACOS product overview — what it is, who it's for, and how the framewo
 
 ## What this is
 
-ACOS is theProductPath's framework for running a company as a coherent context surface for AI agents. The premise is simple: when multiple AI tools work across multiple folders for the same company, they need a shared operating layer — conventions for where things live, how documents reference each other, what to skip, how skills attach to a company instance — or each tool reinvents context on every task.
+ACOS is theProductPath's framework for running a company as a coherent context surface for AI agents. The premise is simple: when multiple AI tools work across multiple folders for the same company, they need a shared operating layer — conventions for where things live, how documents reference each other, which folders are in scope, how skills attach to a company instance — or each tool reinvents context on every task.
 
 tPPOS, the operating system theProductPath itself runs on, is the first and canonical reference instance of ACOS. ACOS extracts the generic, reusable parts of tPPOS — the cascade rules, the README pattern set, the template library, the skill structure — and packages them as something another company can adopt.
 
@@ -28,8 +28,9 @@ ACOS is **LLM-agnostic, tool-agnostic, and instance-pluggable.** It assumes:
 
 What ACOS provides:
 
+- An opt-in membership model — the instance root's `## Folder map` is an allowlist, so ACOS governs only the folders you list and nothing else in the tree.
 - A small, opinionated set of folder README patterns (root, container, item, asset).
-- A template library for the artifacts that show up in every company: company brief, client brief, client manifest.
+- A template library for the artifacts that show up in every company: company brief, client brief, stakeholder brief, client manifest, and company dashboard.
 - A skill library — reusable agent capabilities that work against any ACOS instance.
 - An overlay convention so each instance can configure skills without forking them.
 - House rules covering folder naming, markdown style, frontmatter, and the meta-rule for codifying ambiguity as it emerges.
@@ -42,7 +43,7 @@ What ACOS does *not* provide:
 
 ## Status
 
-**Active, v0.1.** The framework is published and in production use in its reference instance. The rules in `framework/README.md` are binding, not provisional — but the surface is young, and it will keep growing as patterns prove general enough to promote out of an instance.
+**Active, v0.2.** The framework is published and in production use in its reference instance. v0.2 made membership an opt-in allowlist (the instance root's folder map), ended the walk at asset libraries, treats a missing README as information rather than an error, and removed the letter-case mandate — ACOS governs structure, not style. The rules in `framework/README.md` are binding, not provisional — but the surface is young, and it will keep growing as patterns prove general enough to promote out of an instance.
 
 Six skills are live in `framework/skills/`: `client-brief-processor`, `client-brand-capture`, `dashboard-refresh`, `dashboard-tune`, `acos-integrity`, and `readme-refresh`.
 
