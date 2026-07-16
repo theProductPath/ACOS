@@ -357,8 +357,8 @@ class TestTemplateCoverage(unittest.TestCase):
         "folder-readme-asset": "folder-readme-asset.md",
         "brief-company": "brief-company.md",
         "brief-client": "brief-client.md",
-        "brief-stakeholder": "stakeholder-brief.md",
-        "client-manifest": "manifest-client.md",
+        "brief-stakeholder": "brief-stakeholder.md",
+        "manifest-client": "manifest-client.md",
         "dashboard-company": "dashboard-company.md",
     }
 
@@ -458,10 +458,10 @@ class TestWalkOnFixtureInstance(unittest.TestCase):
         # A well-formed client, named for the real-world thing it stands for.
         write(tree / "Clients" / "Acme-Industries" / "README.md", readme("folder-readme-item", "Acme"))
         write(tree / "Clients" / "Acme-Industries" / "brief.md", readme("brief-client", "Acme"))
-        write(tree / "Clients" / "Acme-Industries" / "manifest.md", readme("client-manifest", "Acme"))
+        write(tree / "Clients" / "Acme-Industries" / "manifest.md", readme("manifest-client", "Acme"))
         # A badly named client with a missing brief and a bogus status.
         write(tree / "Clients" / "Bad Client" / "README.md", readme("folder-readme-item", "Bad", status="on hold"))
-        write(tree / "Clients" / "Bad Client" / "manifest.md", readme("client-manifest", "Bad"))
+        write(tree / "Clients" / "Bad Client" / "manifest.md", readme("manifest-client", "Bad"))
         # Agent-ignored: must never be walked.
         write(tree / "Clients" / "_archive" / "README.md", readme("nonsense-type", "Archived"))
         write(tree / "Clients" / "_archive" / "MyBadName" / "README.md", "no frontmatter\n")

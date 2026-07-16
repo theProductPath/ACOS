@@ -1,5 +1,5 @@
 ---
-type: client-manifest
+type: manifest-client
 subject: <Client name>
 folder: <Client-folder-name>
 status: active  # active | dormant | archived

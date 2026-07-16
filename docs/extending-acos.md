@@ -93,7 +93,7 @@ The four patterns today are root, container, item, asset. Adding a fifth is a re
 ACOS distinguishes a few categories of substantive artifact, beyond READMEs:
 
 - **Briefs** — substantive records about a *thing*. `brief-company` (singleton at the instance root, identity content) and `brief-client` (per-client, relationship content). Stable.
-- **Manifests** — lookup indexes used by skills for routing. `client-manifest` (per-client). Stable.
+- **Manifests** — lookup indexes used by skills for routing. `manifest-client` (per-client). Stable.
 - **Dashboards** — state records. `dashboard-company` (singleton at the instance root, current state). Volatile, refreshed on a cadence.
 
 Adding a fifth category — alongside READMEs, briefs, manifests, and dashboards — is the same kind of commitment as adding a new README pattern: it adds vocabulary every instance has to learn, and every future skill has to know how to read. Before proposing one:

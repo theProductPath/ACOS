@@ -4,7 +4,7 @@ Detailed guide for each section of the client brief template, plus the canonical
 
 ## Extraction category → brief section mapping
 
-This is the canonical mapping used by the [`client-brief-processor`](../SKILL.md) skill. The skill points at this file rather than duplicating the table; if section names change in the [brief-client template](../../../templates/brief-client.md) or the [stakeholder-brief template](../../../templates/stakeholder-brief.md), update this mapping and the templates in the same pass.
+This is the canonical mapping used by the [`client-brief-processor`](../SKILL.md) skill. The skill points at this file rather than duplicating the table; if section names change in the [brief-client template](../../../templates/brief-client.md) or the [brief-stakeholder template](../../../templates/brief-stakeholder.md), update this mapping and the templates in the same pass.
 
 Two targets exist: the **client brief** (organization-scoped) and a **stakeholder brief** per designated primary stakeholder (person-scoped). The "Target" column says which one each category lands in.
 
@@ -130,7 +130,7 @@ Format:
 
 ## Stakeholder briefs
 
-When a contact is designated a **primary stakeholder**, they get a per-person brief at `Clients/<client>/Stakeholders/<kebab-name>.md` based on the [stakeholder-brief template](../../../templates/stakeholder-brief.md). Stakeholder briefs hold the person-scoped material that would otherwise bloat the client brief: rolling 1:1 history, personal priorities, communication quirks, open threads with that individual.
+When a contact is designated a **primary stakeholder**, they get a per-person brief at `Clients/<client>/Stakeholders/<kebab-name>.md` based on the [brief-stakeholder template](../../../templates/brief-stakeholder.md). Stakeholder briefs hold the person-scoped material that would otherwise bloat the client brief: rolling 1:1 history, personal priorities, communication quirks, open threads with that individual.
 
 The routing table above governs which content lands where. Two notes:
 

@@ -127,7 +127,7 @@ The `type` taxonomy currently in use:
 - `brief-company` — singleton company identity brief.
 - `brief-client` — per-client CRM-flavored brief.
 - `brief-stakeholder` — per-person brief for a primary stakeholder at a client. Lives at `Clients/<client>/Stakeholders/<kebab-name>.md`.
-- `client-manifest` — per-client lookup index for matching transcripts and communications to the correct client. Lives in each client folder as `manifest.md`.
+- `manifest-client` — per-client lookup index for matching transcripts and communications to the correct client. Lives in each client folder as `manifest.md`.
 - `dashboard-company` — singleton company state record. Lives at the instance root as `dashboard.md`. Companion to `brief-company`: the brief is stable (who the company is), the dashboard is volatile (what it's doing right now).
 - `agent-ignore` — singleton skip-rule reference (see [`agent-ignore.md`](agent-ignore.md)).
 - `progress-checkpoint` — point-in-time snapshots of how an ACOS instance is being built. Stored under `_progress/`, which is itself out of scope per [agent-ignore](#agent-ignore).
@@ -156,7 +156,7 @@ Three brief patterns exist today, all with templates in [`templates/`](templates
 |---|---|---|---|
 | **Company brief** | Singleton — identity content about the company itself | [`templates/brief-company.md`](templates/brief-company.md) | `<instance-root>/company-brief.md` |
 | **Client brief** | Per-client — relationship content (CRM-style contacts, engagement history, opportunities, interaction log) | [`templates/brief-client.md`](templates/brief-client.md) | `Clients/<client>/brief.md` (one per client) |
-| **Stakeholder brief** | Per-person — the rolling 1:1 history and personal context for a *primary stakeholder*, kept out of the client brief so it doesn't bloat the organizational record | [`templates/stakeholder-brief.md`](templates/stakeholder-brief.md) | `Clients/<client>/Stakeholders/<kebab-name>.md` |
+| **Stakeholder brief** | Per-person — the rolling 1:1 history and personal context for a *primary stakeholder*, kept out of the client brief so it doesn't bloat the organizational record | [`templates/brief-stakeholder.md`](templates/brief-stakeholder.md) | `Clients/<client>/Stakeholders/<kebab-name>.md` |
 
 Only promote a contact to a stakeholder brief when they're a decision-maker, a recurring 1:1 partner, or someone whose personal context materially shapes the engagement. The client brief stays the source of truth for the *organization*; a stakeholder brief is scoped to one *person*.
 
@@ -167,6 +167,18 @@ Client folders also contain a **manifest** — a lookup index used by skills lik
 | **Client manifest** | Per-client — company identifiers, contact names, email domains, project keywords for transcript routing | [`templates/manifest-client.md`](templates/manifest-client.md) | `Clients/<client>/manifest.md` (one per client) |
 
 When an Item README and a brief live in the same folder, the brief is the source of truth for substantive content. The README's "People" and "Open threads" sections shrink to pointers in that case — see [`templates/folder-readme-item.md`](templates/folder-readme-item.md) for how that's wired.
+
+### Template and instance file names
+
+Templates are named for their `type`, family first — `brief-company`, `brief-client`, `brief-stakeholder`, `dashboard-company`, `manifest-client` — so related templates sort together in [`templates/`](templates/) and every template's filename matches the `type` in its frontmatter. The **instance** copy is saved under the shortest name that's unambiguous *where it lives*: at the instance root the qualifier stays for readability (`company-brief.md`, `dashboard.md`); inside a container folder — where the entity is already implied by the folder — it drops (`Clients/<client>/brief.md`, `Clients/<client>/manifest.md`). The `type` frontmatter, not the filename, is the machine-readable identity — the integrity checker keys off `type` — so the short instance names carry no ambiguity.
+
+| Template (matches its `type`) | Saved in the instance as |
+|---|---|
+| `brief-company.md` | `<instance-root>/company-brief.md` |
+| `brief-client.md` | `Clients/<client>/brief.md` |
+| `brief-stakeholder.md` | `Clients/<client>/Stakeholders/<kebab-name>.md` |
+| `dashboard-company.md` | `<instance-root>/dashboard.md` |
+| `manifest-client.md` | `Clients/<client>/manifest.md` |
 
 ## Dashboards — the singleton state record
 

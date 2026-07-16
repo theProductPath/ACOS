@@ -91,7 +91,7 @@ FRAMEWORK_TYPES = {
     "brief-company",
     "brief-client",
     "brief-stakeholder",
-    "client-manifest",
+    "manifest-client",
     "dashboard-company",
     "agent-ignore",
     "progress-checkpoint",
@@ -783,7 +783,7 @@ class ACOSIntegrityChecker:
         self.attempt("2.3")
         manifest_path = path / "manifest.md"
         if manifest_path.exists():
-            self.validate_fm(manifest_path, load_frontmatter(manifest_path), "client-manifest")
+            self.validate_fm(manifest_path, load_frontmatter(manifest_path), "manifest-client")
         else:
             self.log("2.3", "Client manifest presence", "warning", f"No manifest.md in {path.name}")
 

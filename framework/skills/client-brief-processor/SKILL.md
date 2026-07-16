@@ -188,7 +188,7 @@ For each transcript, after updating the client brief:
 
 If the user designates a new primary stakeholder (explicitly, or by promoting an existing Key contacts row), scaffold a stakeholder brief:
 
-1. Create `Clients/<client>/Stakeholders/<kebab-name>.md` from the [stakeholder-brief template](../../templates/stakeholder-brief.md).
+1. Create `Clients/<client>/Stakeholders/<kebab-name>.md` from the [brief-stakeholder template](../../templates/brief-stakeholder.md).
 2. Fill in frontmatter (name, client, role, email, status).
 3. Populate Who-they-are and Role-and-relationship from what's available in the client brief and any provided context.
 4. Update the Brief column for that contact in the client brief's Key contacts table to link the new file.
@@ -214,7 +214,7 @@ When a new client folder is created, always create both a `manifest.md` (from th
 - [`references/brief-sections.md`](references/brief-sections.md) — section-by-section guide for the client brief: what each section contains, what good content looks like, and the canonical mapping from extraction category to brief section (including stakeholder-scoped routing).
 - [`../../templates/manifest-client.md`](../../templates/manifest-client.md) — template for creating a new client manifest.
 - [`../../templates/brief-client.md`](../../templates/brief-client.md) — template for creating a new client brief.
-- [`../../templates/stakeholder-brief.md`](../../templates/stakeholder-brief.md) — template for creating a new per-stakeholder brief.
+- [`../../templates/brief-stakeholder.md`](../../templates/brief-stakeholder.md) — template for creating a new per-stakeholder brief.
 
 ## Future input sources
 
