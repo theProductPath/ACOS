@@ -110,7 +110,7 @@ purpose: Singleton company dashboard — the morning-glance state record for wha
 - Company brief: [company-brief.md](company-brief.md)
 - Refresh skill: `<path-to-acos>/framework/skills/dashboard-refresh/SKILL.md`
 - Tuning skill: `<path-to-acos>/framework/skills/dashboard-tune/SKILL.md`
-- Brand asset library (if present): `../Brand/README.md`
+- Brand asset library (if present): `../Marketing/Brand/README.md`
 
 ## How this dashboard stays current
 

@@ -72,6 +72,6 @@ Conventions that apply to **all software the company builds — for clients, for
 ## Links
 
 - Instance root: [README](README.md)
-- Brand and visual identity: `../Brand/README.md` *(if present)*
+- Brand and visual identity: `../Marketing/Brand/README.md` *(if present)*
 - Products: `../Products/README.md` *(if present)*
 - Active clients: `../Clients/README.md` *(if present)*
