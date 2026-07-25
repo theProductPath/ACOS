@@ -57,8 +57,9 @@ ACOS is developed in its own git repository, separate from any instance. A read-
 - `framework/skills/` — agent capabilities that work against any ACOS instance. Each skill folder has its own `SKILL.md` and supporting references.
 - `docs/extending-acos.md` — conventions for agents and contributors extending the framework. Read this before adding a new skill, template, or rule.
 - `docs/adopting-acos.md` — guide for a new company adopting ACOS: scaffolding an instance, filling in the templates, wiring in skills, and pointing agents at the tree.
+- `docs/reorganizing-an-instance.md` — how to reshape an existing instance: group folders under a container and relocate a folder without breaking the reference graph. Read this before demoting a top-level folder or moving anything load-bearing.
 - `instances/README.md` — known instances of ACOS. tPPOS is currently the only one and is the reference implementation.
-- `scripts/` — developer tooling you run by choice, never a dependency. `acos-integrity-check.py` checks an instance against the conventions; `check-links.py` checks this repo's own links. ACOS ships no *runtime* tooling — nothing an instance needs in order to operate — see [`docs/extending-acos.md`](docs/extending-acos.md#code-in-acos--tools-yes-runtime-no) for where that line is drawn, and why a scaffolder like `acos init` falls on the permitted side of it.
+- `scripts/` — developer tooling you run by choice, never a dependency. `acos-integrity-check.py` checks an instance against the conventions; `check-links.py` checks this repo's own links; `relink-folder.py` rewrites relative links when a folder moves inside an instance. ACOS ships no *runtime* tooling — nothing an instance needs in order to operate — see [`docs/extending-acos.md`](docs/extending-acos.md#code-in-acos--tools-yes-runtime-no) for where that line is drawn, and why a scaffolder like `acos init` falls on the permitted side of it.
 
 ## Relationship to tPPOS
 
@@ -74,6 +75,7 @@ The decision rule for where a new change lands is in [`docs/extending-acos.md`](
 - Framework manual: [`framework/README.md`](framework/README.md)
 - Adoption guide: [`docs/adopting-acos.md`](docs/adopting-acos.md)
 - Extension conventions: [`docs/extending-acos.md`](docs/extending-acos.md)
+- Reorganizing an instance: [`docs/reorganizing-an-instance.md`](docs/reorganizing-an-instance.md)
 - Known instances: [`instances/README.md`](instances/README.md)
 - Source: https://github.com/theProductPath/ACOS
 - Marketing site: https://acos.theproductpath.com — built from the `gh-pages` branch of this repo, which is a separate content root. It is not part of a framework clone, and nothing on `main` depends on it.
