@@ -174,6 +174,18 @@ code{font-family:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;fo
 .proof-line p{color:var(--muted);font-size:.95rem;margin:0}
 @media(max-width:560px){.proof-line{flex-direction:column;align-items:flex-start;gap:10px}}
 .bx svg{width:13px;height:13px;display:block}
+
+/* Extensions — editorial accent-rule list (distinct from the card grids used elsewhere on this page) */
+.ext-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:30px 36px;margin:22px 0 4px}
+.ext-item{border-left:3px solid var(--ext-color,var(--accent));padding-left:18px}
+.ext-icon{width:34px;height:34px;border-radius:8px;background:var(--ext-soft,var(--accentSoft));display:grid;place-items:center;margin-bottom:14px}
+.ext-icon svg{width:18px;height:18px;display:block}
+.ext-item h3{font-size:1.03rem;font-weight:700;margin:0 0 8px;color:var(--text);letter-spacing:-.01em;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.ext-tag{font-size:.64rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);background:var(--card2);border:1px solid var(--border);border-radius:999px;padding:3px 9px}
+.ext-item p{color:var(--muted);font-size:.94rem;line-height:1.6;margin:0 0 10px}
+.ext-item a{font-size:.9rem;font-weight:600}
+.ext-teal{--ext-color:#2dd4bf;--ext-soft:rgba(45,212,191,.14)}
+.ext-note{color:var(--muted);font-size:.88rem;margin:26px 0 0;font-style:italic}
 </style>
 </head>
 <body>
@@ -229,6 +241,7 @@ code{font-family:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;fo
     <a href="#day-one">Day one: the small core</a>
     <a href="#grows">As you work: it grows</a>
     <a href="#checklist">Adoption checklist</a>
+    <a href="#extensions">Extensions</a>
     <a href="#next">Where to go next</a>
   </nav>
 
@@ -378,6 +391,22 @@ code{font-family:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;fo
           </ul>
         </div>
       </div>
+    </section>
+
+    <section id="extensions">
+      <h2>Extensions</h2>
+      <p class="lede" style="margin-bottom:6px">Everything above is the whole ask — nothing on this page is required to run an instance. Past that, some companies build optional capabilities on top of a working instance. They're always separate from core adoption, and never a prerequisite for one.</p>
+      <div class="ext-grid">
+        <div class="ext-item ext-teal">
+          <div class="ext-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#2dd4bf" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M20 20l-5-5"/></svg>
+          </div>
+          <h3>Retrieval (RAG)<span class="ext-tag">Bonus guide</span></h3>
+          <p>Once an instance is large enough that folder-walking feels slow, the same conventions that make it easy for an agent to orient itself — consistent frontmatter, lifecycle signals, a canonical topology — make it unusually easy to index for retrieval. The guide covers why, a reference stack, the pitfalls a real corpus hits, and a brief you can hand to a coding agent to build one over your own instance.</p>
+          <a href="https://github.com/theProductPath/ACOS/blob/main/docs/building-a-rag.md" target="_blank" rel="noopener">Read the guide →</a>
+        </div>
+      </div>
+      <p class="ext-note">More will land here as they prove out.</p>
     </section>
 
     <section id="next">
