@@ -58,6 +58,7 @@ ACOS is developed in its own git repository, separate from any instance. A read-
 - `docs/extending-acos.md` — conventions for agents and contributors extending the framework. Read this before adding a new skill, template, or rule.
 - `docs/adopting-acos.md` — guide for a new company adopting ACOS: scaffolding an instance, filling in the templates, wiring in skills, and pointing agents at the tree.
 - `docs/reorganizing-an-instance.md` — how to reshape an existing instance: group folders under a container and relocate a folder without breaking the reference graph. Read this before demoting a top-level folder or moving anything load-bearing.
+- `docs/building-a-rag.md` — optional guide to building a RAG over an instance.
 - `instances/README.md` — known instances of ACOS. tPPOS is currently the only one and is the reference implementation.
 - `scripts/` — developer tooling you run by choice, never a dependency. `acos-integrity-check.py` checks an instance against the conventions; `check-links.py` checks this repo's own links; `relink-folder.py` rewrites relative links when a folder moves inside an instance. ACOS ships no *runtime* tooling — nothing an instance needs in order to operate — see [`docs/extending-acos.md`](docs/extending-acos.md#code-in-acos--tools-yes-runtime-no) for where that line is drawn, and why a scaffolder like `acos init` falls on the permitted side of it.
 
